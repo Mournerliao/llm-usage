@@ -9,3 +9,6 @@ node_modules/
 react/dist/
 
 .vercel
+
+# 本地工作区数据（会话记忆、项目笔记等），含隐私，不进公开仓库
+.workbuddy/
