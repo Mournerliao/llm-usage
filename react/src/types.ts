@@ -21,6 +21,9 @@ export interface UsageStats {
 /** 分组维度：按模型（默认，与 SVG 一致）或按来源。 */
 export type GroupBy = "model" | "source";
 
+/** 主题模式：跟随系统，或强制浅色 / 深色。 */
+export type WidgetTheme = "auto" | "light" | "dark";
+
 /** 排行后的单行（已按 tokens 降序、截断到 limit）。 */
 export interface RankedRow {
   label: string;
@@ -37,12 +40,16 @@ export interface UsageWidgetProps {
   date?: string;
   /** 展示前 N 个，默认 8。 */
   limit?: number;
+  /** 初始分组维度，默认 model。 */
+  defaultGroupBy?: GroupBy;
   /** 条形主色，默认 #378ADD。 */
   accent?: string;
   /** 卡片标题，默认 “LLM 每日用量”。 */
   title?: string;
-  /** 卡片宽度（px），默认 680。 */
+  /** 卡片最大宽度（px），默认 560；窄容器中自动收缩。 */
   width?: number;
+  /** 主题模式，默认跟随系统。 */
+  theme?: WidgetTheme;
 }
 
 /** 运行时契约校验：stats.json 一旦不匹配契约，组件不再静默渲染错乱数据。 */

@@ -4,8 +4,10 @@
 > 数据由本机 `update-local.sh` 采集并推送到本仓库，线上端点据此实时渲染。
 
 <!-- WIDGET_START -->
-![LLM 每日用量](https://llm-usage.vercel.app/widget.svg)
+![LLM 每日用量](https://llm-usage.vercel.app/widget.svg?group_by=model&theme=auto)
 <!-- WIDGET_END -->
+
+> GitHub README 会把 SVG 当作静态图片，因此卡片里的「ADE / 模型」分段控件只表示当前维度，不能在图片内部点击切换。主页可选择展示其中一个维度：`group_by=source` 为 ADE，`group_by=model` 为模型。博客里的 React 版本提供真正可交互的 Tab。
 
 ## 原理
 采集（cloud 类走 API，local 类走本机脚本）→ 聚合为统一 schema（`data/stats.json`）→ 线上 Vercel 端点动态渲染 SVG，React 组件读取同一份数据展示。详见各 collector。
@@ -18,11 +20,17 @@
 
 ## React 组件（博客用）
 
-本项目同时提供一个 React 版本的用量组件，方便嵌进博客：复用同一份 `data/stats.json`，渲染逻辑用 React 重写，观感与上方 Vercel SVG 端点一致。
+本项目同时提供一个 React 版本的用量组件，方便嵌进博客：复用同一份 `data/stats.json`，并与 Vercel SVG 端点保持相同的颜色、圆角、间距、排版和百分比口径。
 
-- 代码：`react/src/UsageWidget.tsx`（零额外依赖，纯 React + 内联样式）。
+- 代码：`react/src/UsageWidget.tsx`（Tailwind CSS v4 + shadcn 风格的 `Card` / `Tabs`，Tab 基于 Radix UI）。
 - 本地预览：`cd react && npm install && npm run dev`（Vite 直接读取仓库根的 `data/stats.json`）。
 - 集成：组件接受 `dataUrl`（运行时从 CDN 拉取，随仓库 `data/stats.json` 更新自动刷新）或 `data`（构建时注入）两种模式，可放入 Next.js / Astro / Vite 等任意 React 环境。详见 `react/README.md`。
+
+SVG 端点还支持以下参数：
+
+- `group_by=model|source`：模型 / ADE 维度。
+- `theme=auto|light|dark`：跟随系统或固定主题。
+- `date=YYYY-MM-DD`：指定日期，默认展示最新日期。
 
 ## WorkBuddy 接入（local 采集器）
 

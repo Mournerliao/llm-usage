@@ -11,6 +11,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 import aggregate  # noqa: E402  (根级模块，非 collectors 包内)
+import render  # noqa: E402
+from api.widget import _build_svg  # noqa: E402
 from ranking import rank_models  # noqa: E402
 from schema import validate_stats  # noqa: E402
 
@@ -114,6 +116,45 @@ class TestContract(unittest.TestCase):
             stats = json.load(f)
         errs = validate_stats(stats)
         self.assertEqual(errs, [], f"stats.json 不符合契约：{errs}")
+
+
+class TestSvgRenderer(unittest.TestCase):
+    def _stats(self):
+        return {
+            "latest_date": "2026-01-01",
+            "total_dates": 1,
+            "daily": [
+                {"source": "ADE <local>", "model": "m1", "date": "2026-01-01",
+                 "requests": 2, "input_tokens": 40, "output_tokens": 10,
+                 "total_tokens": 50},
+                {"source": "cloud", "model": "m2", "date": "2026-01-01",
+                 "requests": 1, "input_tokens": 20, "output_tokens": 10,
+                 "total_tokens": 30},
+            ],
+        }
+
+    def test_renderers_stay_in_sync(self):
+        stats = self._stats()
+        view = rank_models(stats["daily"], "2026-01-01", group_by="source")
+        local_svg = render.build_svg(stats, group_by="source", theme="dark")
+        api_svg = _build_svg(view, group_by="source", theme="dark")
+        self.assertEqual(local_svg, api_svg)
+
+    def test_svg_is_compact_and_escapes_labels(self):
+        svg = render.build_svg(self._stats(), group_by="source")
+        self.assertIn('class="theme-auto"', svg)
+        self.assertIn('height="174"', svg)  # 2 行时按内容动态计算高度
+        self.assertIn("ADE &lt;local&gt;", svg)
+        self.assertNotIn("ADE <local>", svg)
+
+    def test_source_tab_is_selected(self):
+        svg = render.build_svg(self._stats(), group_by="source")
+        self.assertIn('class="tab-active" x="22"', svg)
+
+    def test_invalid_options_fall_back_safely(self):
+        svg = render.build_svg(self._stats(), group_by="invalid", theme="invalid")
+        self.assertIn('class="theme-auto"', svg)
+        self.assertIn('class="tab-active" x="282"', svg)
 
 
 if __name__ == "__main__":

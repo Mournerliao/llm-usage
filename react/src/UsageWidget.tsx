@@ -1,17 +1,17 @@
 "use client";
-import {
-  memo,
-  useEffect,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-} from "react";
+
+import { memo, useEffect, useState, type CSSProperties } from "react";
+
+import { Card } from "./components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "./components/ui/tabs";
+import "./index.css";
 import type {
   GroupBy,
   RankedRow,
   UsageRow,
   UsageStats,
   UsageWidgetProps,
+  WidgetTheme,
 } from "./types";
 import { isValidStats } from "./types";
 
@@ -19,9 +19,7 @@ const fmt = (n: number) => n.toLocaleString("en-US");
 
 /**
  * 纯函数：从 daily 中过滤某天、按 groupBy 维度合并、按 token 降序取前 N。
- * 与 Python 侧 ranking.rank_models 共用同一份数据契约（stats.json），
- * 把「筛选 + 分组 + 排序 + 截断 + 算占比」集中在此，组件只做薄渲染。
- * 派生状态在 render 阶段计算（非 effect），符合派生状态不进 effect 的原则。
+ * 与 Python 侧 ranking.rank_models 共用同一份数据契约（stats.json）。
  */
 export function rankModels(
   daily: UsageRow[],
@@ -30,15 +28,16 @@ export function rankModels(
   groupBy: GroupBy = "model",
 ): { rows: RankedRow[]; totalTokens: number; totalRequests: number } {
   const dayRows = daily.filter((r) => r.date === date);
-  const totalTokens = dayRows.reduce((s, r) => s + r.total_tokens, 0);
-  const totalRequests = dayRows.reduce((s, r) => s + r.requests, 0);
+  const totalTokens = dayRows.reduce((sum, row) => sum + row.total_tokens, 0);
+  const totalRequests = dayRows.reduce((sum, row) => sum + row.requests, 0);
 
-  const agg = new Map<string, number>();
-  for (const r of dayRows) {
-    const k = groupBy === "source" ? r.source : r.model;
-    agg.set(k, (agg.get(k) ?? 0) + r.total_tokens);
+  const aggregate = new Map<string, number>();
+  for (const row of dayRows) {
+    const key = groupBy === "source" ? row.source : row.model;
+    aggregate.set(key, (aggregate.get(key) ?? 0) + row.total_tokens);
   }
-  const rows: RankedRow[] = [...agg.entries()]
+
+  const rows: RankedRow[] = [...aggregate.entries()]
     .sort((a, b) => b[1] - a[1])
     .slice(0, limit)
     .map(([label, tokens]) => ({
@@ -46,104 +45,128 @@ export function rankModels(
       total_tokens: tokens,
       pct: totalTokens ? (tokens / totalTokens) * 100 : 0,
     }));
+
   return { rows, totalTokens, totalRequests };
 }
 
-/** 单行条形。memo 化：父组件因无关 state 重渲染时，本行不重算（rerender-memo）。 */
 const BarRow = memo(function BarRow({
   label,
-  tokens,
   pct,
-  max,
   accent,
 }: {
   label: string;
-  tokens: number;
   pct: number;
-  max: number;
   accent: string;
 }) {
-  const w = max ? (tokens / max) * 100 : 0;
+  const visibleWidth = Math.max(Math.min(pct, 100), 1);
+
   return (
-    <div style={row}>
-      <span style={modelName}>{label}</span>
-      <div style={barTrack}>
+    <div
+      className="grid grid-cols-[5.5rem_minmax(0,1fr)_2.5rem] items-center gap-2 text-xs sm:grid-cols-[7rem_minmax(0,1fr)_2.75rem] sm:gap-3"
+      aria-label={`${label}，${pct.toFixed(0)}%`}
+    >
+      <span className="truncate text-foreground/80" title={label}>
+        {label}
+      </span>
+      <div className="h-2 overflow-hidden rounded-full bg-muted">
         <div
-          style={{ ...barFill, width: `${Math.max(w, 1)}%`, background: accent }}
+          className="h-full rounded-full transition-[width] duration-500 ease-out motion-reduce:transition-none"
+          style={{ width: `${visibleWidth}%`, backgroundColor: accent }}
         />
       </div>
-      <span style={pctText}>{pct.toFixed(0)}%</span>
+      <span className="text-right text-[11px] tabular-nums text-muted-foreground">
+        {pct.toFixed(0)}%
+      </span>
     </div>
   );
 });
 
-/** Tab 切换按钮（memo 化，定义在组件外，满足 no-inline-components）。 */
-const TabButton = memo(function TabButton({
-  active,
-  onClick,
+type WidgetStyle = CSSProperties & { "--widget-accent": string };
+
+const widgetStyle = (width: number, accent: string): WidgetStyle => ({
+  width: "100%",
+  maxWidth: width,
+  "--widget-accent": accent,
+});
+
+function StatusCard({
+  width,
+  theme,
   children,
 }: {
-  active: boolean;
-  onClick: () => void;
-  children: ReactNode;
+  width: number;
+  theme: WidgetTheme;
+  children: string;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        flex: 1,
-        padding: "6px 0",
-        fontSize: 12,
-        cursor: "pointer",
-        border: "none",
-        borderRadius: 8,
-        fontWeight: active ? 600 : 400,
-        background: active ? "#EAF1FB" : "transparent",
-        color: active ? "#2563EB" : "#6B7280",
-      }}
+    <Card
+      className="usage-widget p-[18px] text-sm text-muted-foreground"
+      data-theme={theme}
+      role="status"
+      style={widgetStyle(width, "#378ADD")}
     >
       {children}
-    </button>
+    </Card>
   );
-});
+}
 
 export function UsageWidget({
   dataUrl,
   data,
   date,
   limit = 8,
+  defaultGroupBy = "model",
   accent = "#378ADD",
   title = "LLM 每日用量",
-  width = 680,
+  width = 560,
+  theme = "auto",
 }: UsageWidgetProps) {
   const [remote, setRemote] = useState<UsageStats | null>(null);
   const [error, setError] = useState<string | null>(null);
-  // 分组维度：默认「按模型」与 SVG 渲染器口径一致；用户可在卡片内切到「按来源」。
-  const [groupBy, setGroupBy] = useState<GroupBy>("model");
+  const [groupBy, setGroupBy] = useState<GroupBy>(defaultGroupBy);
 
   useEffect(() => {
     if (data || !dataUrl) return;
-    let alive = true;
-    fetch(dataUrl)
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
+
+    const controller = new AbortController();
+    setError(null);
+
+    fetch(dataUrl, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
       })
-      .then((j: UsageStats) => alive && setRemote(j))
-      .catch((e: Error) => alive && setError(e.message));
-    return () => {
-      alive = false;
-    };
+      .then((json: UsageStats) => setRemote(json))
+      .catch((cause: Error) => {
+        if (cause.name !== "AbortError") setError(cause.message);
+      });
+
+    return () => controller.abort();
   }, [dataUrl, data]);
 
   const stats = data ?? remote;
 
-  if (!stats && error)
-    return <div style={card(width)}>加载失败：{error}</div>;
-  if (!stats) return <div style={card(width)}>加载中…</div>;
-  if (!isValidStats(stats))
-    return <div style={card(width)}>数据格式异常（不符合 stats.schema.json 契约）</div>;
+  if (!stats && error) {
+    return (
+      <StatusCard width={width} theme={theme}>
+        {`用量数据加载失败（${error}），请稍后重试。`}
+      </StatusCard>
+    );
+  }
+  if (!stats) {
+    return (
+      <StatusCard width={width} theme={theme}>
+        正在加载用量数据…
+      </StatusCard>
+    );
+  }
+  if (!isValidStats(stats)) {
+    return (
+      <StatusCard width={width} theme={theme}>
+        数据格式异常，请检查 stats.schema.json 契约。
+      </StatusCard>
+    );
+  }
 
   const day = date ?? stats.latest_date ?? "";
   const { rows, totalTokens, totalRequests } = rankModels(
@@ -153,98 +176,66 @@ export function UsageWidget({
     groupBy,
   );
 
-  if (rows.length === 0)
-    return <div style={card(width)}>{day || "今天"} 暂无数据</div>;
-
-  const max = Math.max(...rows.map((r) => r.total_tokens), 1);
-
   return (
-    <div style={card(width)}>
-      <div style={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>
-        {title} · {day}
-      </div>
-      <div style={{ fontSize: 13, color: "#374151", marginTop: 8 }}>
-        总 token：<b style={{ color: "#111827" }}>{fmt(totalTokens)}</b>
-        {"　"}会话/请求：<b style={{ color: "#111827" }}>{fmt(totalRequests)}</b>
-      </div>
-      <div style={{ borderTop: "1px solid #F3F4F6", margin: "14px 0 8px" }} />
+    <Card
+      className="usage-widget overflow-hidden p-4 sm:p-[18px]"
+      data-theme={theme}
+      style={widgetStyle(width, accent)}
+    >
+      <header className="flex min-w-0 items-center justify-between gap-3">
+        <h2 className="truncate text-[15px] font-semibold tracking-[-0.01em] text-foreground">
+          {title}
+        </h2>
+        <time
+          className="shrink-0 rounded-md bg-muted px-2 py-1 text-[11px] tabular-nums text-muted-foreground"
+          dateTime={day}
+        >
+          {day || "—"}
+        </time>
+      </header>
 
-      {/* 分组维度切换：按模型 / 按来源 */}
-      <div style={tabsRow}>
-        <TabButton active={groupBy === "model"} onClick={() => setGroupBy("model")}>
-          按模型
-        </TabButton>
-        <TabButton active={groupBy === "source"} onClick={() => setGroupBy("source")}>
-          按来源
-        </TabButton>
+      <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
+        <span>
+          <strong className="font-semibold tabular-nums text-foreground">
+            {fmt(totalTokens)}
+          </strong>{" "}
+          tokens
+        </span>
+        <span>
+          <strong className="font-semibold tabular-nums text-foreground">
+            {fmt(totalRequests)}
+          </strong>{" "}
+          次会话/请求
+        </span>
       </div>
 
-      {rows.map((r) => (
-        <BarRow
-          key={r.label}
-          label={r.label}
-          tokens={r.total_tokens}
-          pct={r.pct}
-          max={max}
-          accent={accent}
-        />
-      ))}
-    </div>
+      <Tabs
+        className="mt-3"
+        value={groupBy}
+        onValueChange={(value) => setGroupBy(value as GroupBy)}
+      >
+        <TabsList aria-label="排行维度">
+          <TabsTrigger value="source">ADE</TabsTrigger>
+          <TabsTrigger value="model">模型</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {rows.length > 0 ? (
+        <div className="mt-3 grid gap-2.5" aria-live="polite">
+          {rows.map((row) => (
+            <BarRow
+              key={row.label}
+              label={row.label}
+              pct={row.pct}
+              accent={accent}
+            />
+          ))}
+        </div>
+      ) : (
+        <p className="mt-3 text-xs text-muted-foreground" role="status">
+          {day || "今天"}暂无用量数据
+        </p>
+      )}
+    </Card>
   );
 }
-
-const card = (w: number): CSSProperties => ({
-  width: w,
-  boxSizing: "border-box",
-  background: "#fff",
-  border: "1px solid #E5E7EB",
-  borderRadius: 14,
-  padding: 20,
-  fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-  color: "#111827",
-});
-
-const tabsRow: CSSProperties = {
-  display: "flex",
-  gap: 4,
-  background: "#F3F4F6",
-  padding: 4,
-  borderRadius: 10,
-  marginBottom: 10,
-};
-
-const row: CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: 10,
-  margin: "6px 0",
-  fontSize: 12,
-};
-const modelName: CSSProperties = {
-  width: 150,
-  color: "#444441",
-  flexShrink: 0,
-  overflow: "hidden",
-  textOverflow: "ellipsis",
-  whiteSpace: "nowrap",
-};
-const barTrack: CSSProperties = {
-  flex: 1,
-  background: "#F3F4F6",
-  borderRadius: 3,
-  height: 14,
-  overflow: "hidden",
-};
-const barFill: CSSProperties = {
-  height: 14,
-  borderRadius: 3,
-  transition: "width .3s ease",
-};
-const pctText: CSSProperties = {
-  width: 36,
-  textAlign: "right",
-  color: "#5F5E5A",
-  fontSize: 11,
-  flexShrink: 0,
-};

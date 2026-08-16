@@ -1,7 +1,8 @@
 # LLM 用量 · React 组件
 
-纯 React 实现的用量看板组件，复用仓库根 `data/stats.json` 的数据。
-**零额外依赖**（仅 react），样式用内联 style，方便直接拷进任意博客。
+React 实现的用量看板组件，复用仓库根 `data/stats.json` 的数据。界面使用 Tailwind CSS v4 与 shadcn 风格的 `Card` / `Tabs`，其中 Tab 基于 Radix UI，支持键盘操作和焦点状态。
+
+React 与 SVG 并不是互相转换：通用 React DOM、shadcn 和 Tailwind CSS 无法无损转成 GitHub 可用的 SVG。两端采用同一套视觉 token 和布局规则分别渲染，从而避免截图式转换，并保持稳定、接近像素级的视觉一致性。
 
 ## 本地预览
 
@@ -39,9 +40,11 @@ Vite 通过 `publicDir` 直接读取仓库根的 `data/stats.json`，所以预�
 | `data` | `UsageStats` | — | 构建时注入的数据 |
 | `date` | `string` | `latest_date` | 展示哪一天 |
 | `limit` | `number` | `8` | 展示前 N 个模型 |
+| `defaultGroupBy` | `"model" \| "source"` | `"model"` | 初始 Tab；source 对应 ADE |
 | `accent` | `string` | `#378ADD` | 条形主色 |
 | `title` | `string` | `LLM 每日用量` | 卡片标题 |
-| `width` | `number` | `680` | 卡片宽度 (px) |
+| `width` | `number` | `560` | 卡片最大宽度 (px)，窄容器自动收缩 |
+| `theme` | `"auto" \| "light" \| "dark"` | `"auto"` | 主题模式 |
 
 ## 数据契约
 
@@ -51,8 +54,8 @@ Vite 通过 `publicDir` 直接读取仓库根的 `data/stats.json`，所以预�
 
 组件消费的 `UsageStats` 结构与 `aggregate.py` 生成的 `data/stats.json` 一致：
 
-**分组维度（卡片内 Tab）**：组件默认「按模型」排行（与 `api/widget.py` 口径一致）；
-也可切到「按来源」按来源聚合。`aggregate.py` 与 `render.py`、本组件三者共用同一份契约，
+**分组维度（卡片内 Tab）**：组件默认「模型」排行（与 `api/widget.py` 口径一致）；
+也可切到「ADE」按来源聚合。`aggregate.py` 与 `render.py`、本组件三者共用同一份契约，
 排行/分组逻辑都收敛到 `ranking.rank_models`（Python）与 `rankModels`（TS）这对纯函数。
 
 ```ts
