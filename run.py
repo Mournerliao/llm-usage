@@ -1,7 +1,7 @@
 """编排：加载配置 → 运行采集（cloud / local 两侧）→ 汇总 → 渲染。
 
 用法：
-  python run.py --mode cloud  --date 2026-08-16   # 在 GitHub Action 中运行（API 类源）
+  python run.py --mode cloud  --date 2026-08-16   # API 类源（需配置 key，手动运行）
   python run.py --mode local  --date 2026-08-16   # 在本机运行（Cursor / WorkBuddy 等）
   python run.py --mode all    --date 2026-08-16   # 本地一次性全跑（调试用）
 """

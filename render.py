@@ -1,8 +1,7 @@
 """渲染辅助：根据 stats.json 生成 SVG 字符串（纯函数，不写盘）。
 
-线上 widget 由 api/widget.py 在 Vercel 端**动态生成**，
-本模块只作为 SVG 模板参考 / 本地调试用途，不再写 assets/widget.svg，
-也不再改动 README.md（README 现在固定嵌入 Vercel 动态地址）。
+线上 widget 由 api/widget.py 在 Vercel 端动态生成；
+本模块作为同源 SVG 模板参考 / 本地调试用途。
 """
 import json
 from pathlib import Path
@@ -13,12 +12,12 @@ ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
 
 
-def build_svg(stats: dict, date: str | None = None, width: int = 680) -> str:
+def build_svg(stats: dict, date: str | None = None, width: int = 680, group_by: str = "model") -> str:
     """根据 stats.json 构建一张 SVG 字符串（不写盘）。"""
     if date is None:
         date = stats.get("latest_date")
 
-    view = ranking.rank_models(stats.get("daily", []), date, limit=8)
+    view = ranking.rank_models(stats.get("daily", []), date, limit=8, group_by=group_by)
     rows_view = view["rows"]
     total_tokens = view["total_tokens"]
     total_requests = view["total_requests"]
@@ -41,12 +40,13 @@ def build_svg(stats: dict, date: str | None = None, width: int = 680) -> str:
         )
         y += row_h
     bars = "".join(rows)
+    subtitle = "来源排行（按 token）" if group_by == "source" else "模型排行（按 token）"
     return f'''<svg viewBox="0 0 {width} {height}" width="{width}" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
   <rect x="0" y="0" width="{width}" height="{height}" rx="14" fill="#ffffff" stroke="#E5E7EB"/>
-  <text x="20" y="34" font-size="15" font-weight="600" fill="#111827">ADE 每日用量 · {date}</text>
+  <text x="20" y="34" font-size="15" font-weight="600" fill="#111827">LLM 每日用量 · {date}</text>
   <text x="20" y="64" font-size="13" fill="#374151">总 token：<tspan fill="#111827" font-weight="600">{total_tokens:,}</tspan>　会话/请求：<tspan fill="#111827" font-weight="600">{total_requests:,}</tspan></text>
   <line x1="20" y1="80" x2="{width - 20}" y2="80" stroke="#F3F4F6"/>
-  <text x="20" y="100" font-size="12" fill="#6B7280">模型排行（按 token）</text>
+  <text x="20" y="100" font-size="12" fill="#6B7280">{subtitle}</text>
   {bars}
 </svg>'''
 

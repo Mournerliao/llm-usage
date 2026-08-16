@@ -114,12 +114,12 @@ export function UsageWidget({
   date,
   limit = 8,
   accent = "#378ADD",
-  title = "ADE 每日用量",
+  title = "LLM 每日用量",
   width = 680,
 }: UsageWidgetProps) {
   const [remote, setRemote] = useState<UsageStats | null>(null);
   const [error, setError] = useState<string | null>(null);
-  // 分组维度：默认「按模型」与 SVG 渲染器口径一致；用户可在卡片内切到「按 ADE」。
+  // 分组维度：默认「按模型」与 SVG 渲染器口径一致；用户可在卡片内切到「按来源」。
   const [groupBy, setGroupBy] = useState<GroupBy>("model");
 
   useEffect(() => {
@@ -169,13 +169,13 @@ export function UsageWidget({
       </div>
       <div style={{ borderTop: "1px solid #F3F4F6", margin: "14px 0 8px" }} />
 
-      {/* 分组维度切换：按模型 / 按 ADE（来源） */}
+      {/* 分组维度切换：按模型 / 按来源 */}
       <div style={tabsRow}>
         <TabButton active={groupBy === "model"} onClick={() => setGroupBy("model")}>
           按模型
         </TabButton>
         <TabButton active={groupBy === "source"} onClick={() => setGroupBy("source")}>
-          按 ADE
+          按来源
         </TabButton>
       </div>
 

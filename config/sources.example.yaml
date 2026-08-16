@@ -1,4 +1,4 @@
-# ADE 用量采集配置
+# LLM 用量采集配置
 # 复制本文件为 sources.yaml 并填入你自己的源；sources.yaml 已被 .gitignore 忽略，不会提交到仓库。
 # 凭据通过环境变量 / 仓库 Secrets 注入，不要写死在文件里。
 
@@ -19,7 +19,7 @@ sources:
     base_url: https://your-relay.example.com
     api_key_env: RELAY_A_API_KEY
 
-  # —— 本地类：Cursor（需本机脚本运行，Action 读取其推送结果）——
+  # —— 本地类：Cursor（需本机脚本运行，仓库读取其推送结果）——
   - name: cursor
     type: cursor
     # Windows 路径（默认）；macOS 为 ~/Library/Application Support/Cursor/User/workspaceStorage/*/state.vscdb

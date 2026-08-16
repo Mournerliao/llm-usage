@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/llm-usage/stats.schema.json",
-  "title": "ADE Usage Stats",
-  "description": "ADE 每日用量组件的数据契约（单一事实源）。aggregate.py 产出、render.py 与 UsageWidget.tsx 共同消费。字段名以本文件为准。",
+  "title": "LLM Usage Stats",
+  "description": "LLM 每日用量组件的数据契约（单一事实源）。aggregate.py 产出、render.py 与 UsageWidget.tsx 共同消费。字段名以本文件为准。",
   "type": "object",
   "required": ["latest_date", "total_dates", "daily"],
   "properties": {
@@ -30,7 +30,7 @@
           "total_tokens"
         ],
         "properties": {
-          "source": { "type": "string", "description": "来源 / ADE，如 openai / cursor / workbuddy。" },
+          "source": { "type": "string", "description": "来源，如 openai / cursor / workbuddy。" },
           "model":  { "type": "string", "description": "模型名，如 gpt-4o / hy3。" },
           "date":   { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
           "requests":      { "type": "integer", "minimum": 0 },

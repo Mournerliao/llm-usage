@@ -1,4 +1,4 @@
-"""ADE 用量采集器集合。每个采集器返回 list[Record]。"""
+"""LLM 用量采集器集合。每个采集器返回 list[Record]。"""
 from dataclasses import dataclass, asdict
 import json
 

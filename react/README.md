@@ -1,4 +1,4 @@
-# ADE 用量 · React 组件
+# LLM 用量 · React 组件
 
 纯 React 实现的用量看板组件，复用仓库根 `data/stats.json` 的数据。
 **零额外依赖**（仅 react），样式用内联 style，方便直接拷进任意博客。
@@ -18,7 +18,7 @@ Vite 通过 `publicDir` 直接读取仓库根的 `data/stats.json`，所以预�
   ```tsx
   <UsageWidget dataUrl="https://cdn.jsdelivr.net/gh/<你>/<仓库>@main/data/stats.json" />
   ```
-  GitHub Action 一提交新 `stats.json`，博客组件自动变新，无需重新构建。
+  仓库 `data/stats.json` 一更新，博客组件自动变新，无需重新构建。
 
 - **构建时注入**：在博客构建阶段拿到数据后作为 `data` 传入，零运行时请求。
   ```tsx
@@ -40,7 +40,7 @@ Vite 通过 `publicDir` 直接读取仓库根的 `data/stats.json`，所以预�
 | `date` | `string` | `latest_date` | 展示哪一天 |
 | `limit` | `number` | `8` | 展示前 N 个模型 |
 | `accent` | `string` | `#378ADD` | 条形主色 |
-| `title` | `string` | `ADE 每日用量` | 卡片标题 |
+| `title` | `string` | `LLM 每日用量` | 卡片标题 |
 | `width` | `number` | `680` | 卡片宽度 (px) |
 
 ## 数据契约
@@ -51,8 +51,8 @@ Vite 通过 `publicDir` 直接读取仓库根的 `data/stats.json`，所以预�
 
 组件消费的 `UsageStats` 结构与 `aggregate.py` 生成的 `data/stats.json` 一致：
 
-**分组维度（卡片内 Tab）**：组件默认「按模型」排行（与 `assets/widget.svg` 口径一致）；
-也可切到「按 ADE」按来源聚合。`aggregate.py` 与 `render.py`、本组件三者共用同一份契约，
+**分组维度（卡片内 Tab）**：组件默认「按模型」排行（与 `api/widget.py` 口径一致）；
+也可切到「按来源」按来源聚合。`aggregate.py` 与 `render.py`、本组件三者共用同一份契约，
 排行/分组逻辑都收敛到 `ranking.rank_models`（Python）与 `rankModels`（TS）这对纯函数。
 
 ```ts

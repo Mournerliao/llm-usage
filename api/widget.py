@@ -41,7 +41,7 @@ def _rank_models(daily, date, limit=8, group_by="model"):
     return {"date": date, "total_tokens": total_tokens, "total_requests": total_requests, "rows": rows}
 
 
-def _build_svg(view, width=WIDTH):
+def _build_svg(view, width=WIDTH, group_by="model"):
     """与 render.py 的 _build_svg 同源的 SVG 模板。"""
     rows_view = view["rows"]
     total_tokens = view["total_tokens"]
@@ -65,12 +65,13 @@ def _build_svg(view, width=WIDTH):
         )
         y += row_h
     bars = "".join(rows)
+    subtitle = "来源排行（按 token）" if group_by == "source" else "模型排行（按 token）"
     return f'''<svg viewBox="0 0 {width} {height}" width="{width}" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Segoe UI, Roboto, sans-serif">
   <rect x="0" y="0" width="{width}" height="{height}" rx="14" fill="#ffffff" stroke="#E5E7EB"/>
-  <text x="20" y="34" font-size="15" font-weight="600" fill="#111827">ADE 每日用量 · {date}</text>
+  <text x="20" y="34" font-size="15" font-weight="600" fill="#111827">LLM 每日用量 · {date}</text>
   <text x="20" y="64" font-size="13" fill="#374151">总 token：<tspan fill="#111827" font-weight="600">{total_tokens:,}</tspan>　会话/请求：<tspan fill="#111827" font-weight="600">{total_requests:,}</tspan></text>
   <line x1="20" y1="80" x2="{width - 20}" y2="80" stroke="#F3F4F6"/>
-  <text x="20" y="100" font-size="12" fill="#6B7280">模型排行（按 token）</text>
+  <text x="20" y="100" font-size="12" fill="#6B7280">{subtitle}</text>
   {bars}
 </svg>'''
 
@@ -91,7 +92,7 @@ class handler(BaseHTTPRequestHandler):
         group_by = qs.get("group_by", ["model"])[0]
         stats_url = os.environ.get("STATS_URL") or DEFAULT_STATS_URL
         try:
-            req = urllib.request.Request(stats_url, headers={"User-Agent": "ade-widget"})
+            req = urllib.request.Request(stats_url, headers={"User-Agent": "llm-usage-widget"})
             with urllib.request.urlopen(req, timeout=10) as resp:
                 stats = json.loads(resp.read().decode("utf-8"))
         except Exception as e:  # noqa: BLE001
@@ -100,5 +101,5 @@ class handler(BaseHTTPRequestHandler):
         if date is None:
             date = stats.get("latest_date")
         view = _rank_models(stats.get("daily", []), date, limit=8, group_by=group_by)
-        svg = _build_svg(view)
+        svg = _build_svg(view, group_by=group_by)
         self._send(200, svg, "image/svg+xml; charset=utf-8")

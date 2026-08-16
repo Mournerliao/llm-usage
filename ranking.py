@@ -21,7 +21,7 @@ def rank_models(
     """对 daily 记录按 `date` 过滤，按 `group_by` 维度合并 token，降序取前 `limit`。
 
     group_by="model"：按模型合并（忽略来源），与 SVG 渲染器口径一致；
-    group_by="source"：按来源（ADE）合并。两个维度都走同一纯函数，
+    group_by="source"：按来源合并。两个维度都走同一纯函数，
     SVG 与 React 组件只是切换默认维度，不再各写一套分组逻辑。
 
     返回：

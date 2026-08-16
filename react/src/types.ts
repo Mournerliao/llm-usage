@@ -18,7 +18,7 @@ export interface UsageStats {
   daily: UsageRow[];
 }
 
-/** 分组维度：按模型（默认，与 SVG 一致）或按来源（ADE）。 */
+/** 分组维度：按模型（默认，与 SVG 一致）或按来源。 */
 export type GroupBy = "model" | "source";
 
 /** 排行后的单行（已按 tokens 降序、截断到 limit）。 */
@@ -39,7 +39,7 @@ export interface UsageWidgetProps {
   limit?: number;
   /** 条形主色，默认 #378ADD。 */
   accent?: string;
-  /** 卡片标题，默认 “ADE 每日用量”。 */
+  /** 卡片标题，默认 “LLM 每日用量”。 */
   title?: string;
   /** 卡片宽度（px），默认 680。 */
   width?: number;
