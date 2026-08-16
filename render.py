@@ -1,34 +1,24 @@
-"""渲染：根据 stats.json 生成 assets/widget.svg，并更新 README.md 中的组件。"""
+"""渲染辅助：根据 stats.json 生成 SVG 字符串（纯函数，不写盘）。
+
+线上 widget 由 api/widget.py 在 Vercel 端**动态生成**，
+本模块只作为 SVG 模板参考 / 本地调试用途，不再写 assets/widget.svg，
+也不再改动 README.md（README 现在固定嵌入 Vercel 动态地址）。
+"""
 import json
-import re
 from pathlib import Path
 
 import ranking
 
 ROOT = Path(__file__).resolve().parent
-ASSETS = ROOT / "assets"
 DATA = ROOT / "data"
-README = ROOT / "README.md"
 
 
-def render(date: str | None = None) -> str:
-    stats = json.loads((DATA / "stats.json").read_text(encoding="utf-8"))
+def build_svg(stats: dict, date: str | None = None, width: int = 680) -> str:
+    """根据 stats.json 构建一张 SVG 字符串（不写盘）。"""
     if date is None:
         date = stats.get("latest_date")
 
-    # 排行归约交给纯函数 ranking.rank_models；此处只做「薄渲染」（排版 + 输出）。
     view = ranking.rank_models(stats.get("daily", []), date, limit=8)
-
-    svg = _build_svg(view)
-    ASSETS.mkdir(parents=True, exist_ok=True)
-    (ASSETS / "widget.svg").write_text(svg, encoding="utf-8")
-    print(f"[ok] 已生成 {ASSETS / 'widget.svg'}")
-
-    _update_readme()
-    return svg
-
-
-def _build_svg(view: dict, width=680):
     rows_view = view["rows"]
     total_tokens = view["total_tokens"]
     total_requests = view["total_requests"]
@@ -61,21 +51,11 @@ def _build_svg(view: dict, width=680):
 </svg>'''
 
 
-def _update_readme():
-    img = "![ADE 每日用量](./assets/widget.svg)"
-    if README.exists():
-        text = README.read_text(encoding="utf-8")
-    else:
-        text = "# ADE 每日用量\n\n<!-- WIDGET_START -->\n<!-- WIDGET_END -->\n"
-    if "<!-- WIDGET_START -->" in text:
-        text = re.sub(r"<!-- WIDGET_START -->.*?<!-- WIDGET_END -->",
-                      f"<!-- WIDGET_START -->\n{img}\n<!-- WIDGET_END -->",
-                      text, flags=re.S)
-    else:
-        text = text.rstrip() + f"\n\n{img}\n"
-    README.write_text(text, encoding="utf-8")
-    print("[ok] 已更新 README.md 组件占位")
+def render(date: str | None = None) -> str:
+    """读取 stats.json 并返回 SVG 字符串（供本地调试打印）。"""
+    stats = json.loads((DATA / "stats.json").read_text(encoding="utf-8"))
+    return build_svg(stats, date)
 
 
 if __name__ == "__main__":
-    render()
+    print(render())
