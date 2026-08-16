@@ -1,0 +1,18 @@
+[
+  {
+    "source": "workbuddy",
+    "model": "hy3",
+    "date": "2026-08-16",
+    "requests": 1,
+    "input_tokens": 128659,
+    "output_tokens": 0
+  },
+  {
+    "source": "workbuddy",
+    "model": "hy3",
+    "date": "2026-08-16",
+    "requests": 1,
+    "input_tokens": 58945,
+    "output_tokens": 0
+  }
+]

@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/widget.svg", "destination": "/api/widget" },
+    { "source": "/widget", "destination": "/api/widget" }
+  ]
+}

@@ -1,0 +1,27 @@
+name: update-ade-usage
+on:
+  schedule:
+    - cron: "0 17 * * *"        # 每天 UTC 17:00（约北京时间次日 01:00）；按需调整
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -r requirements.txt
+      - name: 采集 cloud 源 → 汇总 → 渲染
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          RELAY_A_API_KEY: ${{ secrets.RELAY_A_API_KEY }}
+        run: python run.py --mode cloud --date "$(date -u +%Y-%m-%d)"
+      - name: 提交
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/daily.json assets/widget.svg README.md
+          git commit -m "chore: update usage widget" && git push || echo "no changes"
