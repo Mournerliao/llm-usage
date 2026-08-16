@@ -32,7 +32,7 @@ def build_svg(
     total_requests = view["total_requests"]
     date = escape(str(view["date"] or "—"))
     row_h = 28
-    rows_y = 104
+    rows_y = 84
     height = rows_y + max(len(rows_view), 1) * row_h + 14
     track_x = 145
     track_w = max(width - track_x - 60, 80)
@@ -49,34 +49,26 @@ def build_svg(
             f'<text class="secondary" x="{width - 18}" y="{y + 16}" text-anchor="end" font-size="11">{pct:.0f}%</text>'
         )
         y += row_h
-    bars = "".join(rows) or '<text class="secondary" x="18" y="120" font-size="12">暂无用量数据</text>'
-    tab_w = max((width - 48) // 2, 40)
-    source_tab_x = 22
-    model_tab_x = width - 22 - tab_w
-    active_x = source_tab_x if group_by == "source" else model_tab_x
-    source_label_x = source_tab_x + tab_w / 2
-    model_label_x = model_tab_x + tab_w / 2
+    bars = "".join(rows) or '<text class="secondary" x="18" y="100" font-size="12">暂无用量数据</text>'
+    dimension_title = "ADE 排行" if group_by == "source" else "模型排行"
     return f'''<svg class="theme-{theme}" viewBox="0 0 {width} {height}" width="{width}" height="{height}" role="img" aria-labelledby="widget-title" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans SC, Roboto, sans-serif">
-  <title id="widget-title">LLM 每日用量，{date}</title>
+  <title id="widget-title">LLM 每日用量，{dimension_title}，{date}</title>
   <style>
     .surface {{ fill: #ffffff; stroke: #e5e7eb; }}
     .primary {{ fill: #111827; }}
     .secondary {{ fill: #6b7280; }}
     .muted {{ fill: #f3f4f6; }}
     .accent {{ fill: #378add; }}
-    .tab-active {{ fill: #ffffff; stroke: #e5e7eb; }}
     .label {{ clip-path: url(#label-clip); }}
     .theme-dark .surface {{ fill: #0d1117; stroke: #30363d; }}
     .theme-dark .primary {{ fill: #f0f6fc; }}
     .theme-dark .secondary {{ fill: #8b949e; }}
     .theme-dark .muted {{ fill: #21262d; }}
-    .theme-dark .tab-active {{ fill: #0d1117; stroke: #30363d; }}
     @media (prefers-color-scheme: dark) {{
       .theme-auto .surface {{ fill: #0d1117; stroke: #30363d; }}
       .theme-auto .primary {{ fill: #f0f6fc; }}
       .theme-auto .secondary {{ fill: #8b949e; }}
       .theme-auto .muted {{ fill: #21262d; }}
-      .theme-auto .tab-active {{ fill: #0d1117; stroke: #30363d; }}
     }}
   </style>
   <defs><clipPath id="label-clip"><rect x="18" y="{rows_y}" width="112" height="{max(len(rows_view), 1) * row_h}"/></clipPath></defs>
@@ -86,10 +78,7 @@ def build_svg(
   <text class="secondary" x="{width - 68}" y="28" text-anchor="middle" font-size="11">{date}</text>
   <text class="secondary" x="18" y="52" font-size="12"><tspan class="primary" font-weight="600">{total_tokens:,}</tspan> tokens</text>
   <text class="secondary" x="170" y="52" font-size="12"><tspan class="primary" font-weight="600">{total_requests:,}</tspan> 次会话/请求</text>
-  <rect class="muted" x="18" y="64" width="{width - 36}" height="30" rx="8"/>
-  <rect class="tab-active" x="{active_x}" y="68" width="{tab_w}" height="22" rx="6" stroke-width="0.5"/>
-  <text class="{'primary' if group_by == 'source' else 'secondary'}" x="{source_label_x:g}" y="83" text-anchor="middle" font-size="12" font-weight="500">ADE</text>
-  <text class="{'primary' if group_by == 'model' else 'secondary'}" x="{model_label_x:g}" y="83" text-anchor="middle" font-size="12" font-weight="500">模型</text>
+  <text class="secondary" x="18" y="76" font-size="11" font-weight="500">{dimension_title}</text>
   {bars}
 </svg>'''
 

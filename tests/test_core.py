@@ -143,18 +143,19 @@ class TestSvgRenderer(unittest.TestCase):
     def test_svg_is_compact_and_escapes_labels(self):
         svg = render.build_svg(self._stats(), group_by="source")
         self.assertIn('class="theme-auto"', svg)
-        self.assertIn('height="174"', svg)  # 2 行时按内容动态计算高度
+        self.assertIn('height="154"', svg)  # 2 行时按内容动态计算高度
         self.assertIn("ADE &lt;local&gt;", svg)
         self.assertNotIn("ADE <local>", svg)
 
-    def test_source_tab_is_selected(self):
+    def test_source_dimension_is_labeled_without_fake_tabs(self):
         svg = render.build_svg(self._stats(), group_by="source")
-        self.assertIn('class="tab-active" x="22"', svg)
+        self.assertIn(">ADE 排行</text>", svg)
+        self.assertNotIn("tab-active", svg)
 
     def test_invalid_options_fall_back_safely(self):
         svg = render.build_svg(self._stats(), group_by="invalid", theme="invalid")
         self.assertIn('class="theme-auto"', svg)
-        self.assertIn('class="tab-active" x="282"', svg)
+        self.assertIn(">模型排行</text>", svg)
 
 
 if __name__ == "__main__":

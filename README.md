@@ -7,7 +7,7 @@
 ![LLM 每日用量](https://llm-usage.vercel.app/widget.svg?group_by=model&theme=auto)
 <!-- WIDGET_END -->
 
-> GitHub README 会把 SVG 当作静态图片，因此卡片里的「ADE / 模型」分段控件只表示当前维度，不能在图片内部点击切换。主页可选择展示其中一个维度：`group_by=source` 为 ADE，`group_by=model` 为模型。博客里的 React 版本提供真正可交互的 Tab。
+> GitHub README 会把 SVG 当作静态图片，因此每张卡片只展示当前维度：`group_by=source` 为 ADE，`group_by=model` 为模型。主页可用两个 `<details>` 折叠区提供原生切换，博客里的 React 版本则提供真正可交互的 Tab。
 
 ## 原理
 采集（cloud 类走 API，local 类走本机脚本）→ 聚合为统一 schema（`data/stats.json`）→ 线上 Vercel 端点动态渲染 SVG，React 组件读取同一份数据展示。详见各 collector。

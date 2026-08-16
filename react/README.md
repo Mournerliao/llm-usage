@@ -2,7 +2,7 @@
 
 React 实现的用量看板组件，复用仓库根 `data/stats.json` 的数据。界面使用 Tailwind CSS v4 与 shadcn 风格的 `Card` / `Tabs`，其中 Tab 基于 Radix UI，支持键盘操作和焦点状态。
 
-React 与 SVG 并不是互相转换：通用 React DOM、shadcn 和 Tailwind CSS 无法无损转成 GitHub 可用的 SVG。两端采用同一套视觉 token 和布局规则分别渲染，从而避免截图式转换，并保持稳定、接近像素级的视觉一致性。
+React 与 SVG 并不是互相转换：通用 React DOM、shadcn 和 Tailwind CSS 无法无损转成 GitHub 可用的 SVG。两端采用同一套视觉 token 和布局规则分别渲染，从而避免截图式转换，并保持稳定、接近像素级的视觉一致性；交互层有意不同，React 使用真正的 Tab，SVG 只标明当前维度。
 
 ## 本地预览
 
