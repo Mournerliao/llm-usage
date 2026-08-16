@@ -7,3 +7,5 @@ data/cloud/
 # React 预览依赖与构建产物
 node_modules/
 react/dist/
+
+.vercel

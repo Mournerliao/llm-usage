@@ -4,7 +4,7 @@
 > 由 GitHub Action 每日定时更新。
 
 <!-- WIDGET_START -->
-![ADE 每日用量](./assets/widget.svg)
+![ADE 每日用量](https://llm-usage.vercel.app/widget.svg)
 <!-- WIDGET_END -->
 
 ## 原理
