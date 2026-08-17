@@ -103,7 +103,7 @@ export interface UsageStats {
   latest_date: string | null;
   weeks: WeekRef[];
   sources: string[];
-  /** 订阅制源。没有逐次成本，金额列显示「订阅」而不是美元。 */
+  /** 订阅制源。没有逐次成本，金额列显示 Subscription 而不是美元。 */
   subscription_sources?: string[];
   daily: UsageRow[];
   year: YearSummary | null;
@@ -119,7 +119,7 @@ export interface UsageWidgetProps {
   data?: UsageStats;
   /** 指定初始展示哪一周（ISO 周编号，如 2026-W34），默认最新一周。 */
   week?: string;
-  /** 卡片标题，默认 “LLM 用量”。 */
+  /** 卡片标题，默认 “LLM usage”。 */
   title?: string;
   /** 卡片最大宽度（px），默认 760；窄容器中自动收缩。 */
   width?: number;

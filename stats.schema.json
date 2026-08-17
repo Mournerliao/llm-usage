@@ -54,7 +54,7 @@
     "subscription_sources": {
       "type": "array",
       "items": { "type": "string" },
-      "description": "订阅制源。没有逐次折算成本，金额列显示「订阅」。取自 config/aggregate.yaml。"
+      "description": "订阅制源。没有逐次折算成本，金额列显示 Subscription。取自 config/aggregate.yaml。"
     },
     "daily": {
       "type": "array",

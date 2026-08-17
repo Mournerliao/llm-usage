@@ -108,16 +108,16 @@ def render_svg(view: dict[str, Any], theme_name: str = "light") -> str:
     body: list[str] = []
 
     # ---- 页眉：左边说明这是哪一周，右边给出确切区间。
-    body.append(_text(PAD, 44, "本周用量", size=12.5, fill=t["muted"], spacing=0.9))
+    body.append(_text(PAD, 44, "This week", size=12.5, fill=t["muted"], spacing=0.9))
     if view.get("range_display"):
         body.append(_text(CARD_W - PAD, 44, view["range_display"], size=12.5,
                           fill=t["muted"], anchor="end"))
 
     if not view.get("week"):
-        body.append(_text(PAD, 92, "暂无数据", size=22, fill=t["ink"],
+        body.append(_text(PAD, 92, "No data", size=22, fill=t["ink"],
                           family=MONO, weight="600"))
         height = 132
-        return _wrap(body, height, t, "暂无用量数据")
+        return _wrap(body, height, t, "No usage data")
 
     # ---- 主数字：左 token 量，右折算成本。两者字号刻意差一级，token 是主角。
     #
@@ -129,12 +129,12 @@ def render_svg(view: dict[str, Any], theme_name: str = "light") -> str:
         f'fill="{t["ink"]}" font-weight="600">{esc(view["tokens_display"])}'
         f'<tspan font-family="{SANS}" font-size="13" fill="{t["muted"]}"'
         f' font-weight="400" dx="9">tokens</tspan></text>')
-    body.append(_text(PAD, 126, f"{view['requests_display']} 次请求", size=12,
+    body.append(_text(PAD, 126, f"{view['requests_display']} requests", size=12,
                       fill=t["muted"]))
 
     body.append(_text(CARD_W - PAD, 104, view["cost_display"], size=30,
                       fill=t["accent"], family=MONO, weight="600", anchor="end"))
-    body.append(_text(CARD_W - PAD, 126, "模型成本", size=12, fill=t["muted"],
+    body.append(_text(CARD_W - PAD, 126, "Model cost", size=12, fill=t["muted"],
                       anchor="end"))
 
     body.append(_rule(146, t))
@@ -168,9 +168,11 @@ def render_svg(view: dict[str, Any], theme_name: str = "light") -> str:
                         f'fill="{t["kinds"][seg["kind"]]}"/>')
             body.append(_text(cx + 13, y_bar + 29, seg["label"], size=11.5,
                               fill=t["muted"]))
-            body.append(_text(cx + 13 + len(seg["label"]) * 12 + 6, y_bar + 29,
-                              seg["display"], size=11.5, fill=t["ink"],
-                              family=MONO))
+            # 中文约 1em、拉丁约 0.56em；英文标签比原来的两到四字中文长，
+            # 不能再按「一字 12px」估宽度，否则金额会叠到下一列上。
+            body.append(_text(cx + 13 + _label_advance(seg["label"], 11.5) + 8,
+                              y_bar + 29, seg["display"], size=11.5,
+                              fill=t["ink"], family=MONO))
 
     y = y_bar + 46
     body.append(_rule(y, t))
@@ -178,15 +180,15 @@ def render_svg(view: dict[str, Any], theme_name: str = "light") -> str:
     # ---- 模型行。条形长度按 token 占比，右侧两列是计费与 token 量。
     # 表头上方留得比下方多，让它归属于下面的表格，而不是漂在两块之间。
     y += 28
-    body.append(_text(PAD, y, "模型", size=11, fill=t["muted"], spacing=1.2))
-    body.append(_text(CARD_W - PAD - 96, y, "成本", size=11, fill=t["muted"],
+    body.append(_text(PAD, y, "Model", size=11, fill=t["muted"], spacing=1.2))
+    body.append(_text(CARD_W - PAD - 96, y, "Cost", size=11, fill=t["muted"],
                       anchor="end", spacing=1.2))
     body.append(_text(CARD_W - PAD, y, "Tokens", size=11, fill=t["muted"],
                       anchor="end", spacing=1.2))
 
     name_w = 236
     bar_x = PAD + name_w + 20
-    bar_w = 248                            # 右端留到成本列前，中间不留死区
+    bar_w = 216                            # 英文 Subscription 比「订阅」宽，条形右端让出一截
     row_h = 27
     y += 8
     for i, row in enumerate(models):
@@ -206,9 +208,14 @@ def render_svg(view: dict[str, Any], theme_name: str = "light") -> str:
 
     y = y + row_h * max(len(models), 1) + 4
     height = y + 28
-    alt = (f"本周 {view['range_display']}：{view['tokens_display']} tokens，"
-           f"模型成本 {view['cost_display']}")
+    alt = (f"This week {view['range_display']}: {view['tokens_display']} tokens, "
+           f"model cost {view['cost_display']}")
     return _wrap(body, height, t, alt, clip_w=name_w)
+
+
+def _label_advance(label: str, size: float) -> float:
+    """图例标签的估算宽度。中文按 1em，拉丁按 0.56em。"""
+    return sum(size if ord(ch) > 0x2E80 else size * 0.56 for ch in label)
 
 
 def _wrap(body: list[str], height: float, theme: dict, alt: str,

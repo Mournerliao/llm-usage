@@ -26,9 +26,9 @@ const KIND_COLOR: Record<TokenKind, string> = {
 
 /** 相对当前周的说法。第 0 项永远是最新一周。 */
 function weekLabel(index: number): string {
-  if (index === 0) return "本周";
-  if (index === 1) return "上周";
-  return `${index} 周前`;
+  if (index === 0) return "This week";
+  if (index === 1) return "Last week";
+  return `${index} weeks ago`;
 }
 
 /** 周次按钮上的短标签：该周周一的月/日。 */
@@ -151,17 +151,17 @@ const ModelTable = memo(function ModelTable({
 }) {
   return (
     <div className="grid gap-3">
-      <div className="grid grid-cols-[minmax(0,1fr)_4.5rem] items-center gap-4 text-[11px] tracking-wider text-muted-foreground @xl:grid-cols-[minmax(0,13rem)_minmax(0,1fr)_4.5rem_4.5rem]">
-        <span>模型</span>
+      <div className="grid grid-cols-[minmax(0,1fr)_7rem] items-center gap-4 text-[11px] tracking-wider text-muted-foreground @xl:grid-cols-[minmax(0,13rem)_minmax(0,1fr)_7rem_4.5rem]">
+        <span>Model</span>
         <span className="hidden @xl:block" aria-hidden="true" />
-        <span className="text-right">成本</span>
+        <span className="text-right">Cost</span>
         <span className="hidden text-right @xl:block">Tokens</span>
       </div>
 
       {models.map((row) => (
         <div
           key={row.label}
-          className="grid grid-cols-[minmax(0,1fr)_4.5rem] items-center gap-4 text-[12.5px] @xl:grid-cols-[minmax(0,13rem)_minmax(0,1fr)_4.5rem_4.5rem]"
+          className="grid grid-cols-[minmax(0,1fr)_7rem] items-center gap-4 text-[12.5px] @xl:grid-cols-[minmax(0,13rem)_minmax(0,1fr)_7rem_4.5rem]"
         >
           <span className="truncate text-foreground" title={row.label}>
             {row.label}
@@ -189,7 +189,7 @@ export function UsageWidget({
   dataUrl,
   data,
   week,
-  title = "LLM 用量",
+  title = "LLM usage",
   width = 760,
   theme = "auto",
 }: UsageWidgetProps) {
@@ -227,21 +227,21 @@ export function UsageWidget({
   if (!stats && error) {
     return (
       <StatusCard width={width} theme={theme}>
-        {`用量数据加载失败（${error}），请稍后重试。`}
+        {`Failed to load usage data (${error}). Try again later.`}
       </StatusCard>
     );
   }
   if (!stats) {
     return (
       <StatusCard width={width} theme={theme}>
-        正在加载用量数据…
+        Loading usage data…
       </StatusCard>
     );
   }
   if (!valid) {
     return (
       <StatusCard width={width} theme={theme}>
-        数据格式异常，请检查 stats.schema.json 契约。
+        Unexpected data format. Check the stats.schema.json contract.
       </StatusCard>
     );
   }
@@ -270,12 +270,12 @@ export function UsageWidget({
           value={activeWeek?.week ?? ""}
           onValueChange={(value) => setSelected(value)}
         >
-          <TabsList aria-label="选择周次">
+          <TabsList aria-label="Select week">
             {weeks.map((item, index) => (
               <TabsTrigger
                 key={item.week}
                 value={item.week}
-                aria-label={`${weekLabel(index)}，${item.start} 至 ${item.end}`}
+                aria-label={`${weekLabel(index)}, ${item.start} to ${item.end}`}
               >
                 <span className="font-mono tabular-nums">
                   {shortStart(item.start)}
@@ -291,7 +291,7 @@ export function UsageWidget({
       <div key={view.week ?? "empty"} className="animate-week-in grid gap-5">
         {view.week === null || view.requests === 0 ? (
           <p className="text-[13px] text-muted-foreground" role="status">
-            {weekLabel(activeIndex)}（{view.range_display || "—"}）暂无用量数据。
+            No usage data for {weekLabel(activeIndex)} ({view.range_display || "—"}).
           </p>
         ) : (
           <>
@@ -304,7 +304,7 @@ export function UsageWidget({
                   <span className="text-[13px] text-muted-foreground">tokens</span>
                 </p>
                 <p className="mt-2 text-[12px] text-muted-foreground">
-                  {weekLabel(activeIndex)}共 {view.requests_display} 次请求
+                  {weekLabel(activeIndex)} · {view.requests_display} requests
                 </p>
               </div>
               {/* 窄容器里成本会换到下一行，此时跟着左边缘对齐；只有和 token 量并排
@@ -313,7 +313,7 @@ export function UsageWidget({
                 <p className="font-mono text-[1.875rem] leading-none font-semibold tabular-nums text-accent">
                   {view.cost_display}
                 </p>
-                <p className="mt-2 text-[12px] text-muted-foreground">模型成本</p>
+                <p className="mt-2 text-[12px] text-muted-foreground">Model cost</p>
               </div>
             </div>
 
