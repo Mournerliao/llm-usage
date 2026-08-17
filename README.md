@@ -109,9 +109,27 @@ Common flags:
 - `--since 2026-07-01` override the collection start
 - `--skip-collect` fold and render only; this is what CI runs
 
-For daily updates, cron can run `./update-local.sh`; Windows Task Scheduler can
+For automatic updates, cron can run `./update-local.sh`; Windows Task Scheduler can
 run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File update-local.ps1`.
 Both scripts collect and push raw data; CI builds the rest.
+
+To install the recommended Windows schedule (daily at midnight, catch up after
+a missed run, and retry failures every 30 minutes), run once in PowerShell:
+
+```powershell
+.\install-scheduled-task.ps1
+# Choose another time and test it immediately:
+.\install-scheduled-task.ps1 -DailyAt 01:00 -RunNow
+```
+
+Manage the task in Task Scheduler (`taskschd.msc`) or from PowerShell:
+
+```powershell
+Get-ScheduledTask -TaskName "LLM Usage Update"       # inspect
+Start-ScheduledTask -TaskName "LLM Usage Update"     # run now
+Disable-ScheduledTask -TaskName "LLM Usage Update"   # pause
+.\install-scheduled-task.ps1 -Uninstall               # remove
+```
 
 ## Config is two files
 
