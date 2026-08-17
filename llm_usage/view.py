@@ -1,21 +1,15 @@
 """纯函数：把 stats.daily 归约成某一周的展示视图。
 
-这是 SVG 渲染器（render.py）与 React 组件（UsageWidget）共用的 seam：两边都只做薄
-渲染，「取哪一周、按什么排序、怎么算占比、数字怎么写」这些判断集中在此。
+fold 在写出 stats.json 时对每个展示周调用一次，把结果写进 ``weeks[i].view``。
+两个渲染器（SVG 与 widget）只消费这份产物，不再各自 fold。
 
 == 为什么格式化也在这里 ==
 
 视图里带 ``*_display`` 字符串，而不是让两个渲染器各自把数字转成文本。因为
-「479.0M」这种写法涉及量级选择与舍入方向，两边各写一遍必然漂移，而
-``tests/test_parity.py`` 逐字段比对 Python 与 TS 的输出，把格式化收进视图，格式
-本身就被这个测试锁住了。
+「479.0M」这种写法涉及量级选择与舍入方向，渲染器各写一遍必然漂移。
 
-舍入不用各语言内建的格式化：Python 的 ``f"{x:.1f}"`` 用银行家舍入，JS 的
-``toFixed`` 用四舍五入，恰好落在半分位上的值会给出不同结果。所以两边都手写
-``floor(|x| * 10^n + 0.5)``，在 IEEE754 双精度下逐位相同。
-
-deletion test：删掉本模块，render.py 与 UsageWidget 必须各自把取周、排序、占比、
-格式化逻辑搬回去，两份实现会立刻开始漂移。
+deletion test：删掉本模块，fold 就必须把取周、排序、占比、格式化搬回去，
+两个渲染器会立刻开始各写一份。
 """
 from __future__ import annotations
 
@@ -25,7 +19,7 @@ from datetime import date as Date
 from datetime import timedelta
 from typing import Any
 
-TOKEN_KINDS = ("tokens_in", "tokens_out", "cache_write", "cache_read")
+from llm_usage.contract import TOKEN_KINDS
 
 TOKEN_LABELS = {
     "tokens_in": "输入",
@@ -46,11 +40,14 @@ SUBSCRIPTION_LABEL = "订阅"
 
 WEEKDAY_LABELS = ("一", "二", "三", "四", "五", "六", "日")
 
+# 模型行展示前 N 个。只活在这一层，渲染器不再各自截断。
+MODEL_LIMIT = 6
+
 
 # ------------------------------------------------------------------ 数字格式化
 
 def _fixed(value: float, digits: int) -> str:
-    """定点格式化，四舍五入远离零。与 TS 侧实现逐位一致。"""
+    """定点格式化，四舍五入远离零。"""
     factor = 10 ** digits
     scaled = math.floor(abs(value) * factor + 0.5)
     sign = "-" if value < 0 and scaled != 0 else ""
@@ -126,14 +123,13 @@ def format_range(start: str, end: str) -> str:
     return f"{format_day(start)} – {format_day(end)}"
 
 
-# ---------------------------------------------------------------------- 视图
+# ---------------------------------------------------------------------- 归约
 
-def _totals(rows: list[dict[str, Any]]) -> dict[str, Any]:
+def fold_rows(rows: list[dict[str, Any]], *, round_cost: bool = False) -> dict[str, Any]:
     """按字段求和。全都没报的字段保持 ``None``，不塞 0。
 
-    成本刻意**不做中途取整**：两端按同一顺序累加同一批双精度浮点，结果逐位相同，
-    而 Python 的 ``round`` 是银行家舍入、JS 没有等价内建，中途取整反而会制造出
-    parity 测试要抓的那种漂移。对外显示的位数由 ``format_cost`` 统一决定。
+    ``round_cost``：year 汇总中途取整到四位；WeekView 故意不取整，显示位数由
+    ``format_cost`` 统一决定。
     """
     out: dict[str, Any] = {
         "requests": sum(int(r.get("requests") or 0) for r in rows),
@@ -142,7 +138,11 @@ def _totals(rows: list[dict[str, Any]]) -> dict[str, Any]:
         values = [r[field] for r in rows if r.get(field) is not None]
         out[field] = sum(values) if values else None
     costs = [r["cost_cents"] for r in rows if r.get("cost_cents") is not None]
-    out["cost_cents"] = sum(costs) if costs else None
+    if costs:
+        total = sum(costs)
+        out["cost_cents"] = round(total, 4) if round_cost else total
+    else:
+        out["cost_cents"] = None
     present = [out[f] for f in TOKEN_KINDS if out[f] is not None]
     out["tokens_total"] = sum(present) if present else None
     return out
@@ -165,13 +165,12 @@ def _basis_value(row: dict[str, Any], basis: str) -> float:
 def build_week_view(
     daily: list[dict[str, Any]],
     week: dict[str, str] | None,
-    limit: int = 6,
+    limit: int = MODEL_LIMIT,
     subscription_sources: list[str] | None = None,
 ) -> dict[str, Any]:
     """构建某一周的展示视图。
 
-    ``week`` 形如 ``{"week": "2026-W34", "start": "2026-08-17", "end": "2026-08-23"}``，
-    直接取自 stats.json 的 ``weeks``。
+    ``week`` 形如 ``{"week": "2026-W34", "start": "2026-08-17", "end": "2026-08-23"}``。
 
     ``models`` 按 token 降序，``pct`` 是该行在本周内的 token 占比（0~100）。
     ``days`` 恒为 7 项（周一到周日），没有用量的那天补零，让日条形图的横轴稳定。
@@ -187,7 +186,7 @@ def build_week_view(
     rows = [r for r in daily if start <= r.get("date", "") <= end]
     sub_set = set(subscription_sources or ())
 
-    totals = _totals(rows)
+    totals = fold_rows(rows)
     basis = _basis_of(totals)
 
     by_model: dict[str, list[dict]] = defaultdict(list)
@@ -196,7 +195,7 @@ def build_week_view(
 
     model_rows = []
     for name, group in by_model.items():
-        agg = _totals(group)
+        agg = fold_rows(group)
         model_rows.append({
             "label": name,
             "requests": agg["requests"],
@@ -236,13 +235,14 @@ def build_week_view(
     days = []
     for offset in range(7):
         day = (first + timedelta(days=offset)).isoformat()
-        agg = _totals(day_index.get(day, []))
+        agg = fold_rows(day_index.get(day, []))
         days.append({
             "date": day,
             "weekday": WEEKDAY_LABELS[offset],
             "requests": agg["requests"],
             "tokens_total": agg["tokens_total"],
             "cost_cents": agg["cost_cents"],
+            "tokens_display": format_tokens(agg["tokens_total"]),
         })
 
     return {

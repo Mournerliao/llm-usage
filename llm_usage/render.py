@@ -1,6 +1,6 @@
 """把某一周的视图渲染成静态 SVG，供 README 直接引用。
 
-只渲染**本周**一张卡片（亮暗两版）。历史与四周切换交给博客里的 React 组件——
+只渲染**本周**一张卡片（亮暗两版）。历史与四周切换交给博客里的 widget——
 README 里的图是静态的，塞进多周内容只会让它变拥挤，而看历史的人本来就会点进组件。
 
 == 两个平台约束决定了排版 ==
@@ -21,13 +21,11 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-import ranking
+from llm_usage import REPO_ROOT, view as weekview
 
-ROOT = Path(__file__).resolve().parent
-ASSETS = ROOT / "assets"
+ASSETS = REPO_ROOT / "assets"
 
 CARD_W = 760
-MODEL_LIMIT = 6
 
 SANS = ("-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',"
         "'Hiragino Sans GB','Microsoft YaHei',sans-serif")
@@ -103,7 +101,7 @@ def _rule(y: float, theme: dict, x0: float = PAD, x1: float = CARD_W - PAD) -> s
 
 
 def render_svg(view: dict[str, Any], theme_name: str = "light") -> str:
-    """把一周的视图渲染成一张卡片。``view`` 来自 ``ranking.build_week_view``。"""
+    """把一周的视图渲染成一张卡片。``view`` 来自 ``stats.weeks[0].view``。"""
     t = THEMES[theme_name]
     models = view.get("models") or []
     inner_w = CARD_W - PAD * 2
@@ -234,16 +232,12 @@ def _wrap(body: list[str], height: float, theme: dict, alt: str,
 def render_files(stats: dict) -> list[Path]:
     """渲染本周卡片的亮暗两版，写入 assets/。"""
     weeks = stats.get("weeks") or []
-    view = ranking.build_week_view(stats.get("daily", []),
-                                   weeks[0] if weeks else None,
-                                   limit=MODEL_LIMIT,
-                                   subscription_sources=stats.get(
-                                       "subscription_sources") or [])
+    card = (weeks[0].get("view") if weeks else None) or weekview.build_week_view([], None)
     ASSETS.mkdir(exist_ok=True)
     written = []
     for theme in ("light", "dark"):
         path = ASSETS / f"widget-{theme}.svg"
-        path.write_text(render_svg(view, theme), encoding="utf-8")
+        path.write_text(render_svg(card, theme), encoding="utf-8")
         written.append(path)
-    print(f"[ok] 渲染 {len(written)} 个 SVG：{view.get('week') or '空'}")
+    print(f"[ok] 渲染 {len(written)} 个 SVG：{card.get('week') or '空'}")
     return written

@@ -13,11 +13,8 @@ on:
     paths:
       - "data/raw/**"
       - "config/aggregate.yaml"
-      - "aggregate.py"
-      - "ranking.py"
-      - "render.py"
-      - "config.py"
-      - "collectors/**"
+      - "stats.schema.json"
+      - "llm_usage/**"
   workflow_dispatch:
 
 permissions:
@@ -42,25 +39,11 @@ jobs:
       - name: 安装依赖
         run: pip install -r requirements.txt
 
-      # 跨语言口径一致性测试需要 node 与 react/node_modules，所以这里把它们装上。
-      # 下面还会设 PARITY_STRICT，确保装漏了是报错而不是静默跳过。
-      - uses: actions/setup-node@v7
-        with:
-          node-version: "22"
-
-      - name: 安装前端依赖
-        working-directory: react
-        run: npm ci --no-audit --no-fund
-
       - name: 跑单测
-        env:
-          PARITY_STRICT: "1"
-        run: |
-          python tests/test_core.py
-          python tests/test_parity.py
+        run: python tests/test_core.py
 
       - name: 重新生成 stats.json 与 SVG
-        run: python run.py --skip-collect
+        run: python -m llm_usage --skip-collect
 
       - name: 提交产物
         run: |

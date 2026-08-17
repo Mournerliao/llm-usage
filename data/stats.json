@@ -1,27 +1,659 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "timezone": "Asia/Shanghai",
   "latest_date": "2026-08-17",
   "weeks": [
     {
       "week": "2026-W34",
       "start": "2026-08-17",
-      "end": "2026-08-23"
+      "end": "2026-08-23",
+      "view": {
+        "week": "2026-W34",
+        "start": "2026-08-17",
+        "end": "2026-08-23",
+        "range_display": "8月17日 – 8月23日",
+        "basis": "tokens",
+        "requests": 63,
+        "tokens_total": 69063768,
+        "cost_cents": 5420.4658,
+        "tokens_display": "69.1M",
+        "cost_display": "$54.20 · 订阅",
+        "requests_display": "63",
+        "breakdown": [
+          {
+            "kind": "tokens_in",
+            "label": "输入",
+            "amount": 2244342,
+            "display": "2.2M",
+            "pct": 3.2496663083890818
+          },
+          {
+            "kind": "tokens_out",
+            "label": "输出",
+            "amount": 451478,
+            "display": "451.5K",
+            "pct": 0.6537117986380355
+          },
+          {
+            "kind": "cache_write",
+            "label": "缓存写入",
+            "amount": 1656795,
+            "display": "1.7M",
+            "pct": 2.3989351406369837
+          },
+          {
+            "kind": "cache_read",
+            "label": "缓存读取",
+            "amount": 64711153,
+            "display": "64.7M",
+            "pct": 93.6976867523359
+          }
+        ],
+        "models": [
+          {
+            "label": "claude-opus-5-thinking-high",
+            "requests": 6,
+            "tokens_total": 51850296,
+            "cost_cents": 4342.7753,
+            "tokens_display": "51.9M",
+            "cost_display": "$43.43",
+            "requests_display": "6",
+            "pct": 75.07597326575058
+          },
+          {
+            "label": "cursor-grok-4.6-high",
+            "requests": 23,
+            "tokens_total": 15335338,
+            "cost_cents": 1077.6905,
+            "tokens_display": "15.3M",
+            "cost_display": "$10.78",
+            "requests_display": "23",
+            "pct": 22.204606618046093
+          },
+          {
+            "label": "gpt-5.6-sol",
+            "requests": 26,
+            "tokens_total": 1717004,
+            "cost_cents": null,
+            "tokens_display": "1.7M",
+            "cost_display": "订阅",
+            "requests_display": "26",
+            "pct": 2.486113992506172
+          },
+          {
+            "label": "codex-auto-review",
+            "requests": 8,
+            "tokens_total": 161130,
+            "cost_cents": null,
+            "tokens_display": "161.1K",
+            "cost_display": "订阅",
+            "requests_display": "8",
+            "pct": 0.23330612369716056
+          }
+        ],
+        "days": [
+          {
+            "date": "2026-08-17",
+            "weekday": "一",
+            "requests": 63,
+            "tokens_total": 69063768,
+            "cost_cents": 5420.4658,
+            "tokens_display": "69.1M"
+          },
+          {
+            "date": "2026-08-18",
+            "weekday": "二",
+            "requests": 0,
+            "tokens_total": null,
+            "cost_cents": null,
+            "tokens_display": "—"
+          },
+          {
+            "date": "2026-08-19",
+            "weekday": "三",
+            "requests": 0,
+            "tokens_total": null,
+            "cost_cents": null,
+            "tokens_display": "—"
+          },
+          {
+            "date": "2026-08-20",
+            "weekday": "四",
+            "requests": 0,
+            "tokens_total": null,
+            "cost_cents": null,
+            "tokens_display": "—"
+          },
+          {
+            "date": "2026-08-21",
+            "weekday": "五",
+            "requests": 0,
+            "tokens_total": null,
+            "cost_cents": null,
+            "tokens_display": "—"
+          },
+          {
+            "date": "2026-08-22",
+            "weekday": "六",
+            "requests": 0,
+            "tokens_total": null,
+            "cost_cents": null,
+            "tokens_display": "—"
+          },
+          {
+            "date": "2026-08-23",
+            "weekday": "日",
+            "requests": 0,
+            "tokens_total": null,
+            "cost_cents": null,
+            "tokens_display": "—"
+          }
+        ]
+      }
     },
     {
       "week": "2026-W33",
       "start": "2026-08-10",
-      "end": "2026-08-16"
+      "end": "2026-08-16",
+      "view": {
+        "week": "2026-W33",
+        "start": "2026-08-10",
+        "end": "2026-08-16",
+        "range_display": "8月10日 – 8月16日",
+        "basis": "tokens",
+        "requests": 3472,
+        "tokens_total": 871495948,
+        "cost_cents": 36456.372,
+        "tokens_display": "871.5M",
+        "cost_display": "$364.56 · 订阅",
+        "requests_display": "3,472",
+        "breakdown": [
+          {
+            "kind": "tokens_in",
+            "label": "输入",
+            "amount": 34749761,
+            "display": "34.7M",
+            "pct": 3.987369198875495
+          },
+          {
+            "kind": "tokens_out",
+            "label": "输出",
+            "amount": 3857539,
+            "display": "3.9M",
+            "pct": 0.4426341865217714
+          },
+          {
+            "kind": "cache_write",
+            "label": "缓存写入",
+            "amount": 13246010,
+            "display": "13.2M",
+            "pct": 1.519916418475419
+          },
+          {
+            "kind": "cache_read",
+            "label": "缓存读取",
+            "amount": 819642638,
+            "display": "819.6M",
+            "pct": 94.05008019612731
+          }
+        ],
+        "models": [
+          {
+            "label": "gpt-5.6-sol",
+            "requests": 2892,
+            "tokens_total": 381884452,
+            "cost_cents": null,
+            "tokens_display": "381.9M",
+            "cost_display": "订阅",
+            "requests_display": "2,892",
+            "pct": 43.81941796475226
+          },
+          {
+            "label": "claude-opus-5-thinking-high",
+            "requests": 114,
+            "tokens_total": 313744907,
+            "cost_cents": 26518.8133,
+            "tokens_display": "313.7M",
+            "cost_display": "$265.19",
+            "requests_display": "114",
+            "pct": 36.00073043598363
+          },
+          {
+            "label": "cursor-grok-4.5-high",
+            "requests": 145,
+            "tokens_total": 61870952,
+            "cost_cents": 4324.466100000001,
+            "tokens_display": "61.9M",
+            "cost_display": "$43.24",
+            "requests_display": "145",
+            "pct": 7.099396404766761
+          },
+          {
+            "label": "cursor-grok-4.6-high",
+            "requests": 74,
+            "tokens_total": 58223801,
+            "cost_cents": 3894.8455,
+            "tokens_display": "58.2M",
+            "cost_display": "$38.95",
+            "requests_display": "74",
+            "pct": 6.680903236970644
+          },
+          {
+            "label": "composer-2.5",
+            "requests": 59,
+            "tokens_total": 35117043,
+            "cost_cents": 845.1761,
+            "tokens_display": "35.1M",
+            "cost_display": "$8.45",
+            "requests_display": "59",
+            "pct": 4.029513055177166
+          },
+          {
+            "label": "codex-auto-review",
+            "requests": 171,
+            "tokens_total": 10565729,
+            "cost_cents": null,
+            "tokens_display": "10.6M",
+            "cost_display": "订阅",
+            "requests_display": "171",
+            "pct": 1.212366967884055
+          }
+        ],
+        "days": [
+          {
+            "date": "2026-08-10",
+            "weekday": "一",
+            "requests": 231,
+            "tokens_total": 61777484,
+            "cost_cents": 2307.4093000000003,
+            "tokens_display": "61.8M"
+          },
+          {
+            "date": "2026-08-11",
+            "weekday": "二",
+            "requests": 154,
+            "tokens_total": 84854834,
+            "cost_cents": 6263.4907,
+            "tokens_display": "84.9M"
+          },
+          {
+            "date": "2026-08-12",
+            "weekday": "三",
+            "requests": 1088,
+            "tokens_total": 267518953,
+            "cost_cents": 9720.6015,
+            "tokens_display": "267.5M"
+          },
+          {
+            "date": "2026-08-13",
+            "weekday": "四",
+            "requests": 663,
+            "tokens_total": 130358350,
+            "cost_cents": 4652.3405,
+            "tokens_display": "130.4M"
+          },
+          {
+            "date": "2026-08-14",
+            "weekday": "五",
+            "requests": 1336,
+            "tokens_total": 326986327,
+            "cost_cents": 13512.529999999999,
+            "tokens_display": "327.0M"
+          },
+          {
+            "date": "2026-08-15",
+            "weekday": "六",
+            "requests": 0,
+            "tokens_total": null,
+            "cost_cents": null,
+            "tokens_display": "—"
+          },
+          {
+            "date": "2026-08-16",
+            "weekday": "日",
+            "requests": 0,
+            "tokens_total": null,
+            "cost_cents": null,
+            "tokens_display": "—"
+          }
+        ]
+      }
     },
     {
       "week": "2026-W32",
       "start": "2026-08-03",
-      "end": "2026-08-09"
+      "end": "2026-08-09",
+      "view": {
+        "week": "2026-W32",
+        "start": "2026-08-03",
+        "end": "2026-08-09",
+        "range_display": "8月3日 – 8月9日",
+        "basis": "tokens",
+        "requests": 1642,
+        "tokens_total": 451373461,
+        "cost_cents": 19243.8839,
+        "tokens_display": "451.4M",
+        "cost_display": "$192.44 · 订阅",
+        "requests_display": "1,642",
+        "breakdown": [
+          {
+            "kind": "tokens_in",
+            "label": "输入",
+            "amount": 22408579,
+            "display": "22.4M",
+            "pct": 4.964531798204237
+          },
+          {
+            "kind": "tokens_out",
+            "label": "输出",
+            "amount": 2402493,
+            "display": "2.4M",
+            "pct": 0.5322627951314133
+          },
+          {
+            "kind": "cache_write",
+            "label": "缓存写入",
+            "amount": 11096169,
+            "display": "11.1M",
+            "pct": 2.4583122311659347
+          },
+          {
+            "kind": "cache_read",
+            "label": "缓存读取",
+            "amount": 415466220,
+            "display": "415.5M",
+            "pct": 92.04489317549842
+          }
+        ],
+        "models": [
+          {
+            "label": "gpt-5.6-sol",
+            "requests": 1201,
+            "tokens_total": 153417246,
+            "cost_cents": null,
+            "tokens_display": "153.4M",
+            "cost_display": "订阅",
+            "requests_display": "1,201",
+            "pct": 33.98898235180025
+          },
+          {
+            "label": "claude-opus-5-thinking-high",
+            "requests": 46,
+            "tokens_total": 111392883,
+            "cost_cents": 10627.803,
+            "tokens_display": "111.4M",
+            "cost_display": "$106.28",
+            "requests_display": "46",
+            "pct": 24.678651410566648
+          },
+          {
+            "label": "composer-2.5",
+            "requests": 158,
+            "tokens_total": 86701758,
+            "cost_cents": 2009.8674,
+            "tokens_display": "86.7M",
+            "cost_display": "$20.10",
+            "requests_display": "158",
+            "pct": 19.208430599334683
+          },
+          {
+            "label": "cursor-grok-4.5-high",
+            "requests": 104,
+            "tokens_total": 51215152,
+            "cost_cents": 3629.1503000000002,
+            "tokens_display": "51.2M",
+            "cost_display": "$36.29",
+            "requests_display": "104",
+            "pct": 11.34651379071664
+          },
+          {
+            "label": "kimi-k3-max",
+            "requests": 44,
+            "tokens_total": 26268829,
+            "cost_cents": 1658.9124,
+            "tokens_display": "26.3M",
+            "cost_display": "$16.59",
+            "requests_display": "44",
+            "pct": 5.819754874777629
+          },
+          {
+            "label": "claude-sonnet-5-thinking-high",
+            "requests": 22,
+            "tokens_total": 11802077,
+            "cost_cents": 719.6386,
+            "tokens_display": "11.8M",
+            "cost_display": "$7.20",
+            "requests_display": "22",
+            "pct": 2.6147033487199196
+          }
+        ],
+        "days": [
+          {
+            "date": "2026-08-03",
+            "weekday": "一",
+            "requests": 347,
+            "tokens_total": 100378509,
+            "cost_cents": 5769.0617999999995,
+            "tokens_display": "100.4M"
+          },
+          {
+            "date": "2026-08-04",
+            "weekday": "二",
+            "requests": 828,
+            "tokens_total": 182627677,
+            "cost_cents": 5292.6747,
+            "tokens_display": "182.6M"
+          },
+          {
+            "date": "2026-08-05",
+            "weekday": "三",
+            "requests": 49,
+            "tokens_total": 59210416,
+            "cost_cents": 4033.6721,
+            "tokens_display": "59.2M"
+          },
+          {
+            "date": "2026-08-06",
+            "weekday": "四",
+            "requests": 306,
+            "tokens_total": 49374738,
+            "cost_cents": 1233.9003,
+            "tokens_display": "49.4M"
+          },
+          {
+            "date": "2026-08-07",
+            "weekday": "五",
+            "requests": 112,
+            "tokens_total": 59782121,
+            "cost_cents": 2914.575,
+            "tokens_display": "59.8M"
+          },
+          {
+            "date": "2026-08-08",
+            "weekday": "六",
+            "requests": 0,
+            "tokens_total": null,
+            "cost_cents": null,
+            "tokens_display": "—"
+          },
+          {
+            "date": "2026-08-09",
+            "weekday": "日",
+            "requests": 0,
+            "tokens_total": null,
+            "cost_cents": null,
+            "tokens_display": "—"
+          }
+        ]
+      }
     },
     {
       "week": "2026-W31",
       "start": "2026-07-27",
-      "end": "2026-08-02"
+      "end": "2026-08-02",
+      "view": {
+        "week": "2026-W31",
+        "start": "2026-07-27",
+        "end": "2026-08-02",
+        "range_display": "7月27日 – 8月2日",
+        "basis": "tokens",
+        "requests": 2506,
+        "tokens_total": 636498627,
+        "cost_cents": 22822.9557,
+        "tokens_display": "636.5M",
+        "cost_display": "$228.23 · 订阅",
+        "requests_display": "2,506",
+        "breakdown": [
+          {
+            "kind": "tokens_in",
+            "label": "输入",
+            "amount": 29014442,
+            "display": "29.0M",
+            "pct": 4.558445339741479
+          },
+          {
+            "kind": "tokens_out",
+            "label": "输出",
+            "amount": 3223964,
+            "display": "3.2M",
+            "pct": 0.5065154681001378
+          },
+          {
+            "kind": "cache_write",
+            "label": "缓存写入",
+            "amount": 15115405,
+            "display": "15.1M",
+            "pct": 2.3747741721365885
+          },
+          {
+            "kind": "cache_read",
+            "label": "缓存读取",
+            "amount": 589144816,
+            "display": "589.1M",
+            "pct": 92.56026502002179
+          }
+        ],
+        "models": [
+          {
+            "label": "gpt-5.6-sol",
+            "requests": 2024,
+            "tokens_total": 273383817,
+            "cost_cents": null,
+            "tokens_display": "273.4M",
+            "cost_display": "订阅",
+            "requests_display": "2,024",
+            "pct": 42.95120294108663
+          },
+          {
+            "label": "composer-2.5",
+            "requests": 153,
+            "tokens_total": 103398642,
+            "cost_cents": 2375.6503,
+            "tokens_display": "103.4M",
+            "cost_display": "$23.76",
+            "requests_display": "153",
+            "pct": 16.244912025552573
+          },
+          {
+            "label": "cursor-grok-4.5-high",
+            "requests": 144,
+            "tokens_total": 94667265,
+            "cost_cents": 6603.721799999999,
+            "tokens_display": "94.7M",
+            "cost_display": "$66.04",
+            "requests_display": "144",
+            "pct": 14.873129490662674
+          },
+          {
+            "label": "claude-opus-5-thinking-high",
+            "requests": 28,
+            "tokens_total": 87948674,
+            "cost_cents": 7514.067300000001,
+            "tokens_display": "87.9M",
+            "cost_display": "$75.14",
+            "requests_display": "28",
+            "pct": 13.817574817800823
+          },
+          {
+            "label": "claude-opus-5-thinking-medium",
+            "requests": 27,
+            "tokens_total": 60166574,
+            "cost_cents": 5043.0583,
+            "tokens_display": "60.2M",
+            "cost_display": "$50.43",
+            "requests_display": "27",
+            "pct": 9.452742150219908
+          },
+          {
+            "label": "Claude Opus 5 (Auto Balanced)",
+            "requests": 3,
+            "tokens_total": 8491927,
+            "cost_cents": 952.7853,
+            "tokens_display": "8.5M",
+            "cost_display": "$9.53",
+            "requests_display": "3",
+            "pct": 1.3341626579816646
+          }
+        ],
+        "days": [
+          {
+            "date": "2026-07-27",
+            "weekday": "一",
+            "requests": 868,
+            "tokens_total": 226134447,
+            "cost_cents": 6666.6014,
+            "tokens_display": "226.1M"
+          },
+          {
+            "date": "2026-07-28",
+            "weekday": "二",
+            "requests": 1222,
+            "tokens_total": 251036917,
+            "cost_cents": 7311.7366,
+            "tokens_display": "251.0M"
+          },
+          {
+            "date": "2026-07-29",
+            "weekday": "三",
+            "requests": 288,
+            "tokens_total": 52015028,
+            "cost_cents": 1441.4203,
+            "tokens_display": "52.0M"
+          },
+          {
+            "date": "2026-07-30",
+            "weekday": "四",
+            "requests": 76,
+            "tokens_total": 69202568,
+            "cost_cents": 4347.9865,
+            "tokens_display": "69.2M"
+          },
+          {
+            "date": "2026-07-31",
+            "weekday": "五",
+            "requests": 52,
+            "tokens_total": 38109667,
+            "cost_cents": 3055.2109,
+            "tokens_display": "38.1M"
+          },
+          {
+            "date": "2026-08-01",
+            "weekday": "六",
+            "requests": 0,
+            "tokens_total": null,
+            "cost_cents": null,
+            "tokens_display": "—"
+          },
+          {
+            "date": "2026-08-02",
+            "weekday": "日",
+            "requests": 0,
+            "tokens_total": null,
+            "cost_cents": null,
+            "tokens_display": "—"
+          }
+        ]
+      }
     }
   ],
   "sources": [

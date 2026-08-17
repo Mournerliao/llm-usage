@@ -10,7 +10,7 @@
 </div>
 <!-- WIDGET_END -->
 
-这里只放**本周**一张静态图。要翻看过去几周，用博客里的 [React 版本](react/)，它支持在
+这里只放**本周**一张静态图。要翻看过去几周，用博客里的 [widget](widget/)，它支持在
 本周与过去三周之间切换。
 
 ## 关于「模型成本」
@@ -25,8 +25,8 @@
 
 ```
 Cursor 官方接口 / Codex 本机日志 → data/raw/<源>/…    （原始事件，本机采集）
-                → data/stats.json            （CI 聚合产物）
-                → assets/*.svg + React 组件   （两个渲染器共用同一份视图函数）
+                → data/stats.json            （CI 聚合产物，含四周 WeekView）
+                → assets/*.svg + widget      （两个渲染器只消费 weeks[].view）
 ```
 
 采集需要本机 Cursor 的登录态，以及本机的 Codex 会话目录（`~/.codex`），只能在本机
@@ -53,14 +53,13 @@ Cursor 官方接口 / Codex 本机日志 → data/raw/<源>/…    （原始事�
 | `cursor` | 输入 / 输出 / 缓存写入 / 缓存读取 | 有 | 官方 dashboard 接口，可回溯到账号开通日 |
 | `chatgpt` | 输入 / 输出 / 缓存写入 / 缓存读取 | 订阅 | Codex 本机会话日志；ChatGPT Plus 不计逐次成本 |
 | 中转站（Codex 的其他 provider） | 同上 | 无 | 与 chatgpt 分开落盘，展示层同名模型仍聚合 |
-| OpenAI 兼容接口 | 仅输入 / 输出 | 无 | 各家 `/v1/usage` 口径，缓存与成本字段留空 |
 
 拿不到某个口径时字段**缺失**而不是填 0，展示层据此显示横线。「不报 token」和「报了但
 确实是零」是两件事。
 
 缓存读取通常占总 token 的九成以上，所以四类 token 始终分开存，绝不合并成一个总数。
 
-已排除的数据源，以及排除的实测依据，见 `collectors/cursor.py` 的模块文档与
+已排除的数据源，以及排除的实测依据，见 `llm_usage/collect/cursor.py` 的模块文档与
 [`docs/DESIGN.md`](docs/DESIGN.md)：
 
 - Cursor 本机的 `ai-code-tracking.db`：只有请求数，没有任何 token 或成本字段。
@@ -73,6 +72,7 @@ Cursor 官方接口 / Codex 本机日志 → data/raw/<源>/…    （原始事�
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 cp config/sources.example.yaml sources.yaml
 .venv/bin/python run.py                       # 采集 + 汇总 + 渲染
+# 等价：python -m llm_usage
 ```
 
 采集默认从本机 Cursor 的登录态读凭据，本机登录着 Cursor 就不用配任何东西。换机时可设
@@ -103,8 +103,9 @@ cookie 复制）。
 
 ## 数据契约
 
-`stats.schema.json` 是单一事实源，当前为 v3。`schema_version` 供消费方校验，避免字段
-语义变更后静默渲染错误数据。
+`stats.schema.json` 是单一事实源，当前为 v4。`schema_version` 供消费方校验，避免字段
+语义变更后静默渲染错误数据。每个展示周带已经算好的 `view`（排序、占比、显示字符串），
+SVG 与博客 widget 只渲染，不再各自计算。
 
 `daily` 只保留最近四个 ISO 周的明细；`year` 是当年汇总，**目前不展示，先存着**，等数据
 攒够一年再用。完整历史始终在 `data/raw` 里，随时可以重新切窗口。
@@ -112,16 +113,8 @@ cookie 复制）。
 ## 测试
 
 ```bash
-.venv/bin/python tests/test_core.py      # 纯函数与契约
-.venv/bin/python tests/test_parity.py    # Python 与 TS 的口径必须逐字段一致
+.venv/bin/python tests/test_core.py
 ```
-
-parity 测试把真实的那份 TS 代码交给 node 执行，再与 Python 的输出逐字段比对，**包括
-每一个显示字符串**。SVG 和 React 组件因此不可能对同一份数据显示出不同的数。
-
-本机没装 node 时它会自动跳过，不挡住 Python 侧的测试。CI 里设了 `PARITY_STRICT=1`，
-此时跳过一律算失败——否则工具链装漏了会让 CI 绿着通过，而这是唯一能拦住两边漂移的
-测试。
 
 设计取舍与实现偏差见 [`docs/DESIGN.md`](docs/DESIGN.md)，产品前提见
 [`PRODUCT.md`](PRODUCT.md)。

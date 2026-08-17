@@ -3,13 +3,15 @@
 > 目标读者：本人
 > 关联：日常使用说明见仓库根 `README.md`，产品前提见 `PRODUCT.md`
 
-本文是按时间累积的设计日志，不是当前架构的说明书。**当前架构以第 8 节为准。**
+本文是按时间累积的设计日志，不是当前架构的说明书。**当前架构以第 10 节为准。**
 
 - 第 2 节：第一轮重构前的问题，含实测证据。仍然有效，是很多决定的依据。
 - 第 3 节：第一轮的目标架构。**其中 3.1、3.3、3.5、3.6 已被第 8 节推翻**，见下表。
 - 第 4、5、6 节：第一轮的展示口径、迁移路径与待确认项，多数已由第 8 节结案。
 - 第 7 节：第一轮实现后与计划的偏差。**7.1、7.3 已被第 8 节推翻。**
-- 第 8 节：第二轮（v3）的架构与推翻的理由。**这是现状。**
+- 第 8 节：第二轮（v3）的架构与推翻的理由。
+- 第 9 节：接入 ChatGPT / Codex。
+- 第 10 节：第三轮（v4）：WeekView 物化、采集 seam、目录收成 `llm_usage/`。**这是现状。**
 
 被推翻的部分不删，因为「为什么放弃它」本身是有用的记录。但别照着它们实现：
 
@@ -554,4 +556,28 @@ jsonl 里的 `token_count` / `last_token_usage`。
    Cursor 仍是美元；`chatgpt` 显示「订阅」；两者同时出现时写成 `$X · 订阅`。
 3. **中转站分开采。** `model_provider=openai` → 源 `chatgpt`；其余 provider 各自
    成源。展示层仍按模型名聚合，给以后「ADE vs 中转站」卡片留分片。
+
+---
+
+## 10. 第三轮（v4）：物化 WeekView，收目录
+
+第 8.5 节把格式化收进「共享视图函数」，物理上却是 Python 与 TS 各写一份，靠
+parity 测试钉住。ChatGPT 接入时改一次订阅文案就要抄三处。这不是共享模块，是用
+测试锁住的双 adapter。
+
+**现在的做法：** fold 对四个 ISO 周各算一次 `WeekView`，写入 `stats.json` 的
+`weeks[i].view`。`llm_usage/render.py` 与 `widget` 只读产物。契约升到 v4。
+详见 `docs/adr/0001-weekview-in-stats.md`。
+
+顺带三件事：
+
+1. **采集 seam。** `CollectResult.machine_shard` 声明落盘策略，`persist` 按
+   `Event.source` 分组写入。`LOCAL_TYPES` 从编排里消失。cursor / chatgpt 的
+   I/O 从「内部创建」改成注入（`fetch` / `rollouts`），测试穿过 `collect()`。
+2. **闲置 adapter 拿掉。** `openai_compatible` 从未进入热路径，删掉。真有这类
+   源再加回来。
+3. **目录。** Python 管线收进 `llm_usage/`（`collect/`、`fold`、`view`、
+   `render`、`contract`）；React 目录改名 `widget/`。根上留三行 `run.py`。
+   契约常量从 `stats.schema.json` 读出，不再手抄 `TOKEN_KINDS`。
+
 

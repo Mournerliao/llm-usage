@@ -10,7 +10,7 @@ venv/
 
 # React 预览依赖与构建产物
 node_modules/
-react/dist/
+widget/dist/
 
 # 本地工作区数据（会话记忆、项目笔记等），含隐私，不进公开仓库
 .workbuddy/

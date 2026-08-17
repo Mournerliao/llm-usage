@@ -72,7 +72,7 @@ import urllib.request
 from collections import defaultdict
 from pathlib import Path
 
-from . import Event
+from . import CollectResult, Event
 
 API_HOST = "https://cursor.com"
 USAGE_ENDPOINT = "/api/dashboard/get-filtered-usage-events"
@@ -264,16 +264,23 @@ def to_events(raw: list[dict], day_of, source: str = "cursor") -> list[Event]:
     return events
 
 
-def collect(ctx, cfg: dict) -> tuple[list[Event], list[str]]:
+def collect(ctx, cfg: dict, *, fetch=None) -> CollectResult:
     """拉取并翻译，同时给出本次采集「负责」的日期范围。
+
+    ``fetch(start_ms, end_ms) -> list[dict]`` 是远端 adapter。默认走官方接口；
+    测试传入 fixture，不必碰网络或登录态。
 
     负责范围从**最早一条事件所在的那天**算到今天，而不是从配置的 ``since`` 算起。
     区别在于：账号开通之前的日子根本不可能有数据，把它们也列入负责范围只会在 raw
     里生成一堆全是空数组的月份文件。范围内确实没有用量的那天仍然会留空数组，那是
     有意义的「采过，没有用量」。
     """
-    cookie = _session_cookie(cfg)
-    raw = fetch_events(cookie, ctx.since_ms(), int(time.time() * 1000))
+    if fetch is None:
+        cookie = _session_cookie(cfg)
+
+        def fetch(start, end, _cookie=cookie):
+            return fetch_events(_cookie, start, end)
+    raw = fetch(ctx.since_ms(), int(time.time() * 1000))
     events = to_events(raw, ctx.day_of, cfg.get("name", "cursor"))
 
     kept = sum(1 for r in raw if r.get("kind") not in SKIP_KINDS)
@@ -281,5 +288,9 @@ def collect(ctx, cfg: dict) -> tuple[list[Event], list[str]]:
           f" → {len(events)} 条日模型记录，起点 {ctx.since}")
 
     if not events:
-        return [], []
-    return events, ctx.days_between(min(e.date for e in events), ctx.today())
+        return CollectResult(events=[], days=[], machine_shard=False)
+    return CollectResult(
+        events=events,
+        days=ctx.days_between(min(e.date for e in events), ctx.today()),
+        machine_shard=False,
+    )

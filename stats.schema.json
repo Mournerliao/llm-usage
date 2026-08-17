@@ -2,13 +2,13 @@
   "$schema": "https://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/Mournerliao/llm-usage/main/stats.schema.json",
   "title": "LLM Usage Stats",
-  "description": "LLM 用量的数据契约（单一事实源）。aggregate.py 产出，render.py 与 UsageWidget.tsx 共同消费。字段名以本文件为准。",
+  "description": "LLM 用量的数据契约（单一事实源）。llm_usage.fold 产出，render.py 与 UsageWidget 共同消费 weeks[].view。字段名以本文件为准。",
   "type": "object",
   "required": ["schema_version", "timezone", "latest_date", "weeks", "sources", "daily", "year"],
   "properties": {
     "schema_version": {
-      "const": 3,
-      "description": "契约版本。消费方应校验它，避免在字段语义变更后静默渲染错误数据。v1 用 input_tokens/output_tokens；v2 改为 unit + amount + machine；v3 去掉 unit 与 machine，改用具名 token 字段并加入 cost_cents 与周维度。"
+      "const": 4,
+      "description": "契约版本。消费方应校验它，避免在字段语义变更后静默渲染错误数据。v1 用 input_tokens/output_tokens；v2 改为 unit + amount + machine；v3 去掉 unit 与 machine，改用具名 token 字段并加入 cost_cents 与周维度；v4 把 WeekView 物化进 weeks[].view，渲染器不再各自计算。"
     },
     "timezone": {
       "type": "string",
@@ -20,10 +20,10 @@
     },
     "weeks": {
       "type": "array",
-      "description": "可展示的 ISO 周，新的在前，共 4 个（本周加过去三周）。README 的 SVG 只渲染第一个；博客组件用它做切换。",
+      "description": "可展示的 ISO 周，新的在前，共 4 个（本周加过去三周）。每个元素带已经算好的 view。README 的 SVG 只渲染第一个 view；博客组件用 weeks 做切换。",
       "items": {
         "type": "object",
-        "required": ["week", "start", "end"],
+        "required": ["week", "start", "end", "view"],
         "properties": {
           "week": {
             "type": "string",
@@ -39,6 +39,9 @@
             "type": "string",
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
             "description": "该周周日。"
+          },
+          "view": {
+            "$ref": "#/$defs/weekView"
           }
         }
       }
@@ -151,6 +154,45 @@
               "requests": { "type": "integer", "minimum": 0 },
               "tokens_total": { "type": ["integer", "null"], "minimum": 0 },
               "cost_cents": { "type": ["number", "null"], "minimum": 0 }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "weekView": {
+      "type": "object",
+      "description": "某一周已经算好的展示视图：排序、占比、格式化字符串。由 llm_usage.view 在 fold 时写入。",
+      "required": ["week", "start", "end", "range_display", "basis", "requests",
+                   "tokens_display", "cost_display", "requests_display",
+                   "breakdown", "models", "days"],
+      "properties": {
+        "week": { "type": ["string", "null"] },
+        "start": { "type": ["string", "null"] },
+        "end": { "type": ["string", "null"] },
+        "range_display": { "type": "string" },
+        "basis": { "type": "string", "enum": ["cost", "tokens", "requests"] },
+        "requests": { "type": "integer", "minimum": 0 },
+        "tokens_total": { "type": ["integer", "null"] },
+        "cost_cents": { "type": ["number", "null"] },
+        "tokens_display": { "type": "string" },
+        "cost_display": { "type": "string" },
+        "requests_display": { "type": "string" },
+        "breakdown": { "type": "array" },
+        "models": { "type": "array" },
+        "days": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["date", "weekday", "requests", "tokens_display"],
+            "properties": {
+              "date": { "type": "string" },
+              "weekday": { "type": "string" },
+              "requests": { "type": "integer" },
+              "tokens_total": { "type": ["integer", "null"] },
+              "cost_cents": { "type": ["number", "null"] },
+              "tokens_display": { "type": "string" }
             }
           }
         }

@@ -11,14 +11,14 @@ base_url 之类的信息又会进公开仓库。
 """
 from __future__ import annotations
 
-from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import yaml
 
-ROOT = Path(__file__).resolve().parent
-SOURCES_PATH = ROOT / "sources.yaml"
-AGGREGATE_PATH = ROOT / "config" / "aggregate.yaml"
+from llm_usage import REPO_ROOT
+
+SOURCES_PATH = REPO_ROOT / "sources.yaml"
+AGGREGATE_PATH = REPO_ROOT / "config" / "aggregate.yaml"
 
 DEFAULT_TZ = "Asia/Shanghai"
 

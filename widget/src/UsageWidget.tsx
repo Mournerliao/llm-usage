@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useEffect, useMemo, useState, type CSSProperties } from "react";
+import { memo, useEffect, useState, type CSSProperties } from "react";
 
 import { Card } from "./components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "./components/ui/tabs";
@@ -12,13 +12,9 @@ import type {
   TokenKind,
   UsageStats,
   UsageWidgetProps,
-  WeekView,
   WidgetTheme,
 } from "./types";
-import { isValidStats } from "./types";
-import { buildWeekView, formatTokens } from "./view";
-
-export { buildWeekView };
+import { EMPTY_VIEW, isValidStats } from "./types";
 
 // 与 CSS 变量一一对应，顺序即构成条的绘制顺序（固定顺序而非按大小，让配色稳定）。
 const KIND_COLOR: Record<TokenKind, string> = {
@@ -121,7 +117,7 @@ const DayStrip = memo(function DayStrip({ days }: { days: DayCell[] }) {
             <div
               key={day.date}
               className="flex h-11 items-end justify-center"
-              title={`${day.date}　${formatTokens(day.tokens_total)} tokens`}
+              title={`${day.date}　${day.tokens_display} tokens`}
             >
               <div
                 className="w-2.5 bg-foreground/70 transition-[height] duration-500 ease-out motion-reduce:transition-none"
@@ -193,7 +189,6 @@ export function UsageWidget({
   dataUrl,
   data,
   week,
-  limit = 6,
   title = "LLM 用量",
   width = 760,
   theme = "auto",
@@ -227,16 +222,7 @@ export function UsageWidget({
   const activeWeek = weeks.find((w) => w.week === selected) ?? weeks[0] ?? null;
   const activeIndex = activeWeek ? weeks.indexOf(activeWeek) : 0;
 
-  const view = useMemo(
-    () =>
-      buildWeekView(
-        valid ? stats.daily : [],
-        activeWeek,
-        limit,
-        valid ? (stats.subscription_sources ?? []) : [],
-      ),
-    [valid, stats, activeWeek, limit],
-  );
+  const view = activeWeek?.view ?? EMPTY_VIEW;
 
   if (!stats && error) {
     return (
