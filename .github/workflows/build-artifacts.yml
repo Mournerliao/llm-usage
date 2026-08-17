@@ -1,0 +1,72 @@
+# 原始数据一变就重新生成产物（data/stats.json 与 assets/*.svg）。
+#
+# 为什么放在 CI 而不是本机：产物是全局的，两台机器如果各自生成并提交，就会在
+# 同一批文件上互相冲突。原始数据按机器分片、各写各的文件，产物由这里单点串行生成，
+# 冲突面归零。
+#
+# 聚合与渲染只读仓库内的文件，不需要任何 secret。
+name: build artifacts
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "data/raw/**"
+      - "config/aggregate.yaml"
+      - "aggregate.py"
+      - "ranking.py"
+      - "render.py"
+      - "config.py"
+      - "collectors/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  # 两台机器接连推送时，只让最后一次跑完，避免并发提交产物。
+  group: build-artifacts
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      # 跨语言口径一致性测试需要 node 与 react/node_modules，缺了会自动跳过，
+      # 所以这里把它们装上，让 CI 真的跑到那两个断言。
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+
+      - name: 安装前端依赖
+        working-directory: react
+        run: npm ci --no-audit --no-fund
+
+      - name: 跑单测
+        run: |
+          python tests/test_core.py
+          python tests/test_parity.py
+
+      - name: 重新生成 stats.json 与 SVG
+        run: python run.py --skip-collect
+
+      - name: 提交产物
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/stats.json assets
+          if git diff --cached --quiet; then
+            echo "产物无变化，跳过提交。"
+            exit 0
+          fi
+          git commit -m "chore(ci): rebuild usage artifacts"
+          git push
