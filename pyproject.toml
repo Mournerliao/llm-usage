@@ -1,8 +1,6 @@
 [project]
-name = "llm-usage-widget"
-version = "0.1.0"
-description = "Vercel dynamic SVG widget for LLM usage"
+name = "llm-usage"
+version = "0.2.0"
+description = "个人 LLM 每日用量看板：本机采集，静态 SVG 与 React 组件展示"
 requires-python = ">=3.12"
-
-[tool.vercel]
-entrypoint = "api.widget:handler"
+dependencies = ["pyyaml>=6.0", "requests>=2.31"]

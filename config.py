@@ -1,0 +1,62 @@
+"""配置加载。刻意分成两个文件，因为它们的读者不同。
+
+``sources.yaml``（不提交）：本机专属信息——机器名、各源的 base_url 与 key 环境变量名。
+只有采集阶段需要，只在本机存在。
+
+``config/aggregate.yaml``（提交）：时区与模型别名表。聚合与渲染阶段需要，且不含任何
+密钥，所以 CI 拿着仓库就能重新生成 stats.json 和 SVG，不必配置 secret。
+
+把两者混在一份 gitignore 掉的文件里，CI 就永远拿不到别名表；混在提交的文件里，
+base_url 之类的信息又会进公开仓库。
+"""
+from __future__ import annotations
+
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+import yaml
+
+ROOT = Path(__file__).resolve().parent
+SOURCES_PATH = ROOT / "sources.yaml"
+AGGREGATE_PATH = ROOT / "config" / "aggregate.yaml"
+
+DEFAULT_TZ = "Asia/Shanghai"
+
+
+def load_aggregate_config() -> dict:
+    """读取公共聚合配置。文件缺失时退回内置默认值，保证 CI 不会因此失败。"""
+    if not AGGREGATE_PATH.exists():
+        return {"timezone": DEFAULT_TZ, "model_aliases": {}}
+    cfg = yaml.safe_load(AGGREGATE_PATH.read_text(encoding="utf-8")) or {}
+    cfg.setdefault("timezone", DEFAULT_TZ)
+    cfg.setdefault("model_aliases", {})
+    return cfg
+
+
+def load_sources_config() -> dict:
+    if not SOURCES_PATH.exists():
+        raise SystemExit(
+            f"找不到 {SOURCES_PATH}，请复制 config/sources.example.yaml 为 sources.yaml")
+    cfg = yaml.safe_load(SOURCES_PATH.read_text(encoding="utf-8")) or {}
+    if not cfg.get("machine"):
+        raise SystemExit(
+            "sources.yaml 缺少 machine 字段。它是原始数据的分片键，"
+            "两台机器必须取不同的值（如 work-mac / home-win），否则会互相覆盖。")
+    cfg.setdefault("sources", [])
+    return cfg
+
+
+def timezone() -> ZoneInfo:
+    return ZoneInfo(load_aggregate_config()["timezone"])
+
+
+def model_aliases() -> dict[str, str]:
+    """模型别名表，用于把同一模型在不同机器上的标签归一。"""
+    raw = load_aggregate_config().get("model_aliases") or {}
+    return {str(k): str(v) for k, v in raw.items()}
+
+
+def normalize_model(model: str, aliases: dict[str, str] | None = None) -> str:
+    """归一模型名。未登记的名字原样返回，不做猜测。"""
+    aliases = model_aliases() if aliases is None else aliases
+    return aliases.get(model, model)

@@ -1,31 +1,33 @@
-# LLM 用量采集配置
-# 复制本文件为 sources.yaml 并填入你自己的源；sources.yaml 已被 .gitignore 忽略，不会提交到仓库。
-# 凭据通过环境变量 / 仓库 Secrets 注入，不要写死在文件里。
+# 本机采集配置。复制本文件为仓库根的 sources.yaml 并按你的机器填写。
+# sources.yaml 已被 .gitignore 忽略：它含 base_url 等本机信息，且 machine 每台不同。
+# 公共的时区与模型别名在 config/aggregate.yaml 里（随仓库提交，CI 需要）。
+
+# 机器名，也是原始数据的分片键：data/raw/<machine>/<source>/<月>.json
+# 两台机器必须取不同的值，否则会互相覆盖对方的数据。
+machine: work-mac        # 家里那台填 home-win
 
 sources:
-  # —— API 类：OpenAI / DeepSeek / 所有 OpenAI 兼容中转 共用一个采集器 ——
-  - name: openai
-    type: openai_compatible
-    base_url: https://api.openai.com
-    api_key_env: OPENAI_API_KEY        # 在你的环境 / 仓库 Secrets 中设置
-
-  - name: deepseek
-    type: openai_compatible
-    base_url: https://api.deepseek.com
-    api_key_env: DEEPSEEK_API_KEY
-
-  - name: relay-a                      # 中转站：换站只改这里 + 对应 env 名，无需改代码
-    type: openai_compatible
-    base_url: https://your-relay.example.com
-    api_key_env: RELAY_A_API_KEY
-
-  # —— 本地类：Cursor（需本机脚本运行，仓库读取其推送结果）——
+  # —— 本地类：Cursor（读 ~/.cursor/ai-tracking/ai-code-tracking.db，无需 key）——
+  # 口径为「按模型的 AI 请求数」。该库只保留最近约一个月，需定期采集，
+  # 否则数据滚出窗口后永久丢失。详见 collectors/cursor.py 模块文档。
   - name: cursor
     type: cursor
-    # Windows 路径（默认）；macOS 为 ~/Library/Application Support/Cursor/User/workspaceStorage/*/state.vscdb
-    db_glob: "%APPDATA%/Cursor/User/workspaceStorage/*/state.vscdb"
+    # db_path 可选；不填则自动探测 macOS 与 Windows 的默认位置
 
-  # —— 本地类：WorkBuddy（读 ~/.workbuddy/workbuddy.db，需本机运行）——
-  - name: workbuddy
-    type: workbuddy
-    # db_path 可选；不填则自动探测 ~/.workbuddy/workbuddy.db（跨平台）
+  # —— API 类：OpenAI / DeepSeek / 任意 OpenAI 兼容中转站，共用一个采集器 ——
+  # 这是唯一能给出真实 token 口径的源。凭据只写环境变量名，不要写死 key。
+  # 用不到的源整段删掉即可，留着会每次都打印「缺少环境变量」的告警。
+  # - name: openai
+  #   type: openai_compatible
+  #   base_url: https://api.openai.com
+  #   api_key_env: OPENAI_API_KEY
+  #
+  # - name: deepseek
+  #   type: openai_compatible
+  #   base_url: https://api.deepseek.com
+  #   api_key_env: DEEPSEEK_API_KEY
+  #
+  # - name: relay-a                    # 中转站：换站只改这里 + 对应 env 名
+  #   type: openai_compatible
+  #   base_url: https://your-relay.example.com
+  #   api_key_env: RELAY_A_API_KEY

@@ -1,6 +1,0 @@
-{
-  "rewrites": [
-    { "source": "/widget.svg", "destination": "/" },
-    { "source": "/widget", "destination": "/" }
-  ]
-}

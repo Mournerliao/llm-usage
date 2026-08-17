@@ -1,11 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/llm-usage/stats.schema.json",
+  "$id": "https://raw.githubusercontent.com/Mournerliao/llm-usage/main/stats.schema.json",
   "title": "LLM Usage Stats",
-  "description": "LLM 每日用量组件的数据契约（单一事实源）。aggregate.py 产出、render.py 与 UsageWidget.tsx 共同消费。字段名以本文件为准。",
+  "description": "LLM 每日用量组件的数据契约（单一事实源）。aggregate.py 产出，render.py 与 UsageWidget.tsx 共同消费。字段名以本文件为准。",
   "type": "object",
-  "required": ["latest_date", "total_dates", "daily"],
+  "required": ["schema_version", "latest_date", "total_dates", "units", "machines", "daily"],
   "properties": {
+    "schema_version": {
+      "const": 2,
+      "description": "契约版本。消费方应校验它，避免在字段语义变更后静默渲染错误数据。v1 用 input_tokens/output_tokens/total_tokens，v2 改为 unit + amount。"
+    },
     "latest_date": {
       "type": ["string", "null"],
       "description": "最近一天，格式 YYYY-MM-DD；无数据时 null。"
@@ -15,28 +19,60 @@
       "minimum": 0,
       "description": "覆盖的天数。"
     },
+    "units": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "数据中出现过的所有计量单位，便于消费方预先知道要分几节展示。"
+    },
+    "machines": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "数据中出现过的所有采集机器。"
+    },
     "daily": {
       "type": "array",
-      "description": "按 (source, model, date) 聚合后的日记录。",
+      "description": "按 (date, machine, source, model, unit) 聚合后的日记录。",
       "items": {
         "type": "object",
-        "required": [
-          "source",
-          "model",
-          "date",
-          "requests",
-          "input_tokens",
-          "output_tokens",
-          "total_tokens"
-        ],
+        "required": ["date", "machine", "source", "model", "unit", "amount"],
         "properties": {
-          "source": { "type": "string", "description": "来源，如 openai / cursor / workbuddy。" },
-          "model":  { "type": "string", "description": "模型名，如 gpt-4o / hy3。" },
-          "date":   { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
-          "requests":      { "type": "integer", "minimum": 0 },
-          "input_tokens":  { "type": "integer", "minimum": 0 },
-          "output_tokens": { "type": "integer", "minimum": 0 },
-          "total_tokens":  { "type": "integer", "minimum": 0, "description": "input + output，由 aggregate 计算。" }
+          "date": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "按 config/aggregate.yaml 的 timezone 计算的日期。"
+          },
+          "machine": {
+            "type": "string",
+            "description": "采集机器，如 work-mac / home-win。同时是原始数据的分片键。"
+          },
+          "source": {
+            "type": "string",
+            "description": "ADE 名，如 cursor / openai。"
+          },
+          "model": {
+            "type": "string",
+            "description": "归一后的模型名。cursor-tab 表示 Tab 补全（不上报模型）。"
+          },
+          "unit": {
+            "type": "string",
+            "enum": ["requests", "sessions", "tokens", "credits", "lines"],
+            "description": "计量单位。不同源口径不同，消费方必须按 unit 分桶展示，绝不跨单位相加。"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "该 unit 下的用量。"
+          },
+          "amount_in": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "输入侧用量。仅当源能拆分输入输出时存在（目前只有 OpenAI 兼容接口）。"
+          },
+          "amount_out": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "输出侧用量。与 amount_in 同时存在或同时缺失。"
+          }
         }
       }
     }

@@ -1,14 +1,16 @@
-# 敏感配置，不提交
+# 本机采集配置：含 machine 与各源的 base_url，每台机器不同，不提交
 sources.yaml
+
+# 任何数据库副本
 *.db
+
 __pycache__/
-data/cloud/
+.venv/
+venv/
 
 # React 预览依赖与构建产物
 node_modules/
 react/dist/
-
-.vercel
 
 # 本地工作区数据（会话记忆、项目笔记等），含隐私，不进公开仓库
 .workbuddy/

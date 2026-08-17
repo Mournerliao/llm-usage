@@ -1,15 +1,525 @@
 {
-  "latest_date": "2026-08-16",
-  "total_dates": 1,
+  "schema_version": 2,
+  "latest_date": "2026-08-17",
+  "total_dates": 21,
+  "units": [
+    "requests"
+  ],
+  "machines": [
+    "work-mac"
+  ],
   "daily": [
     {
-      "source": "workbuddy",
-      "model": "hy3",
-      "date": "2026-08-16",
-      "requests": 2,
-      "input_tokens": 187604,
-      "output_tokens": 0,
-      "total_tokens": 187604
+      "date": "2026-07-20",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.5",
+      "unit": "requests",
+      "amount": 20
+    },
+    {
+      "date": "2026-07-21",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-opus-4-8",
+      "unit": "requests",
+      "amount": 4
+    },
+    {
+      "date": "2026-07-21",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.5",
+      "unit": "requests",
+      "amount": 31
+    },
+    {
+      "date": "2026-07-22",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-opus-4-8",
+      "unit": "requests",
+      "amount": 12
+    },
+    {
+      "date": "2026-07-22",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.5",
+      "unit": "requests",
+      "amount": 3
+    },
+    {
+      "date": "2026-07-23",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "auto-smart",
+      "unit": "requests",
+      "amount": 8
+    },
+    {
+      "date": "2026-07-23",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-opus-4-8",
+      "unit": "requests",
+      "amount": 11
+    },
+    {
+      "date": "2026-07-23",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "composer-2.5",
+      "unit": "requests",
+      "amount": 25
+    },
+    {
+      "date": "2026-07-23",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "cursor-tab",
+      "unit": "requests",
+      "amount": 6
+    },
+    {
+      "date": "2026-07-23",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "gpt-5.6-sol",
+      "unit": "requests",
+      "amount": 1
+    },
+    {
+      "date": "2026-07-23",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.5",
+      "unit": "requests",
+      "amount": 25
+    },
+    {
+      "date": "2026-07-24",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-opus-4-8",
+      "unit": "requests",
+      "amount": 3
+    },
+    {
+      "date": "2026-07-24",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "composer-2.5",
+      "unit": "requests",
+      "amount": 12
+    },
+    {
+      "date": "2026-07-24",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.5",
+      "unit": "requests",
+      "amount": 3
+    },
+    {
+      "date": "2026-07-27",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-opus-5",
+      "unit": "requests",
+      "amount": 7
+    },
+    {
+      "date": "2026-07-27",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "composer-2.5",
+      "unit": "requests",
+      "amount": 17
+    },
+    {
+      "date": "2026-07-27",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.5",
+      "unit": "requests",
+      "amount": 11
+    },
+    {
+      "date": "2026-07-28",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-opus-5",
+      "unit": "requests",
+      "amount": 12
+    },
+    {
+      "date": "2026-07-28",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "composer-2.5",
+      "unit": "requests",
+      "amount": 5
+    },
+    {
+      "date": "2026-07-28",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.5",
+      "unit": "requests",
+      "amount": 24
+    },
+    {
+      "date": "2026-07-29",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-opus-5",
+      "unit": "requests",
+      "amount": 1
+    },
+    {
+      "date": "2026-07-29",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "composer-2.5",
+      "unit": "requests",
+      "amount": 3
+    },
+    {
+      "date": "2026-07-29",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.5",
+      "unit": "requests",
+      "amount": 7
+    },
+    {
+      "date": "2026-07-30",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-opus-5",
+      "unit": "requests",
+      "amount": 5
+    },
+    {
+      "date": "2026-07-30",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "composer-2.5",
+      "unit": "requests",
+      "amount": 20
+    },
+    {
+      "date": "2026-07-30",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "cursor-tab",
+      "unit": "requests",
+      "amount": 1
+    },
+    {
+      "date": "2026-07-30",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.5",
+      "unit": "requests",
+      "amount": 8
+    },
+    {
+      "date": "2026-07-31",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "auto-smart",
+      "unit": "requests",
+      "amount": 5
+    },
+    {
+      "date": "2026-07-31",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-opus-5",
+      "unit": "requests",
+      "amount": 2
+    },
+    {
+      "date": "2026-07-31",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "composer-2.5",
+      "unit": "requests",
+      "amount": 4
+    },
+    {
+      "date": "2026-07-31",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.5",
+      "unit": "requests",
+      "amount": 16
+    },
+    {
+      "date": "2026-08-03",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-opus-5",
+      "unit": "requests",
+      "amount": 7
+    },
+    {
+      "date": "2026-08-03",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "composer-2.5",
+      "unit": "requests",
+      "amount": 1
+    },
+    {
+      "date": "2026-08-03",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.5",
+      "unit": "requests",
+      "amount": 22
+    },
+    {
+      "date": "2026-08-04",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-opus-5",
+      "unit": "requests",
+      "amount": 3
+    },
+    {
+      "date": "2026-08-04",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "composer-2.5",
+      "unit": "requests",
+      "amount": 3
+    },
+    {
+      "date": "2026-08-04",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.5",
+      "unit": "requests",
+      "amount": 6
+    },
+    {
+      "date": "2026-08-04",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "kimi-k3",
+      "unit": "requests",
+      "amount": 10
+    },
+    {
+      "date": "2026-08-05",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-opus-5",
+      "unit": "requests",
+      "amount": 7
+    },
+    {
+      "date": "2026-08-05",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "composer-2.5",
+      "unit": "requests",
+      "amount": 2
+    },
+    {
+      "date": "2026-08-05",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.5",
+      "unit": "requests",
+      "amount": 5
+    },
+    {
+      "date": "2026-08-06",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-opus-5",
+      "unit": "requests",
+      "amount": 2
+    },
+    {
+      "date": "2026-08-06",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "composer-2.5",
+      "unit": "requests",
+      "amount": 11
+    },
+    {
+      "date": "2026-08-06",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.5",
+      "unit": "requests",
+      "amount": 1
+    },
+    {
+      "date": "2026-08-06",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "kimi-k3",
+      "unit": "requests",
+      "amount": 17
+    },
+    {
+      "date": "2026-08-07",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-opus-5",
+      "unit": "requests",
+      "amount": 5
+    },
+    {
+      "date": "2026-08-07",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-sonnet-5",
+      "unit": "requests",
+      "amount": 10
+    },
+    {
+      "date": "2026-08-07",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "composer-2.5",
+      "unit": "requests",
+      "amount": 27
+    },
+    {
+      "date": "2026-08-07",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.5",
+      "unit": "requests",
+      "amount": 4
+    },
+    {
+      "date": "2026-08-07",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "kimi-k3",
+      "unit": "requests",
+      "amount": 3
+    },
+    {
+      "date": "2026-08-10",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "composer-2.5",
+      "unit": "requests",
+      "amount": 9
+    },
+    {
+      "date": "2026-08-10",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.5",
+      "unit": "requests",
+      "amount": 16
+    },
+    {
+      "date": "2026-08-11",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-opus-5",
+      "unit": "requests",
+      "amount": 7
+    },
+    {
+      "date": "2026-08-11",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.5",
+      "unit": "requests",
+      "amount": 21
+    },
+    {
+      "date": "2026-08-11",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "kimi-k3",
+      "unit": "requests",
+      "amount": 1
+    },
+    {
+      "date": "2026-08-12",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-opus-5",
+      "unit": "requests",
+      "amount": 13
+    },
+    {
+      "date": "2026-08-12",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "composer-2.5",
+      "unit": "requests",
+      "amount": 1
+    },
+    {
+      "date": "2026-08-13",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-opus-5",
+      "unit": "requests",
+      "amount": 3
+    },
+    {
+      "date": "2026-08-13",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.6",
+      "unit": "requests",
+      "amount": 10
+    },
+    {
+      "date": "2026-08-14",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "auto-smart",
+      "unit": "requests",
+      "amount": 4
+    },
+    {
+      "date": "2026-08-14",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-opus-5",
+      "unit": "requests",
+      "amount": 39
+    },
+    {
+      "date": "2026-08-14",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.6",
+      "unit": "requests",
+      "amount": 12
+    },
+    {
+      "date": "2026-08-17",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "claude-opus-5",
+      "unit": "requests",
+      "amount": 2
+    },
+    {
+      "date": "2026-08-17",
+      "machine": "work-mac",
+      "source": "cursor",
+      "model": "grok-4.6",
+      "unit": "requests",
+      "amount": 4
     }
   ]
 }

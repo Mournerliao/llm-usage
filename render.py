@@ -1,8 +1,17 @@
-"""渲染辅助：根据 stats.json 生成 SVG 字符串（纯函数，不写盘）。
+"""把 stats.json 渲染成静态 SVG 卡片，写到 assets/。
 
-线上 widget 由 api/widget.py 在 Vercel 端动态生成；
-本模块作为同源 SVG 模板参考 / 本地调试用途。
+== 为什么是静态文件而不是动态端点 ==
+
+数据一天更新一次，push 的那一刻内容就已确定；GitHub 的 camo 还会把图片缓存 5~10
+分钟。动态端点换不来实时性，却要维护一份复制的渲染逻辑（Vercel 只打包 api/ 目录），
+并且引入一个可能 502 的外部依赖。所以改成构建期生成、随仓库提交，本模块成为唯一
+的 SVG 实现。
+
+主题用 GitHub 的 ``#gh-light-mode-only`` / ``#gh-dark-mode-only`` 图片语法解决，
+所以每个维度各生成亮/暗两份，而不是靠 CSS 媒体查询。
 """
+from __future__ import annotations
+
 import json
 from html import escape
 from pathlib import Path
@@ -11,83 +20,145 @@ import ranking
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
+ASSETS = ROOT / "assets"
+
+WIDTH = 560
+PAD = 18
+ROW_H = 28
+SECTION_HEAD_H = 22
+SECTION_GAP = 6
+BODY_TOP = 68
+LABEL_W = 112
+TRACK_X = 145
+
+PALETTES = {
+    "light": {"surface": "#ffffff", "border": "#e5e7eb", "primary": "#111827",
+              "secondary": "#6b7280", "muted": "#f3f4f6", "accent": "#378add"},
+    "dark": {"surface": "#0d1117", "border": "#30363d", "primary": "#f0f6fc",
+             "secondary": "#8b949e", "muted": "#21262d", "accent": "#378add"},
+}
+
+FONT = ("-apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans SC, "
+        "Roboto, sans-serif")
+
+
+def _fmt(n: int) -> str:
+    return f"{n:,}"
+
+
+def _totals_text(totals: list[dict]) -> str:
+    """把各单位的汇总拼成一行，例如「136 次请求 · 2 个会话」。
+
+    刻意不给出跨单位的「总量」：请求数和会话数相加没有意义。
+    """
+    if not totals:
+        return "暂无用量"
+    return "  ·  ".join(
+        ranking.unit_counted(t["unit"], t["amount"]) for t in totals)
 
 
 def build_svg(
     stats: dict,
     date: str | None = None,
-    width: int = 560,
     group_by: str = "model",
-    theme: str = "auto",
+    theme: str = "light",
+    width: int = WIDTH,
+    limit: int = 8,
 ) -> str:
-    """根据 stats.json 构建一张 SVG 字符串（不写盘）。"""
-    group_by = group_by if group_by in {"model", "source"} else "model"
-    theme = theme if theme in {"auto", "light", "dark"} else "auto"
+    """根据 stats.json 构建一张 SVG 字符串（纯函数，不写盘）。"""
+    theme = theme if theme in PALETTES else "light"
+    c = PALETTES[theme]
     if date is None:
         date = stats.get("latest_date")
 
-    view = ranking.rank_models(stats.get("daily", []), date, limit=8, group_by=group_by)
-    rows_view = view["rows"]
-    total_tokens = view["total_tokens"]
-    total_requests = view["total_requests"]
-    date = escape(str(view["date"] or "—"))
-    row_h = 28
-    rows_y = 84
-    height = rows_y + max(len(rows_view), 1) * row_h + 14
-    track_x = 145
-    track_w = max(width - track_x - 60, 80)
-    rows = []
-    y = rows_y
-    for r in rows_view:
-        label = escape(str(r["label"]))
-        pct = r["pct"]
-        bar_w = max(3, round(track_w * min(max(pct, 0), 100) / 100))
-        rows.append(
-            f'<text class="secondary label" x="18" y="{y + 16}" font-size="12">{label}</text>'
-            f'<rect class="muted" x="{track_x}" y="{y + 8}" width="{track_w}" height="8" rx="4"/>'
-            f'<rect class="accent" x="{track_x}" y="{y + 8}" width="{bar_w}" height="8" rx="4"/>'
-            f'<text class="secondary" x="{width - 18}" y="{y + 16}" text-anchor="end" font-size="11">{pct:.0f}%</text>'
-        )
-        y += row_h
-    bars = "".join(rows) or '<text class="secondary" x="18" y="100" font-size="12">暂无用量数据</text>'
-    dimension_title = "ADE 排行" if group_by == "source" else "模型排行"
-    return f'''<svg class="theme-{theme}" viewBox="0 0 {width} {height}" width="{width}" height="{height}" role="img" aria-labelledby="widget-title" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans SC, Roboto, sans-serif">
-  <title id="widget-title">LLM 每日用量，{dimension_title}，{date}</title>
-  <style>
-    .surface {{ fill: #ffffff; stroke: #e5e7eb; }}
-    .primary {{ fill: #111827; }}
-    .secondary {{ fill: #6b7280; }}
-    .muted {{ fill: #f3f4f6; }}
-    .accent {{ fill: #378add; }}
-    .label {{ clip-path: url(#label-clip); }}
-    .theme-dark .surface {{ fill: #0d1117; stroke: #30363d; }}
-    .theme-dark .primary {{ fill: #f0f6fc; }}
-    .theme-dark .secondary {{ fill: #8b949e; }}
-    .theme-dark .muted {{ fill: #21262d; }}
-    @media (prefers-color-scheme: dark) {{
-      .theme-auto .surface {{ fill: #0d1117; stroke: #30363d; }}
-      .theme-auto .primary {{ fill: #f0f6fc; }}
-      .theme-auto .secondary {{ fill: #8b949e; }}
-      .theme-auto .muted {{ fill: #21262d; }}
-    }}
-  </style>
-  <defs><clipPath id="label-clip"><rect x="18" y="{rows_y}" width="112" height="{max(len(rows_view), 1) * row_h}"/></clipPath></defs>
-  <rect class="surface" x="0.5" y="0.5" width="{width - 1}" height="{height - 1}" rx="13.5"/>
-  <text class="primary" x="18" y="27" font-size="15" font-weight="600">LLM 每日用量</text>
-  <rect class="muted" x="{width - 118}" y="13" width="100" height="22" rx="6"/>
-  <text class="secondary" x="{width - 68}" y="28" text-anchor="middle" font-size="11">{date}</text>
-  <text class="secondary" x="18" y="52" font-size="12"><tspan class="primary" font-weight="600">{total_tokens:,}</tspan> tokens</text>
-  <text class="secondary" x="170" y="52" font-size="12"><tspan class="primary" font-weight="600">{total_requests:,}</tspan> 次会话/请求</text>
-  <text class="secondary" x="18" y="76" font-size="11" font-weight="500">{dimension_title}</text>
-  {bars}
-</svg>'''
+    view = ranking.build_view(stats.get("daily", []), date, limit=limit,
+                              group_by=group_by)
+    sections = [s for s in view["sections"] if s["rows"]]
+    track_w = max(width - TRACK_X - 60, 80)
+
+    # 只有一种单位时，小节标题会和顶部汇总行显示同一个数，是冗余，省掉。
+    show_headers = len(sections) > 1
+
+    body: list[str] = []
+    y = BODY_TOP
+    for section in sections:
+        if show_headers:
+            body.append(
+                f'<text x="{PAD}" y="{y + 14}" fill="{c["secondary"]}" font-size="11" '
+                f'font-weight="500">{escape(ranking.unit_label(section["unit"]))}'
+                f'<tspan fill="{c["primary"]}" font-weight="600"> '
+                f'{_fmt(section["total"])}</tspan></text>'
+            )
+            y += SECTION_HEAD_H
+        for row in section["rows"]:
+            pct = min(max(row["pct"], 0), 100)
+            bar_w = max(3, round(track_w * pct / 100))
+            body.append(
+                f'<text x="{PAD}" y="{y + 16}" fill="{c["secondary"]}" font-size="12" '
+                f'clip-path="url(#label-clip)">{escape(str(row["label"]))}</text>'
+                f'<rect x="{TRACK_X}" y="{y + 8}" width="{track_w}" height="8" rx="4" '
+                f'fill="{c["muted"]}"/>'
+                f'<rect x="{TRACK_X}" y="{y + 8}" width="{bar_w}" height="8" rx="4" '
+                f'fill="{c["accent"]}"/>'
+                f'<text x="{width - PAD}" y="{y + 16}" fill="{c["secondary"]}" '
+                f'text-anchor="end" font-size="11">{pct:.0f}%</text>'
+            )
+            y += ROW_H
+        y += SECTION_GAP
+
+    if not sections:
+        body.append(f'<text x="{PAD}" y="{BODY_TOP + 16}" fill="{c["secondary"]}" '
+                    f'font-size="12">暂无用量数据</text>')
+        y = BODY_TOP + ROW_H
+
+    height = y + 8
+    dim = ranking.dimension_label(view["group_by"])
+    shown_date = escape(str(view["date"] or "—"))
+    title = f"LLM 每日用量，按{dim}，{shown_date}"
+
+    return f'''<svg viewBox="0 0 {width} {height}" width="{width}" height="{height}" \
+role="img" aria-labelledby="card-title" xmlns="http://www.w3.org/2000/svg" \
+font-family="{FONT}">
+  <title id="card-title">{escape(title)}</title>
+  <defs><clipPath id="label-clip"><rect x="{PAD}" y="0" width="{LABEL_W}" \
+height="{height}"/></clipPath></defs>
+  <rect x="0.5" y="0.5" width="{width - 1}" height="{height - 1}" rx="13.5" \
+fill="{c["surface"]}" stroke="{c["border"]}"/>
+  <text x="{PAD}" y="27" fill="{c["primary"]}" font-size="15" font-weight="600">\
+LLM 每日用量</text>
+  <rect x="{width - 118}" y="13" width="100" height="22" rx="6" fill="{c["muted"]}"/>
+  <text x="{width - 68}" y="28" fill="{c["secondary"]}" text-anchor="middle" \
+font-size="11">{shown_date}</text>
+  <text x="{PAD}" y="52" fill="{c["secondary"]}" font-size="12">\
+{escape(_totals_text(view["totals"]))}</text>
+  <text x="{width - PAD}" y="52" fill="{c["secondary"]}" text-anchor="end" \
+font-size="11">按{escape(dim)}</text>
+  {"".join(body)}
+</svg>
+'''
 
 
-def render(date: str | None = None) -> str:
-    """读取 stats.json 并返回 SVG 字符串（供本地调试打印）。"""
+def render_files(stats: dict, out_dir: Path = ASSETS,
+                 date: str | None = None) -> list[Path]:
+    """为每个维度生成亮/暗两份 SVG，返回写出的文件列表。"""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    written = []
+    for group_by in ("model", "source"):
+        for theme in ("light", "dark"):
+            path = out_dir / f"widget-{group_by}-{theme}.svg"
+            path.write_text(
+                build_svg(stats, date=date, group_by=group_by, theme=theme),
+                encoding="utf-8")
+            written.append(path)
+    return written
+
+
+def render(date: str | None = None) -> list[Path]:
     stats = json.loads((DATA / "stats.json").read_text(encoding="utf-8"))
-    return build_svg(stats, date)
+    written = render_files(stats, date=date)
+    print(f"[ok] 渲染完成：{', '.join(p.name for p in written)}")
+    return written
 
 
 if __name__ == "__main__":
-    print(render())
+    render()

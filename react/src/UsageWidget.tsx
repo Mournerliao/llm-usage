@@ -5,49 +5,11 @@ import { memo, useEffect, useState, type CSSProperties } from "react";
 import { Card } from "./components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "./components/ui/tabs";
 import "./index.css";
-import type {
-  GroupBy,
-  RankedRow,
-  UsageRow,
-  UsageStats,
-  UsageWidgetProps,
-  WidgetTheme,
-} from "./types";
-import { isValidStats } from "./types";
+import type { GroupBy, UsageStats, UsageWidgetProps, WidgetTheme } from "./types";
+import { DIMENSION_LABELS, isValidStats, unitCounted, unitLabel } from "./types";
+import { buildView } from "./view";
 
-const fmt = (n: number) => n.toLocaleString("en-US");
-
-/**
- * 纯函数：从 daily 中过滤某天、按 groupBy 维度合并、按 token 降序取前 N。
- * 与 Python 侧 ranking.rank_models 共用同一份数据契约（stats.json）。
- */
-export function rankModels(
-  daily: UsageRow[],
-  date: string,
-  limit = 8,
-  groupBy: GroupBy = "model",
-): { rows: RankedRow[]; totalTokens: number; totalRequests: number } {
-  const dayRows = daily.filter((r) => r.date === date);
-  const totalTokens = dayRows.reduce((sum, row) => sum + row.total_tokens, 0);
-  const totalRequests = dayRows.reduce((sum, row) => sum + row.requests, 0);
-
-  const aggregate = new Map<string, number>();
-  for (const row of dayRows) {
-    const key = groupBy === "source" ? row.source : row.model;
-    aggregate.set(key, (aggregate.get(key) ?? 0) + row.total_tokens);
-  }
-
-  const rows: RankedRow[] = [...aggregate.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, limit)
-    .map(([label, tokens]) => ({
-      label,
-      total_tokens: tokens,
-      pct: totalTokens ? (tokens / totalTokens) * 100 : 0,
-    }));
-
-  return { rows, totalTokens, totalRequests };
-}
+export { buildView };
 
 const BarRow = memo(function BarRow({
   label,
@@ -169,12 +131,13 @@ export function UsageWidget({
   }
 
   const day = date ?? stats.latest_date ?? "";
-  const { rows, totalTokens, totalRequests } = rankModels(
-    stats.daily,
-    day,
-    limit,
-    groupBy,
-  );
+  const view = buildView(stats.daily, day, limit, groupBy);
+  // 只有一种单位时，小节标题会和顶部汇总行显示同一个数，是冗余，省掉。
+  const showSectionHeaders = view.sections.length > 1;
+  const hasRows = view.sections.some((section) => section.rows.length > 0);
+  // 机器维度只在确实有多台机器时才提供，单机时那个 Tab 永远是 100%，没有信息量。
+  const dimensions: GroupBy[] = ["source", "model"];
+  if (stats.machines.length > 1) dimensions.push("machine");
 
   return (
     <Card
@@ -195,18 +158,13 @@ export function UsageWidget({
       </header>
 
       <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
-        <span>
-          <strong className="font-semibold tabular-nums text-foreground">
-            {fmt(totalTokens)}
-          </strong>{" "}
-          tokens
-        </span>
-        <span>
-          <strong className="font-semibold tabular-nums text-foreground">
-            {fmt(totalRequests)}
-          </strong>{" "}
-          次会话/请求
-        </span>
+        {view.totals.length > 0 ? (
+          view.totals.map((total) => (
+            <span key={total.unit}>{unitCounted(total.unit, total.amount)}</span>
+          ))
+        ) : (
+          <span>暂无用量</span>
+        )}
       </div>
 
       <Tabs
@@ -215,21 +173,38 @@ export function UsageWidget({
         onValueChange={(value) => setGroupBy(value as GroupBy)}
       >
         <TabsList aria-label="排行维度">
-          <TabsTrigger value="source">ADE</TabsTrigger>
-          <TabsTrigger value="model">模型</TabsTrigger>
+          {dimensions.map((dimension) => (
+            <TabsTrigger key={dimension} value={dimension}>
+              {DIMENSION_LABELS[dimension]}
+            </TabsTrigger>
+          ))}
         </TabsList>
       </Tabs>
 
-      {rows.length > 0 ? (
-        <div className="mt-3 grid gap-2.5" aria-live="polite">
-          {rows.map((row) => (
-            <BarRow
-              key={row.label}
-              label={row.label}
-              pct={row.pct}
-              accent={accent}
-            />
-          ))}
+      {hasRows ? (
+        <div className="mt-3 grid gap-4" aria-live="polite">
+          {view.sections
+            .filter((section) => section.rows.length > 0)
+            .map((section) => (
+              <section key={section.unit} className="grid gap-2.5">
+                {showSectionHeaders && (
+                  <h3 className="text-[11px] font-medium text-muted-foreground">
+                    {unitLabel(section.unit)}{" "}
+                    <span className="font-semibold tabular-nums text-foreground">
+                      {section.total.toLocaleString("en-US")}
+                    </span>
+                  </h3>
+                )}
+                {section.rows.map((row) => (
+                  <BarRow
+                    key={row.label}
+                    label={row.label}
+                    pct={row.pct}
+                    accent={accent}
+                  />
+                ))}
+              </section>
+            ))}
         </div>
       ) : (
         <p className="mt-3 text-xs text-muted-foreground" role="status">
