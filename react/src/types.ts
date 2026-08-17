@@ -1,58 +1,112 @@
 // TS 侧对数据契约的唯一镜像。单一事实源是仓库根的 stats.schema.json，
 // 字段名必须与 schema 完全一致；一旦漂移，isValidStats 会在运行时告警。
-// SVG 渲染器（render.py → ranking.build_view）与本组件消费同一份契约。
+// SVG 渲染器（render.py → ranking.build_week_view）与本组件消费同一份契约。
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
-/** 计量单位。不同源口径不同，展示时必须按 unit 分节，绝不跨单位相加。 */
-export type Unit = "requests" | "sessions" | "tokens" | "credits" | "lines";
+/** token 的四个分类。缓存读写与输入输出的单价差一个量级，永远分开存。 */
+export const TOKEN_KINDS = [
+  "tokens_in",
+  "tokens_out",
+  "cache_write",
+  "cache_read",
+] as const;
+
+export type TokenKind = (typeof TOKEN_KINDS)[number];
 
 export interface UsageRow {
   date: string;
-  machine: string;
   source: string;
   model: string;
-  unit: Unit;
-  amount: number;
-  /** 仅当源能拆分输入输出时存在（目前只有 OpenAI 兼容接口）。 */
-  amount_in?: number;
-  amount_out?: number;
+  requests: number;
+  /** 以下字段缺失表示「这个源不报该口径」，与「报了但是零」不是一回事。 */
+  tokens_in?: number;
+  tokens_out?: number;
+  cache_write?: number;
+  cache_read?: number;
+  /** token 按各模型单价折算出的成本，单位为分。不是账单金额。 */
+  cost_cents?: number;
+}
+
+/** 可切换的一周。取自 stats.json 的 weeks，新的在前。 */
+export interface WeekRef {
+  week: string;
+  start: string;
+  end: string;
+}
+
+/** 年度汇总。现在不展示，先存着。 */
+export interface YearSummary {
+  year: string;
+  start: string | null;
+  end: string | null;
+  days_active: number;
+  requests?: number;
+  tokens_total?: number | null;
+  cost_cents?: number | null;
+  months: { month: string; requests: number; tokens_total: number | null }[];
+  models: { model: string; requests: number; tokens_total: number | null }[];
 }
 
 export interface UsageStats {
   schema_version: number;
+  timezone: string;
   latest_date: string | null;
-  total_dates: number;
-  units: Unit[];
-  machines: string[];
+  weeks: WeekRef[];
+  sources: string[];
   daily: UsageRow[];
+  year: YearSummary | null;
 }
-
-/** 分组维度：按模型（默认，与 SVG 一致）、按来源，或按采集机器。 */
-export type GroupBy = "model" | "source" | "machine";
 
 /** 主题模式：跟随系统，或强制浅色 / 深色。 */
 export type WidgetTheme = "auto" | "light" | "dark";
 
-export interface RankedRow {
+/** 排序与占比的口径。有成本按成本，否则退到 token，再退到请求数。 */
+export type Basis = "cost" | "tokens" | "requests";
+
+export interface ModelRow {
   label: string;
-  amount: number;
-  /** 在所在小节内的占比（0~100），不是全局占比。 */
+  requests: number;
+  tokens_total: number | null;
+  cost_cents: number | null;
+  tokens_display: string;
+  cost_display: string;
+  requests_display: string;
+  /** 在本周内的占比（0~100）。 */
   pct: number;
 }
 
-/** 一个单位对应一节，节内自成 100%。 */
-export interface ViewSection {
-  unit: Unit;
-  total: number;
-  rows: RankedRow[];
+export interface BreakdownSegment {
+  kind: TokenKind;
+  label: string;
+  amount: number;
+  display: string;
+  pct: number;
 }
 
-export interface UsageView {
-  date: string | null;
-  groupBy: GroupBy;
-  totals: { unit: Unit; amount: number }[];
-  sections: ViewSection[];
+export interface DayCell {
+  date: string;
+  weekday: string;
+  requests: number;
+  tokens_total: number | null;
+  cost_cents: number | null;
+}
+
+export interface WeekView {
+  week: string | null;
+  start: string | null;
+  end: string | null;
+  range_display: string;
+  basis: Basis;
+  requests: number;
+  tokens_total: number | null;
+  cost_cents: number | null;
+  tokens_display: string;
+  cost_display: string;
+  requests_display: string;
+  breakdown: BreakdownSegment[];
+  models: ModelRow[];
+  days: DayCell[];
 }
 
 export interface UsageWidgetProps {
@@ -60,93 +114,58 @@ export interface UsageWidgetProps {
   dataUrl?: string;
   /** 构建时直接注入的数据（无需网络请求）。 */
   data?: UsageStats;
-  /** 指定展示哪一天，默认取 latest_date。 */
-  date?: string;
-  /** 每节展示前 N 个，默认 8。 */
+  /** 指定初始展示哪一周（ISO 周编号，如 2026-W34），默认最新一周。 */
+  week?: string;
+  /** 模型行展示前 N 个，默认 6。 */
   limit?: number;
-  /** 初始分组维度，默认 model。 */
-  defaultGroupBy?: GroupBy;
-  /** 条形主色，默认 #378ADD。 */
-  accent?: string;
-  /** 卡片标题，默认 “LLM 每日用量”。 */
+  /** 卡片标题，默认 “LLM 用量”。 */
   title?: string;
-  /** 卡片最大宽度（px），默认 560；窄容器中自动收缩。 */
+  /** 卡片最大宽度（px），默认 760；窄容器中自动收缩。 */
   width?: number;
   /** 主题模式，默认跟随系统。 */
   theme?: WidgetTheme;
 }
-
-const UNITS: readonly string[] = [
-  "requests",
-  "sessions",
-  "tokens",
-  "credits",
-  "lines",
-];
 
 /** 运行时契约校验：stats.json 一旦不匹配契约，组件不再静默渲染错乱数据。 */
 export function isValidStats(v: unknown): v is UsageStats {
   if (!v || typeof v !== "object") return false;
   const s = v as Record<string, unknown>;
   if (s.schema_version !== SCHEMA_VERSION) return false;
-  if (!Array.isArray(s.daily)) return false;
+  if (!Array.isArray(s.daily) || !Array.isArray(s.weeks)) return false;
+  const weeksOk = s.weeks.every((w) => {
+    const week = w as Record<string, unknown>;
+    return (
+      typeof week?.week === "string" &&
+      typeof week?.start === "string" &&
+      typeof week?.end === "string"
+    );
+  });
+  if (!weeksOk) return false;
   return s.daily.every((r) => {
     if (!r || typeof r !== "object") return false;
     const row = r as Record<string, unknown>;
     return (
       typeof row.date === "string" &&
-      typeof row.machine === "string" &&
       typeof row.source === "string" &&
       typeof row.model === "string" &&
-      typeof row.unit === "string" &&
-      UNITS.includes(row.unit) &&
-      typeof row.amount === "number"
+      typeof row.requests === "number"
     );
   });
 }
 
-/** 单位的中文名。与 Python 侧 ranking.UNIT_LABELS / UNIT_COUNTED 保持一致。 */
-export const UNIT_LABELS: Record<Unit, string> = {
+/** token 分类的中文名。与 Python 侧 ranking.TOKEN_LABELS 一致。 */
+export const TOKEN_LABELS: Record<TokenKind, string> = {
+  tokens_in: "输入",
+  tokens_out: "输出",
+  cache_write: "缓存写入",
+  cache_read: "缓存读取",
+};
+
+/** 排序口径的表头文案。与 Python 侧 ranking.BASIS_LABELS 一致。 */
+export const BASIS_LABELS: Record<Basis, string> = {
+  cost: "成本",
   tokens: "Tokens",
   requests: "请求",
-  sessions: "会话",
-  credits: "积分",
-  lines: "代码行",
 };
 
-const UNIT_COUNTED: Record<Unit, (n: string) => string> = {
-  tokens: (n) => `${n} tokens`,
-  requests: (n) => `${n} 次请求`,
-  sessions: (n) => `${n} 个会话`,
-  credits: (n) => `${n} 积分`,
-  lines: (n) => `${n} 行代码`,
-};
-
-export const DIMENSION_LABELS: Record<GroupBy, string> = {
-  model: "模型",
-  source: "ADE",
-  machine: "机器",
-};
-
-/** 单位展示顺序，与 Python 侧 ranking.UNIT_ORDER 一致。 */
-const UNIT_ORDER: readonly Unit[] = [
-  "tokens",
-  "requests",
-  "sessions",
-  "credits",
-  "lines",
-];
-
-export function unitLabel(unit: Unit): string {
-  return UNIT_LABELS[unit] ?? unit;
-}
-
-export function unitCounted(unit: Unit, amount: number): string {
-  const n = amount.toLocaleString("en-US");
-  return UNIT_COUNTED[unit]?.(n) ?? `${n} ${unit}`;
-}
-
-export function unitSortKey(unit: Unit): number {
-  const index = UNIT_ORDER.indexOf(unit);
-  return index === -1 ? UNIT_ORDER.length : index;
-}
+export const WEEKDAY_LABELS = ["一", "二", "三", "四", "五", "六", "日"] as const;

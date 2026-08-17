@@ -5,15 +5,18 @@
 """
 from __future__ import annotations
 
+import re
 from typing import Any
 
-SCHEMA_VERSION = 2
-UNITS = {"requests", "sessions", "tokens", "credits", "lines"}
+SCHEMA_VERSION = 3
 
-_REQUIRED_TOP = ("schema_version", "latest_date", "total_dates", "units",
-                 "machines", "daily")
-_REQUIRED_ROW = ("date", "machine", "source", "model", "unit", "amount")
-_INT_FIELDS = ("amount", "amount_in", "amount_out")
+TOKEN_KINDS = ("tokens_in", "tokens_out", "cache_write", "cache_read")
+
+_REQUIRED_TOP = ("schema_version", "timezone", "latest_date", "weeks",
+                 "sources", "daily", "year")
+_REQUIRED_ROW = ("date", "source", "model", "requests")
+_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_WEEK_RE = re.compile(r"^\d{4}-W\d{2}$")
 
 
 def validate_stats(stats: Any) -> list[str]:
@@ -30,11 +33,35 @@ def validate_stats(stats: Any) -> list[str]:
         errs.append(f"schema_version 应为 {SCHEMA_VERSION}，"
                     f"实际为 {stats.get('schema_version')!r}")
 
-    daily = stats.get("daily")
-    if not isinstance(daily, list):
-        errs.append("daily 必须是数组")
-        return errs
+    errs += _check_weeks(stats.get("weeks"))
+    errs += _check_daily(stats.get("daily"))
+    return errs
 
+
+def _check_weeks(weeks: Any) -> list[str]:
+    if not isinstance(weeks, list):
+        return ["weeks 必须是数组"]
+    errs: list[str] = []
+    for i, week in enumerate(weeks):
+        if not isinstance(week, dict):
+            errs.append(f"weeks[{i}] 不是对象")
+            continue
+        if not _WEEK_RE.match(str(week.get("week", ""))):
+            errs.append(f"weeks[{i}].week 不是 YYYY-Www：{week.get('week')!r}")
+        for key in ("start", "end"):
+            if not _DATE_RE.match(str(week.get(key, ""))):
+                errs.append(f"weeks[{i}].{key} 不是 YYYY-MM-DD：{week.get(key)!r}")
+        start, end = week.get("start"), week.get("end")
+        if isinstance(start, str) and isinstance(end, str) and start > end:
+            errs.append(f"weeks[{i}] 的 start 晚于 end")
+    return errs
+
+
+def _check_daily(daily: Any) -> list[str]:
+    if not isinstance(daily, list):
+        return ["daily 必须是数组"]
+
+    errs: list[str] = []
     for i, row in enumerate(daily):
         if not isinstance(row, dict):
             errs.append(f"daily[{i}] 不是对象")
@@ -42,13 +69,25 @@ def validate_stats(stats: Any) -> list[str]:
         for key in _REQUIRED_ROW:
             if key not in row:
                 errs.append(f"daily[{i}] 缺少字段 {key}")
-        for key in _INT_FIELDS:
-            if key in row and not isinstance(row[key], int):
-                errs.append(f"daily[{i}].{key} 应为整数")
-        unit = row.get("unit")
-        if unit is not None and unit not in UNITS:
-            errs.append(f"daily[{i}].unit 未知：{unit!r}")
-        if "amount" in row and isinstance(row["amount"], int) and row["amount"] < 0:
-            errs.append(f"daily[{i}].amount 不应为负")
+        if not _DATE_RE.match(str(row.get("date", ""))):
+            errs.append(f"daily[{i}].date 不是 YYYY-MM-DD：{row.get('date')!r}")
+
+        # token 类字段必须是非负整数；缺失是合法的（表示该源不报此口径），
+        # 但出现了就不能是 null 或浮点——那意味着上游把「没有」和「零」搞混了。
+        for key in ("requests",) + TOKEN_KINDS:
+            if key not in row:
+                continue
+            value = row[key]
+            if not isinstance(value, int) or isinstance(value, bool):
+                errs.append(f"daily[{i}].{key} 应为整数，实际 {value!r}")
+            elif value < 0:
+                errs.append(f"daily[{i}].{key} 不应为负")
+
+        if "cost_cents" in row:
+            cost = row["cost_cents"]
+            if not isinstance(cost, (int, float)) or isinstance(cost, bool):
+                errs.append(f"daily[{i}].cost_cents 应为数字，实际 {cost!r}")
+            elif cost < 0:
+                errs.append(f"daily[{i}].cost_cents 不应为负")
 
     return errs

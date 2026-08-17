@@ -1,12 +1,13 @@
 """编排：加载配置 → 采集 → 写原始数据 → 汇总 → 渲染。
 
 用法：
-    python run.py                      # 采集本机所有源（默认回看 30 天）
+    python run.py                      # 采集所有源
     python run.py --only cursor        # 只采某个源
-    python run.py --lookback 7         # 缩短回看窗口
+    python run.py --since 2026-07-01   # 覆盖采集起点
     python run.py --skip-collect       # 只重跑汇总与渲染（CI 用这条）
 
-采集是幂等的：每次重采回看窗口内的每一天并覆盖写回，跑一次和跑十次结果相同。
+采集是幂等的：每次重采 [起点, 今天] 的全部数据并覆盖写回，跑一次和跑十次结果相同，
+漏跑补跑都能自愈。所以不需要维护游标文件，也不怕中途失败。
 """
 from __future__ import annotations
 
@@ -39,9 +40,9 @@ def run_collect(ctx: CollectContext, sources: list[dict], only: str | None) -> i
             print(f"[warn] {name}: 未知源类型 {stype}，跳过")
             continue
 
-        events = module.collect(ctx, src)
-        days = module.collected_days(ctx)
-        write_events(ctx.root, ctx.machine, name, events, days)
+        events, days = module.collect(ctx, src)
+        if days:
+            write_events(ctx.root, name, events, days)
         total += len(events)
     return total
 
@@ -49,8 +50,7 @@ def run_collect(ctx: CollectContext, sources: list[dict], only: str | None) -> i
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", help="只采集指定名字的源")
-    ap.add_argument("--lookback", type=int, default=30,
-                    help="回看天数，窗口内每天都会被重采并覆盖写回")
+    ap.add_argument("--since", help="采集起点（YYYY-MM-DD），覆盖 sources.yaml 的设置")
     ap.add_argument("--skip-collect", action="store_true",
                     help="跳过采集，只重跑汇总与渲染")
     args = ap.parse_args()
@@ -58,14 +58,13 @@ def main():
     if not args.skip_collect:
         sources_cfg = config.load_sources_config()
         ctx = CollectContext(
-            machine=sources_cfg["machine"],
             tz=config.timezone(),
             root=ROOT,
-            lookback_days=args.lookback,
+            since=args.since or sources_cfg.get("since", "2026-01-01"),
         )
-        print(f"[start] machine={ctx.machine} tz={ctx.tz} lookback={ctx.lookback_days}d")
+        print(f"[start] tz={ctx.tz} since={ctx.since}")
         count = run_collect(ctx, sources_cfg["sources"], args.only)
-        print(f"[summary] 采集到 {count} 条事件")
+        print(f"[summary] 采集到 {count} 条日模型记录")
 
     stats = aggregate.aggregate(ROOT)
     render.render_files(stats)

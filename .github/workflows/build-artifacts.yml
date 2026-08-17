@@ -1,10 +1,10 @@
 # 原始数据一变就重新生成产物（data/stats.json 与 assets/*.svg）。
 #
-# 为什么放在 CI 而不是本机：产物是全局的，两台机器如果各自生成并提交，就会在
-# 同一批文件上互相冲突。原始数据按机器分片、各写各的文件，产物由这里单点串行生成，
-# 冲突面归零。
+# 为什么放在 CI 而不是本机：产物由原始数据完全决定，放在这里单点串行生成，两台机器
+# 就都不必碰产物文件，也不会在上面互相冲突。
 #
-# 聚合与渲染只读仓库内的文件，不需要任何 secret。
+# 聚合与渲染只读仓库内的文件——不访问网络、不需要 Cursor 登录态、不需要任何 secret。
+# 采集是唯一需要凭据的环节，它只在本机跑（见 update-local.sh）。
 name: build artifacts
 
 on:
@@ -24,7 +24,8 @@ permissions:
   contents: write
 
 concurrency:
-  # 两台机器接连推送时，只让最后一次跑完，避免并发提交产物。
+  # 两台机器接连推送时串行执行，避免并发提交产物。不取消进行中的那次：它已经
+  # 在推产物了，中途掐掉会留下没有对应产物的原始数据。
   group: build-artifacts
   cancel-in-progress: false
 
@@ -41,8 +42,8 @@ jobs:
       - name: 安装依赖
         run: pip install -r requirements.txt
 
-      # 跨语言口径一致性测试需要 node 与 react/node_modules，缺了会自动跳过，
-      # 所以这里把它们装上，让 CI 真的跑到那两个断言。
+      # 跨语言口径一致性测试需要 node 与 react/node_modules，所以这里把它们装上。
+      # 下面还会设 PARITY_STRICT，确保装漏了是报错而不是静默跳过。
       - uses: actions/setup-node@v7
         with:
           node-version: "22"
@@ -52,6 +53,8 @@ jobs:
         run: npm ci --no-audit --no-fund
 
       - name: 跑单测
+        env:
+          PARITY_STRICT: "1"
         run: |
           python tests/test_core.py
           python tests/test_parity.py

@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="332" viewBox="0 0 760 332" role="img" aria-label="本周 8月17日 – 8月23日：67.2M tokens，模型成本 $54.20">
+<title>本周 8月17日 – 8月23日：67.2M tokens，模型成本 $54.20</title>
+<defs><clipPath id="nameclip"><rect x="32" y="0" width="236" height="332"/></clipPath></defs>
+<rect x="0.5" y="0.5" width="759" height="331" rx="13" fill="#0D1117" stroke="#242B33"/>
+<text x="32" y="44" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif" font-size="12.5" fill="#98A0A9" letter-spacing="0.9">本周用量</text>
+<text x="728" y="44" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif" font-size="12.5" fill="#98A0A9" text-anchor="end">8月17日 – 8月23日</text>
+<text x="32" y="104" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="44" fill="#E8E4DC" font-weight="600">67.2M<tspan font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif" font-size="13" fill="#98A0A9" font-weight="400" dx="9">tokens</tspan></text>
+<text x="32" y="126" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif" font-size="12" fill="#98A0A9">29 次请求</text>
+<text x="728" y="104" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="30" fill="#F0705C" font-weight="600" text-anchor="end">$54.20</text>
+<text x="728" y="126" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif" font-size="12" fill="#98A0A9" text-anchor="end">模型成本</text>
+<line x1="32" y1="146" x2="728" y2="146" stroke="#242B33" stroke-width="1"/>
+<rect x="32" y="164" width="21.0371" height="8" fill="#E8E4DC"/>
+<rect x="54.0371" y="164" width="3.58124" height="8" fill="#9BA2AA"/>
+<rect x="58.6183" y="164" width="16.1633" height="8" fill="#666E77"/>
+<rect x="75.7816" y="164" width="652.218" height="8" fill="#3F4750"/>
+<rect x="32" y="186" width="7" height="7" fill="#E8E4DC"/>
+<text x="45" y="193" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif" font-size="11.5" fill="#98A0A9">输入</text>
+<text x="75" y="193" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11.5" fill="#E8E4DC">2.1M</text>
+<rect x="206" y="186" width="7" height="7" fill="#9BA2AA"/>
+<text x="219" y="193" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif" font-size="11.5" fill="#98A0A9">输出</text>
+<text x="249" y="193" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11.5" fill="#E8E4DC">442.2K</text>
+<rect x="380" y="186" width="7" height="7" fill="#666E77"/>
+<text x="393" y="193" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif" font-size="11.5" fill="#98A0A9">缓存写入</text>
+<text x="447" y="193" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11.5" fill="#E8E4DC">1.7M</text>
+<rect x="554" y="186" width="7" height="7" fill="#3F4750"/>
+<text x="567" y="193" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif" font-size="11.5" fill="#98A0A9">缓存读取</text>
+<text x="621" y="193" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="11.5" fill="#E8E4DC">63.0M</text>
+<line x1="32" y1="210" x2="728" y2="210" stroke="#242B33" stroke-width="1"/>
+<text x="32" y="238" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif" font-size="11" fill="#98A0A9" letter-spacing="1.2">模型</text>
+<text x="632" y="238" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif" font-size="11" fill="#98A0A9" text-anchor="end" letter-spacing="1.2">成本</text>
+<text x="728" y="238" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif" font-size="11" fill="#98A0A9" text-anchor="end" letter-spacing="1.2">Tokens</text>
+<text x="32" y="258" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif" font-size="12.5" fill="#E8E4DC" clip-path="url(#nameclip)">claude-opus-5-thinking-high</text>
+<rect x="288" y="250" width="248" height="6" fill="#1C232B"/>
+<rect x="288" y="250" width="198.693" height="6" fill="#D8D3CA" fill-opacity="0.85"/>
+<text x="632" y="258" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="12.5" fill="#E8E4DC" text-anchor="end">$43.43</text>
+<text x="728" y="258" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="12" fill="#98A0A9" text-anchor="end">51.9M</text>
+<text x="32" y="285" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif" font-size="12.5" fill="#E8E4DC" clip-path="url(#nameclip)">cursor-grok-4.6-high</text>
+<rect x="288" y="277" width="248" height="6" fill="#1C232B"/>
+<rect x="288" y="277" width="49.3071" height="6" fill="#D8D3CA" fill-opacity="0.85"/>
+<text x="632" y="285" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="12.5" fill="#E8E4DC" text-anchor="end">$10.78</text>
+<text x="728" y="285" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace" font-size="12" fill="#98A0A9" text-anchor="end">15.3M</text>
+</svg>

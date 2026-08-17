@@ -1,33 +1,27 @@
-# 本机采集配置。复制本文件为仓库根的 sources.yaml 并按你的机器填写。
-# sources.yaml 已被 .gitignore 忽略：它含 base_url 等本机信息，且 machine 每台不同。
-# 公共的时区与模型别名在 config/aggregate.yaml 里（随仓库提交，CI 需要）。
+# 本机采集配置。复制为仓库根的 sources.yaml 后使用，该文件已被 gitignore。
+#
+# 这里只放采集阶段需要的东西。时区与模型别名表在 config/aggregate.yaml 里（随仓库
+# 提交），因为聚合跑在 CI 上，而本文件不应该被提交。
 
-# 机器名，也是原始数据的分片键：data/raw/<machine>/<source>/<月>.json
-# 两台机器必须取不同的值，否则会互相覆盖对方的数据。
-machine: work-mac        # 家里那台填 home-win
+# 采集起点。接口型源每次重采 [since, 今天] 全量并覆盖写回，所以这个值往前调不会
+# 产生重复数据，只会多拉一些。留足够早即可，账号开通之前的日子不会生成空文件。
+since: 2026-01-01
 
 sources:
-  # —— 本地类：Cursor（读 ~/.cursor/ai-tracking/ai-code-tracking.db，无需 key）——
-  # 口径为「按模型的 AI 请求数」。该库只保留最近约一个月，需定期采集，
-  # 否则数据滚出窗口后永久丢失。详见 collectors/cursor.py 模块文档。
+  # Cursor：走官方 dashboard 用量接口，拿逐次请求的 token 明细与折算成本。
+  #
+  # 认证默认从本机 Cursor 的登录态里读（state.vscdb 中的 cursorAuth/accessToken），
+  # 所以本机登录着 Cursor 就不用配任何东西。换机或想显式指定时，设置环境变量
+  # CURSOR_SESSION_TOKEN=<sub>::<jwt>，值可从 dashboard 请求的
+  # WorkosCursorSessionToken cookie 里复制。
   - name: cursor
     type: cursor
-    # db_path 可选；不填则自动探测 macOS 与 Windows 的默认位置
+    # token_env: CURSOR_SESSION_TOKEN
 
-  # —— API 类：OpenAI / DeepSeek / 任意 OpenAI 兼容中转站，共用一个采集器 ——
-  # 这是唯一能给出真实 token 口径的源。凭据只写环境变量名，不要写死 key。
-  # 用不到的源整段删掉即可，留着会每次都打印「缺少环境变量」的告警。
-  # - name: openai
-  #   type: openai_compatible
-  #   base_url: https://api.openai.com
-  #   api_key_env: OPENAI_API_KEY
-  #
+  # OpenAI 兼容接口（OpenAI / DeepSeek / 各类中转站共用一个实现）。
+  # 这类接口只给输入输出两类 token，没有缓存拆分也没有成本，对应字段会留空。
+  # 不用时整段删掉或注释掉。
   # - name: deepseek
   #   type: openai_compatible
   #   base_url: https://api.deepseek.com
   #   api_key_env: DEEPSEEK_API_KEY
-  #
-  # - name: relay-a                    # 中转站：换站只改这里 + 对应 env 名
-  #   type: openai_compatible
-  #   base_url: https://your-relay.example.com
-  #   api_key_env: RELAY_A_API_KEY

@@ -1,6 +1,6 @@
 [project]
 name = "llm-usage"
-version = "0.2.0"
-description = "个人 LLM 每日用量看板：本机采集，静态 SVG 与 React 组件展示"
+version = "0.3.0"
+description = "个人 LLM 周用量看板：token 明细与折算成本，静态 SVG 与 React 组件展示"
 requires-python = ">=3.12"
 dependencies = ["pyyaml>=6.0", "requests>=2.31"]

@@ -38,11 +38,11 @@ def load_sources_config() -> dict:
         raise SystemExit(
             f"找不到 {SOURCES_PATH}，请复制 config/sources.example.yaml 为 sources.yaml")
     cfg = yaml.safe_load(SOURCES_PATH.read_text(encoding="utf-8")) or {}
-    if not cfg.get("machine"):
-        raise SystemExit(
-            "sources.yaml 缺少 machine 字段。它是原始数据的分片键，"
-            "两台机器必须取不同的值（如 work-mac / home-win），否则会互相覆盖。")
     cfg.setdefault("sources", [])
+    # YAML 会把不加引号的 2026-01-01 解析成 date 对象。统一转回字符串，免得每个
+    # 用到 since 的地方都要判类型，也不必要求手写配置的人记得加引号。
+    since = cfg.get("since") or "2026-01-01"
+    cfg["since"] = since.isoformat() if hasattr(since, "isoformat") else str(since)
     return cfg
 
 

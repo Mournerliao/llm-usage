@@ -1,20 +1,22 @@
-"""跨语言口径一致性测试：Python 的 ranking.build_view 与 TS 的 buildView 必须给出
-逐字段相同的视图。
+"""跨语言口径一致性测试：Python 的 ranking.build_week_view 与 TS 的 buildWeekView
+必须给出逐字段相同的视图，包括每一个用于显示的字符串。
 
 为什么需要这个测试
 ------------------
-SVG 卡片由 Python 渲染，博客组件由 React 渲染。两边不能共用一份实现（一个跑在
-Python，一个跑在浏览器），但它们必须对「同一天的用量该怎么分节、怎么排序、占比多少」
-给出完全一致的答案，否则同一份数据在两处会显示不同的数字。
+README 的卡片由 Python 渲染成静态 SVG（GitHub 不执行 JS），博客组件由 React 渲染。
+两边不能共用一份实现，但它们必须对「这一周该怎么汇总、怎么排序、占比多少、数字写成
+什么样」给出完全一致的答案，否则同一份 stats.json 在两处会显示不同的数。
 
-以前的做法是把两份 SVG 字符串断言相等，那只能锁住渲染模板，锁不住计算口径，而且是
-在保护重复而不是消除重复。现在两边各自只有一份实现，用这个测试把它们的**输出**钉在
-一起：跑的是真的那份 TS 代码（经 node 执行），不是 Python 里的复刻。
+比对范围刻意包括 ``*_display`` 字符串。量级选择（479.0M 还是 0.48B）与舍入方向都是
+容易各写各的地方，把格式化收进共享视图之后，这个测试就把格式本身也钉住了。
 
 跳过条件
 --------
-需要 node 与 react/node_modules 里的 esbuild。缺任一项时自动跳过，不阻塞 Python 侧
-的测试——这个测试保护的是「两处口径一致」，而不是 Python 本身的正确性。
+需要 node 与 react/node_modules 里的 esbuild。本机缺任一项时自动跳过，不阻塞 Python
+侧的测试——这个测试保护的是「两处口径一致」，而不是 Python 本身的正确性。
+
+CI 里设 `PARITY_STRICT=1`，此时任何跳过都变成失败。否则 CI 会在工具链没装好的情况下
+绿着通过，而这正是唯一能拦住两边漂移的测试。
 """
 import json
 import os
@@ -28,39 +30,72 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 import aggregate  # noqa: E402
-from ranking import build_view  # noqa: E402
+from ranking import build_week_view  # noqa: E402
 
 RUNNER = Path(__file__).parent / "parity_runner.mjs"
 ESBUILD = ROOT / "react" / "node_modules" / ".bin" / "esbuild"
 
+FULL = {"week": "2026-W33", "start": "2026-08-10", "end": "2026-08-16"}
+NEXT = {"week": "2026-W34", "start": "2026-08-17", "end": "2026-08-23"}
+EMPTY = {"week": "2026-W40", "start": "2026-09-28", "end": "2026-10-04"}
+
 CASES = [
-    {"date": "2026-01-01", "limit": 8, "groupBy": "model"},
-    {"date": "2026-01-01", "limit": 8, "groupBy": "source"},
-    {"date": "2026-01-01", "limit": 8, "groupBy": "machine"},
-    {"date": "2026-01-01", "limit": 2, "groupBy": "model"},
-    {"date": "2026-01-02", "limit": 8, "groupBy": "model"},
-    {"date": "2026-12-31", "limit": 8, "groupBy": "model"},  # 无数据的一天
+    {"week": FULL, "limit": 6},
+    {"week": FULL, "limit": 2},      # 截断
+    {"week": NEXT, "limit": 6},      # 只有一天有量
+    {"week": EMPTY, "limit": 6},     # 整周无量
+    {"week": None, "limit": 6},      # 没有可展示的周
 ]
+
+# 视图里所有标量字段。逐个比对而不是挑几个，漏掉的字段就是将来会漂移的字段。
+SCALARS = ("week", "start", "end", "range_display", "basis", "requests",
+           "tokens_total", "tokens_display", "cost_display", "requests_display")
 
 
 def _events():
-    """刻意覆盖几个容易漂移的点：多单位、跨机器、同名模型跨源、并列值排序。"""
-    def e(date, machine, source, model, unit, amount):
-        return {"date": date, "machine": machine, "source": source,
-                "model": model, "unit": unit, "amount": amount}
+    """刻意覆盖几个容易漂移的点。"""
+    def e(date, source, model, **kw):
+        return {"date": date, "source": source, "model": model, **kw}
 
     return [
-        e("2026-01-01", "work-mac", "cursor", "grok-4.6", "requests", 50),
-        e("2026-01-01", "work-mac", "cursor", "claude-opus-5", "requests", 30),
-        e("2026-01-01", "work-mac", "cursor", "composer-2.5", "requests", 10),
-        e("2026-01-01", "home-win", "cursor", "grok-4.6", "requests", 5),
-        e("2026-01-01", "home-win", "other-ade", "some-model", "sessions", 4),
-        e("2026-01-01", "work-mac", "openai", "gpt-5.6", "tokens", 12345),
-        # 并列值：两个模型同为 7，排序必须靠标签字典序决定，两边要一致
-        e("2026-01-01", "work-mac", "cursor", "tie-b", "requests", 7),
-        e("2026-01-01", "work-mac", "cursor", "tie-a", "requests", 7),
-        e("2026-01-02", "work-mac", "cursor", "grok-4.6", "requests", 1),
+        # 大小悬殊的成本，检验排序与占比
+        e("2026-08-10", "cursor", "claude-opus-5-thinking-high", requests=120,
+          tokens_in=1_800_000, tokens_out=270_000, cache_write=1_300_000,
+          cache_read=310_000_000, cost_cents=26_519.37),
+        e("2026-08-11", "cursor", "cursor-grok-4.5-high", requests=64,
+          tokens_in=900_000, tokens_out=140_000, cache_write=700_000,
+          cache_read=60_000_000, cost_cents=4_324.06),
+        # 亚分成本：不能中途取整，否则两边会在末位漂开
+        e("2026-08-12", "cursor", "composer-2.5", requests=9,
+          tokens_in=1234, tokens_out=567, cache_write=890,
+          cache_read=32_100, cost_cents=0.4137),
+        # 不报 token 与成本的源：两边都该退到请求数口径并显示横线
+        e("2026-08-13", "deepseek", "deepseek-v4", requests=15),
+        # 只报输入输出、不报缓存的源
+        e("2026-08-13", "openai", "gpt-5.6", requests=8,
+          tokens_in=40_000, tokens_out=9_000),
+        # 并列值：排序必须靠标签字典序决定，两边要一致
+        e("2026-08-14", "cursor", "tie-b", requests=7, cost_cents=100.0),
+        e("2026-08-14", "cursor", "tie-a", requests=7, cost_cents=100.0),
+        # 恰好落在半分位上的成本，检验两边的舍入方向一致
+        e("2026-08-15", "cursor", "half-cent", requests=1, cost_cents=0.125),
+        # 下一周，用来验证周窗口的边界是闭区间
+        e("2026-08-17", "cursor", "claude-opus-5-thinking-high", requests=28,
+          tokens_in=2_000_000, tokens_out=340_000, cache_write=1_400_000,
+          cache_read=44_100_000, cost_cents=4_056.12),
     ]
+
+
+def _bail(reason: str):
+    """工具链或数据缺失时的退出方式。
+
+    本机开发允许跳过——这个测试保护的是「两处口径一致」，缺 node 时不该拦住 Python
+    侧的测试。但 CI 必须失败：跳过会让 CI 绿着通过，而 parity 恰恰是唯一能拦住两边
+    漂移的东西，静默跳过等于没有这道防线。CI 里设 PARITY_STRICT=1。
+    """
+    if os.environ.get("PARITY_STRICT"):
+        raise AssertionError(f"PARITY_STRICT 已开启，不允许跳过：{reason}")
+    raise unittest.SkipTest(reason)
 
 
 def _toolchain_reason() -> str | None:
@@ -88,7 +123,7 @@ class TestCrossLanguageParity(unittest.TestCase):
     def setUpClass(cls):
         reason = _toolchain_reason()
         if reason:
-            raise unittest.SkipTest(f"跳过跨语言一致性测试：{reason}")
+            _bail(f"跨语言一致性测试无法运行：{reason}")
 
         cls._tmp = tempfile.TemporaryDirectory(prefix="llm-usage-parity-")
         cls.bundle = Path(cls._tmp.name) / "parity.mjs"
@@ -98,7 +133,7 @@ class TestCrossLanguageParity(unittest.TestCase):
             capture_output=True, text=True, timeout=180, cwd=str(ROOT),
         )
         if proc.returncode != 0:
-            raise unittest.SkipTest(f"esbuild 打包失败：{proc.stderr}")
+            _bail(f"esbuild 打包失败：{proc.stderr}")
 
     @classmethod
     def tearDownClass(cls):
@@ -117,60 +152,66 @@ class TestCrossLanguageParity(unittest.TestCase):
             self.fail(f"TS runner 执行失败：\n{proc.stderr}")
         return json.loads(proc.stdout)
 
-    def _ts_views(self, daily):
-        return self._run_ts(daily, CASES)
+    def _assert_views_match(self, py, ts):
+        for key in SCALARS:
+            self.assertEqual(py[key], ts[key], f"字段 {key} 不一致")
+
+        # 成本单独比：两边按同一顺序累加同一批双精度浮点，理应逐位相同，但用
+        # assertAlmostEqual 留出余量，真正把口径钉死的是上面的 cost_display。
+        if py["cost_cents"] is None or ts["cost_cents"] is None:
+            self.assertEqual(py["cost_cents"], ts["cost_cents"])
+        else:
+            self.assertAlmostEqual(py["cost_cents"], ts["cost_cents"], places=9)
+
+        self.assertEqual([s["kind"] for s in py["breakdown"]],
+                         [s["kind"] for s in ts["breakdown"]])
+        for a, b in zip(py["breakdown"], ts["breakdown"]):
+            self.assertEqual((a["label"], a["amount"], a["display"]),
+                             (b["label"], b["amount"], b["display"]))
+            self.assertAlmostEqual(a["pct"], b["pct"], places=9)
+
+        self.assertEqual([m["label"] for m in py["models"]],
+                         [m["label"] for m in ts["models"]])
+        for a, b in zip(py["models"], ts["models"]):
+            self.assertEqual(
+                (a["label"], a["requests"], a["tokens_total"],
+                 a["tokens_display"], a["cost_display"], a["requests_display"]),
+                (b["label"], b["requests"], b["tokens_total"],
+                 b["tokens_display"], b["cost_display"], b["requests_display"]))
+            self.assertAlmostEqual(a["pct"], b["pct"], places=9)
+
+        self.assertEqual([(d["date"], d["weekday"], d["requests"],
+                           d["tokens_total"]) for d in py["days"]],
+                         [(d["date"], d["weekday"], d["requests"],
+                           d["tokens_total"]) for d in ts["days"]])
 
     def test_views_match_field_by_field(self):
         daily = aggregate.fold_events(_events())
-        ts_views = self._ts_views(daily)
+        ts_views = self._run_ts(daily, CASES)
 
         for case, ts_view in zip(CASES, ts_views):
-            with self.subTest(**case):
-                py_view = build_view(daily, case["date"], limit=case["limit"],
-                                     group_by=case["groupBy"])
-
-                self.assertEqual(py_view["date"], ts_view["date"])
-                self.assertEqual(py_view["group_by"], ts_view["groupBy"])
-                self.assertEqual(py_view["totals"], ts_view["totals"])
-
-                self.assertEqual(len(py_view["sections"]), len(ts_view["sections"]))
-                for py_sec, ts_sec in zip(py_view["sections"], ts_view["sections"]):
-                    self.assertEqual(py_sec["unit"], ts_sec["unit"])
-                    self.assertEqual(py_sec["total"], ts_sec["total"])
-                    self.assertEqual([r["label"] for r in py_sec["rows"]],
-                                     [r["label"] for r in ts_sec["rows"]])
-                    self.assertEqual([r["amount"] for r in py_sec["rows"]],
-                                     [r["amount"] for r in ts_sec["rows"]])
-                    for py_row, ts_row in zip(py_sec["rows"], ts_sec["rows"]):
-                        self.assertAlmostEqual(py_row["pct"], ts_row["pct"],
-                                               places=9)
+            with self.subTest(week=(case["week"] or {}).get("week"),
+                              limit=case["limit"]):
+                py_view = build_week_view(daily, case["week"], case["limit"])
+                self._assert_views_match(py_view, ts_view)
 
     def test_real_stats_match(self):
         """用仓库里真实的 stats.json 再对一遍，防止只有构造数据能对上。"""
         path = ROOT / "data" / "stats.json"
         if not path.exists():
-            self.skipTest("data/stats.json 尚未生成")
+            _bail("data/stats.json 尚未生成")
         stats = json.loads(path.read_text(encoding="utf-8"))
-        daily = stats["daily"]
-        date = stats["latest_date"]
-        if not date:
-            self.skipTest("stats.json 为空")
+        weeks = stats.get("weeks") or []
+        if not weeks:
+            _bail("stats.json 里没有可展示的周")
 
-        ts_views = self._run_ts(daily, [
-            {"date": date, "limit": 8, "groupBy": "model"},
-            {"date": date, "limit": 8, "groupBy": "source"},
-        ])
+        cases = [{"week": w, "limit": 6} for w in weeks]
+        ts_views = self._run_ts(stats["daily"], cases)
 
-        for group_by, ts_view in zip(("model", "source"), ts_views):
-            with self.subTest(group_by=group_by):
-                py_view = build_view(daily, date, limit=8, group_by=group_by)
-                self.assertEqual(py_view["totals"], ts_view["totals"])
-                self.assertEqual(
-                    [(s["unit"], s["total"], [r["label"] for r in s["rows"]])
-                     for s in py_view["sections"]],
-                    [(s["unit"], s["total"], [r["label"] for r in s["rows"]])
-                     for s in ts_view["sections"]],
-                )
+        for case, ts_view in zip(cases, ts_views):
+            with self.subTest(week=case["week"]["week"]):
+                py_view = build_week_view(stats["daily"], case["week"], 6)
+                self._assert_views_match(py_view, ts_view)
 
 
 if __name__ == "__main__":
