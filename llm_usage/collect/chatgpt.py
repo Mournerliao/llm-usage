@@ -43,6 +43,7 @@ OPENAI_PROVIDER = "openai"
 SUBSCRIPTION_SOURCE = "chatgpt"
 
 _SOURCE_SAFE = re.compile(r"[^a-zA-Z0-9._-]+")
+_WINDOWS_ENV = re.compile(r"%([^%]+)%")
 
 
 def source_for_provider(provider: str | None) -> str:
@@ -170,6 +171,22 @@ def _load_records(path: Path) -> list[dict]:
     return records
 
 
+def _codex_home(cfg: dict) -> Path:
+    """返回本机 Codex 数据目录，兼容两种平台的环境变量写法。
+
+    默认用 ``Path.home()``，因此 Windows 会自然落到
+    ``C:\\Users\\<user>\\.codex``。显式配置同时支持 ``~``、``$HOME`` /
+    ``${HOME}`` 和 Windows 常见的 ``%USERPROFILE%``。
+    """
+    configured = cfg.get("codex_home")
+    if not configured:
+        return Path.home() / ".codex"
+    value = os.path.expandvars(os.path.expanduser(str(configured)))
+    value = _WINDOWS_ENV.sub(
+        lambda match: os.environ.get(match.group(1), match.group(0)), value)
+    return Path(value)
+
+
 def collect(ctx, cfg: dict, *, rollouts=None) -> CollectResult:
     """扫描本机 Codex 会话日志并翻译。负责范围从最早一条事件到今天。
 
@@ -178,7 +195,7 @@ def collect(ctx, cfg: dict, *, rollouts=None) -> CollectResult:
     """
     n_files = 0
     if rollouts is None:
-        home = Path(os.path.expanduser(cfg.get("codex_home") or "~/.codex"))
+        home = _codex_home(cfg)
         if not home.is_dir():
             print(f"[chatgpt] 找不到 {home}，跳过")
             return CollectResult(events=[], days=[], machine_shard=True)

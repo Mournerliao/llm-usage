@@ -28,4 +28,6 @@ sources:
   # 分卡片留分片。同一模型名在展示层仍按模型聚合。
   - name: chatgpt
     type: chatgpt
+    # 默认跨平台读取当前用户的 ~/.codex；通常无需配置。
+    # Windows 也支持环境变量写法：%USERPROFILE%/.codex
     # codex_home: ~/.codex

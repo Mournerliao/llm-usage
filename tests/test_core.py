@@ -9,6 +9,7 @@ import tempfile
 import unittest
 from datetime import datetime
 from pathlib import Path
+from unittest import mock
 from zoneinfo import ZoneInfo
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -499,6 +500,20 @@ class TestChatgptCollector(unittest.TestCase):
         self.assertEqual(chatgpt_collector.source_for_provider("xiaomi-mimo"),
                          "xiaomi-mimo")
         self.assertEqual(chatgpt_collector.source_for_provider(None), "chatgpt")
+
+    def test_default_codex_home_is_cross_platform(self):
+        self.assertEqual(chatgpt_collector._codex_home({}),
+                         Path.home() / ".codex")
+
+    def test_codex_home_expands_windows_environment_syntax(self):
+        with mock.patch.dict(
+                os.environ, {"CODEX_TEST_HOME": str(Path("test-home"))}):
+            self.assertEqual(
+                chatgpt_collector._codex_home({
+                    "codex_home": "%CODEX_TEST_HOME%/.codex",
+                }),
+                Path("test-home") / ".codex",
+            )
 
 
 class TestCollectSeam(unittest.TestCase):

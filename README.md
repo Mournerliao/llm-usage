@@ -84,6 +84,20 @@ cp config/sources.example.yaml sources.yaml
 # equivalent: python -m llm_usage
 ```
 
+On Windows PowerShell:
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+Copy-Item config\sources.example.yaml sources.yaml
+# Set a unique machine name such as home-win in sources.yaml, then:
+.\.venv\Scripts\python.exe run.py --only chatgpt
+```
+
+Codex logs are detected at the platform's user home automatically
+(`C:\Users\<user>\.codex` on Windows). A custom `codex_home` may use
+`%USERPROFILE%/.codex` as well as `~/.codex`.
+
 Collection reads credentials from the local Cursor login by default. If Cursor is
 signed in, nothing else is needed. On a new machine, set
 `CURSOR_SESSION_TOKEN=<sub>::<jwt>` (copy the `WorkosCursorSessionToken` cookie
@@ -95,8 +109,9 @@ Common flags:
 - `--since 2026-07-01` override the collection start
 - `--skip-collect` fold and render only; this is what CI runs
 
-For daily updates, cron / Task Scheduler can run `./update-local.sh`. It collects
-and pushes raw data; CI builds the rest.
+For daily updates, cron can run `./update-local.sh`; Windows Task Scheduler can
+run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File update-local.ps1`.
+Both scripts collect and push raw data; CI builds the rest.
 
 ## Config is two files
 

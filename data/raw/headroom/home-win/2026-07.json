@@ -1,0 +1,184 @@
+{
+  "source": "headroom",
+  "month": "2026-07",
+  "days": {
+    "2026-07-01": [],
+    "2026-07-02": [],
+    "2026-07-03": [
+      {
+        "date": "2026-07-03",
+        "source": "headroom",
+        "model": "codex-auto-review",
+        "requests": 17,
+        "tokens_in": 120349,
+        "tokens_out": 2282,
+        "cache_write": 0,
+        "cache_read": 275328
+      },
+      {
+        "date": "2026-07-03",
+        "source": "headroom",
+        "model": "gpt-5.5",
+        "requests": 92,
+        "tokens_in": 593986,
+        "tokens_out": 35861,
+        "cache_write": 0,
+        "cache_read": 4150272
+      }
+    ],
+    "2026-07-04": [],
+    "2026-07-05": [],
+    "2026-07-06": [],
+    "2026-07-07": [],
+    "2026-07-08": [],
+    "2026-07-09": [],
+    "2026-07-10": [],
+    "2026-07-11": [],
+    "2026-07-12": [],
+    "2026-07-13": [],
+    "2026-07-14": [
+      {
+        "date": "2026-07-14",
+        "source": "headroom",
+        "model": "codex-auto-review",
+        "requests": 14,
+        "tokens_in": 132464,
+        "tokens_out": 1538,
+        "cache_write": 0,
+        "cache_read": 556800
+      },
+      {
+        "date": "2026-07-14",
+        "source": "headroom",
+        "model": "gpt-5.6-sol",
+        "requests": 290,
+        "tokens_in": 1298706,
+        "tokens_out": 100691,
+        "cache_write": 0,
+        "cache_read": 31110656
+      }
+    ],
+    "2026-07-15": [],
+    "2026-07-16": [],
+    "2026-07-17": [
+      {
+        "date": "2026-07-17",
+        "source": "headroom",
+        "model": "codex-auto-review",
+        "requests": 48,
+        "tokens_in": 231953,
+        "tokens_out": 4792,
+        "cache_write": 0,
+        "cache_read": 1640960
+      },
+      {
+        "date": "2026-07-17",
+        "source": "headroom",
+        "model": "gpt-5.6-sol",
+        "requests": 498,
+        "tokens_in": 4487838,
+        "tokens_out": 180686,
+        "cache_write": 0,
+        "cache_read": 58551296
+      }
+    ],
+    "2026-07-18": [
+      {
+        "date": "2026-07-18",
+        "source": "headroom",
+        "model": "codex-auto-review",
+        "requests": 53,
+        "tokens_in": 227531,
+        "tokens_out": 4251,
+        "cache_write": 0,
+        "cache_read": 2019328
+      },
+      {
+        "date": "2026-07-18",
+        "source": "headroom",
+        "model": "gpt-5.6-sol",
+        "requests": 527,
+        "tokens_in": 2110827,
+        "tokens_out": 256265,
+        "cache_write": 0,
+        "cache_read": 69524736
+      }
+    ],
+    "2026-07-19": [
+      {
+        "date": "2026-07-19",
+        "source": "headroom",
+        "model": "codex-auto-review",
+        "requests": 56,
+        "tokens_in": 264589,
+        "tokens_out": 5021,
+        "cache_write": 0,
+        "cache_read": 2273280
+      },
+      {
+        "date": "2026-07-19",
+        "source": "headroom",
+        "model": "gpt-5.6-sol",
+        "requests": 363,
+        "tokens_in": 2443145,
+        "tokens_out": 147942,
+        "cache_write": 0,
+        "cache_read": 40122112
+      }
+    ],
+    "2026-07-20": [
+      {
+        "date": "2026-07-20",
+        "source": "headroom",
+        "model": "codex-auto-review",
+        "requests": 14,
+        "tokens_in": 161400,
+        "tokens_out": 1261,
+        "cache_write": 0,
+        "cache_read": 225280
+      },
+      {
+        "date": "2026-07-20",
+        "source": "headroom",
+        "model": "gpt-5.6-sol",
+        "requests": 184,
+        "tokens_in": 1151590,
+        "tokens_out": 65285,
+        "cache_write": 0,
+        "cache_read": 17793792
+      }
+    ],
+    "2026-07-21": [],
+    "2026-07-22": [],
+    "2026-07-23": [
+      {
+        "date": "2026-07-23",
+        "source": "headroom",
+        "model": "codex-auto-review",
+        "requests": 44,
+        "tokens_in": 224283,
+        "tokens_out": 5438,
+        "cache_write": 0,
+        "cache_read": 1639424
+      },
+      {
+        "date": "2026-07-23",
+        "source": "headroom",
+        "model": "gpt-5.6-sol",
+        "requests": 274,
+        "tokens_in": 1439438,
+        "tokens_out": 120108,
+        "cache_write": 0,
+        "cache_read": 29948928
+      }
+    ],
+    "2026-07-24": [],
+    "2026-07-25": [],
+    "2026-07-26": [],
+    "2026-07-27": [],
+    "2026-07-28": [],
+    "2026-07-29": [],
+    "2026-07-30": [],
+    "2026-07-31": []
+  }
+}

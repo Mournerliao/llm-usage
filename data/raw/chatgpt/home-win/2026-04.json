@@ -1,0 +1,36 @@
+{
+  "source": "chatgpt",
+  "month": "2026-04",
+  "days": {
+    "2026-04-23": [
+      {
+        "date": "2026-04-23",
+        "source": "chatgpt",
+        "model": "gpt-5.4-mini",
+        "requests": 23,
+        "tokens_in": 146148,
+        "tokens_out": 29442,
+        "cache_write": 0,
+        "cache_read": 980608
+      }
+    ],
+    "2026-04-24": [
+      {
+        "date": "2026-04-24",
+        "source": "chatgpt",
+        "model": "gpt-5.5",
+        "requests": 76,
+        "tokens_in": 753768,
+        "tokens_out": 34256,
+        "cache_write": 0,
+        "cache_read": 3271680
+      }
+    ],
+    "2026-04-25": [],
+    "2026-04-26": [],
+    "2026-04-27": [],
+    "2026-04-28": [],
+    "2026-04-29": [],
+    "2026-04-30": []
+  }
+}
