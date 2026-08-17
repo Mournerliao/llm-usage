@@ -14,15 +14,20 @@
 拿不到 token 的源把四个 token 字段留 ``None``（不是 0）：``None`` 是「这个源不报
 token」，0 是「报了，但确实是零」。展示层据此决定显示数字还是横线。
 
-== 为什么没有 machine 字段 ==
+== 为什么 Event 没有 machine 字段 ==
 
 Cursor 的用量来自账号级接口，两台机器采到的是同一份数据，按机器分片会导致重复
-计数。所以原始数据只按源和月份分片，采集在哪台机器上跑不影响结果。将来若接入
-只能在本机采到的源，再给它自己的分片键，不要把 machine 加回公共契约。
+计数。所以账号级源的原始数据只按源和月份分片。
+
+Codex 这类源相反：会话日志只存在于产生它的那台机器。它们在文件系统上按
+``data/raw/<source>/<machine>/<月>.json`` 分片，避免两台机器互相覆盖；但
+``Event.source`` 仍然是 ``chatgpt`` / 中转站名，machine 不进公开契约。展示与
+聚合都看不见机器。
 """
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, tzinfo
 from pathlib import Path
@@ -74,6 +79,8 @@ class CollectContext:
     # 采集起点。接口型源每次重采 [since, 今天] 的全部数据并覆盖写回，所以采集幂等：
     # 跑一次和跑十次结果相同，漏跑补跑都能自愈。
     since: str = "2026-01-01"
+    # 本机标识，只给「会话在本机」的源当文件分片键。账号级源忽略它。
+    machine: str | None = None
 
     def day_of(self, ms: int) -> str:
         """毫秒时间戳 → 配置时区下的 YYYY-MM-DD。"""
@@ -103,17 +110,25 @@ class CollectContext:
 
 # ---------------------------------------------------------------- 原始数据读写
 
-def _raw_path(root: Path, source: str, month: str) -> Path:
+_MONTH_FILE = re.compile(r"^\d{4}-\d{2}\.json$")
+
+
+def _raw_path(root: Path, source: str, month: str, shard: str | None = None) -> Path:
+    if shard:
+        return root / "data" / "raw" / source / shard / f"{month}.json"
     return root / "data" / "raw" / source / f"{month}.json"
 
 
 def write_events(root: Path, source: str, events: list[Event],
-                 days: list[str]) -> None:
+                 days: list[str], shard: str | None = None) -> None:
     """把 ``events`` 写入按月分片的原始文件，并覆盖 ``days`` 覆盖到的那些天。
 
     ``days`` 是本次采集「负责」的日期列表：这些天在文件里的旧内容会被整体替换，
     没被列出的天原样保留。这让采集可以重复运行而不产生重复记录，也不会因为某天
     恰好没有用量就把旧数据留成幽灵——负责范围内没有用量的那天会留一个空数组。
+
+    ``shard`` 是本机标识。账号级源不传；本机源传了之后写到
+    ``data/raw/<source>/<shard>/<月>.json``，两台机器互不覆盖。
     """
     by_month: dict[str, dict[str, list[dict]]] = {}
     for day in days:
@@ -122,7 +137,7 @@ def write_events(root: Path, source: str, events: list[Event],
         by_month.setdefault(e.date[:7], {}).setdefault(e.date, []).append(e.to_dict())
 
     for month, fresh_days in by_month.items():
-        path = _raw_path(root, source, month)
+        path = _raw_path(root, source, month, shard)
         path.parent.mkdir(parents=True, exist_ok=True)
         doc: dict = {"source": source, "month": month, "days": {}}
         if path.exists():
@@ -139,16 +154,32 @@ def write_events(root: Path, source: str, events: list[Event],
 
 
 def read_all_events(root: Path) -> list[dict]:
-    """读取 data/raw 下所有源、所有月份的事件，供聚合使用。"""
+    """读取 data/raw 下所有源、所有月份的事件，供聚合使用。
+
+    认两种布局：
+
+    - ``<source>/<月>.json``：账号级源（Cursor）
+    - ``<source>/<machine>/<月>.json``：本机源（Codex）
+
+    旧布局 ``<machine>/<source>/<月>.json`` 会被跳过：文件里的 ``source`` 对不上
+    第一段路径。那批文件是第一轮按机器分片留下的，不能再折进总量。
+    """
     out: list[dict] = []
     raw = root / "data" / "raw"
     if not raw.exists():
         return out
-    for path in sorted(raw.glob("*/*.json")):
+    for path in sorted(raw.rglob("*.json")):
+        if not _MONTH_FILE.match(path.name):
+            continue
+        rel = path.relative_to(raw).parts
+        if len(rel) not in (2, 3):
+            continue
         try:
             doc = json.loads(path.read_text(encoding="utf-8"))
         except Exception as exc:
             print(f"[warn] 读取 {path} 失败: {exc}")
+            continue
+        if len(rel) == 3 and doc.get("source") and doc["source"] != rel[0]:
             continue
         for day, rows in (doc.get("days") or {}).items():
             for row in rows:

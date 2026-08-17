@@ -3,6 +3,10 @@
 # 这里只放采集阶段需要的东西。时区与模型别名表在 config/aggregate.yaml 里（随仓库
 # 提交），因为聚合跑在 CI 上，而本文件不应该被提交。
 
+# 本机标识。Cursor 是账号级接口，忽略此项。Codex 会话只存在于产生它的那台机器，
+# 两台机器必须用不同的名字（例如 work-mac / home-win），否则会互相覆盖。
+machine: work-mac
+
 # 采集起点。接口型源每次重采 [since, 今天] 全量并覆盖写回，所以这个值往前调不会
 # 产生重复数据，只会多拉一些。留足够早即可，账号开通之前的日子不会生成空文件。
 since: 2026-01-01
@@ -17,6 +21,14 @@ sources:
   - name: cursor
     type: cursor
     # token_env: CURSOR_SESSION_TOKEN
+
+  # ChatGPT / Codex：读本机 ~/.codex 会话日志里的逐次 token。
+  # openai provider → 源名 chatgpt（Plus 订阅，不填成本）；
+  # 其余 provider（中转站 / 外部模型）各自成为一个源，给以后按 ADE / 中转站
+  # 分卡片留分片。同一模型名在展示层仍按模型聚合。
+  - name: chatgpt
+    type: chatgpt
+    # codex_home: ~/.codex
 
   # OpenAI 兼容接口（OpenAI / DeepSeek / 各类中转站共用一个实现）。
   # 这类接口只给输入输出两类 token，没有缓存拆分也没有成本，对应字段会留空。

@@ -15,7 +15,7 @@ import type {
   WeekView,
   WidgetTheme,
 } from "./types";
-import { BASIS_LABELS, isValidStats } from "./types";
+import { isValidStats } from "./types";
 import { buildWeekView, formatTokens } from "./view";
 
 export { buildWeekView };
@@ -150,17 +150,15 @@ const DayStrip = memo(function DayStrip({ days }: { days: DayCell[] }) {
 
 const ModelTable = memo(function ModelTable({
   models,
-  basisLabel,
 }: {
   models: ModelRow[];
-  basisLabel: string;
 }) {
   return (
     <div className="grid gap-3">
       <div className="grid grid-cols-[minmax(0,1fr)_4.5rem] items-center gap-4 text-[11px] tracking-wider text-muted-foreground @xl:grid-cols-[minmax(0,13rem)_minmax(0,1fr)_4.5rem_4.5rem]">
         <span>模型</span>
         <span className="hidden @xl:block" aria-hidden="true" />
-        <span className="text-right">{basisLabel}</span>
+        <span className="text-right">成本</span>
         <span className="hidden text-right @xl:block">Tokens</span>
       </div>
 
@@ -230,7 +228,13 @@ export function UsageWidget({
   const activeIndex = activeWeek ? weeks.indexOf(activeWeek) : 0;
 
   const view = useMemo(
-    () => buildWeekView(valid ? stats.daily : [], activeWeek, limit),
+    () =>
+      buildWeekView(
+        valid ? stats.daily : [],
+        activeWeek,
+        limit,
+        valid ? (stats.subscription_sources ?? []) : [],
+      ),
     [valid, stats, activeWeek, limit],
   );
 
@@ -334,10 +338,7 @@ export function UsageWidget({
             <DayStrip days={view.days} />
 
             <Rule />
-            <ModelTable
-              models={view.models}
-              basisLabel={BASIS_LABELS[view.basis]}
-            />
+            <ModelTable models={view.models} />
           </>
         )}
       </div>

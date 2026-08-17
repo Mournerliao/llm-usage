@@ -46,7 +46,12 @@
     "sources": {
       "type": "array",
       "items": { "type": "string" },
-      "description": "数据中出现过的所有源，如 cursor / deepseek。"
+      "description": "数据中出现过的所有源，如 cursor / chatgpt。"
+    },
+    "subscription_sources": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "订阅制源。没有逐次折算成本，金额列显示「订阅」。取自 config/aggregate.yaml。"
     },
     "daily": {
       "type": "array",
@@ -137,7 +142,7 @@
         },
         "models": {
           "type": "array",
-          "description": "按模型汇总，成本降序。",
+          "description": "按模型汇总，token 降序。",
           "items": {
             "type": "object",
             "required": ["model", "requests"],

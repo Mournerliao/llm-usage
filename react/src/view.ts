@@ -65,6 +65,9 @@ export function formatTokens(value: number | null): string {
   return String(Math.trunc(value));
 }
 
+/** 订阅制源没有逐次成本时，金额列显示这个而不是横线。与 Python 侧 ranking.SUBSCRIPTION_LABEL 一致。 */
+const SUBSCRIPTION_LABEL = "订阅";
+
 /** 分 → 美元，带千分位与两位小数。 */
 export function formatCost(cents: number | null): string {
   if (cents === null || cents === undefined) return "—";
@@ -73,6 +76,22 @@ export function formatCost(cents: number | null): string {
   if (neg) text = text.slice(1);
   const [intpart, frac] = text.split(".");
   return `${neg ? "-" : ""}$${group(intpart)}.${frac}`;
+}
+
+/** 金额列：有折算成本就写美元；有订阅源就标「订阅」；可以并存。 */
+export function formatBilling(
+  costCents: number | null,
+  sources: string[],
+  subscriptionSources: string[],
+): string {
+  const sub = new Set(subscriptionSources);
+  const hasSub = sources.some((s) => sub.has(s));
+  if (costCents !== null && costCents !== undefined && hasSub) {
+    return `${formatCost(costCents)} · ${SUBSCRIPTION_LABEL}`;
+  }
+  if (costCents !== null && costCents !== undefined) return formatCost(costCents);
+  if (hasSub) return SUBSCRIPTION_LABEL;
+  return "—";
 }
 
 export function formatCount(value: number | null): string {
@@ -130,7 +149,6 @@ function totalsOf(rows: UsageRow[]): Totals {
 }
 
 function basisOf(totals: Totals): Basis {
-  if (totals.cost_cents) return "cost";
   if (totals.tokens_total) return "tokens";
   return "requests";
 }
@@ -170,13 +188,15 @@ const emptyView: WeekView = {
 /**
  * 构建某一周的展示视图。`week` 直接取自 stats.json 的 weeks。
  *
- * `models` 按 `basis` 降序，`pct` 是该行在本周内的占比（0~100）。
+ * `models` 按 token 降序，`pct` 是该行在本周内的 token 占比（0~100）。
  * `days` 恒为 7 项（周一到周日），没有用量的那天补零，让日条形图的横轴稳定。
+ * `subscriptionSources` 里的源没有逐次成本，金额列显示「订阅」。
  */
 export function buildWeekView(
   daily: UsageRow[],
   week: WeekRef | null | undefined,
   limit = 6,
+  subscriptionSources: string[] = [],
 ): WeekView {
   if (!week) return { ...emptyView };
 
@@ -200,13 +220,14 @@ export function buildWeekView(
   const models: ModelRow[] = [];
   for (const [label, groupRows] of byModel) {
     const agg = totalsOf(groupRows);
+    const sources = [...new Set(groupRows.map((r) => r.source))];
     models.push({
       label,
       requests: agg.requests,
       tokens_total: agg.tokens_total,
       cost_cents: agg.cost_cents,
       tokens_display: formatTokens(agg.tokens_total),
-      cost_display: formatCost(agg.cost_cents),
+      cost_display: formatBilling(agg.cost_cents, sources, subscriptionSources),
       requests_display: formatCount(agg.requests),
       pct: 0,
     });
@@ -267,7 +288,11 @@ export function buildWeekView(
     tokens_total: totals.tokens_total,
     cost_cents: totals.cost_cents,
     tokens_display: formatTokens(totals.tokens_total),
-    cost_display: formatCost(totals.cost_cents),
+    cost_display: formatBilling(
+      totals.cost_cents,
+      [...new Set(rows.map((r) => r.source))],
+      subscriptionSources,
+    ),
     requests_display: formatCount(totals.requests),
     breakdown,
     models: models.slice(0, limit),

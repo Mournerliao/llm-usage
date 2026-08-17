@@ -26,10 +26,12 @@ DEFAULT_TZ = "Asia/Shanghai"
 def load_aggregate_config() -> dict:
     """读取公共聚合配置。文件缺失时退回内置默认值，保证 CI 不会因此失败。"""
     if not AGGREGATE_PATH.exists():
-        return {"timezone": DEFAULT_TZ, "model_aliases": {}}
+        return {"timezone": DEFAULT_TZ, "model_aliases": {},
+                "subscription_sources": []}
     cfg = yaml.safe_load(AGGREGATE_PATH.read_text(encoding="utf-8")) or {}
     cfg.setdefault("timezone", DEFAULT_TZ)
     cfg.setdefault("model_aliases", {})
+    cfg.setdefault("subscription_sources", [])
     return cfg
 
 
@@ -54,6 +56,12 @@ def model_aliases() -> dict[str, str]:
     """模型别名表，用于把同一模型在不同机器上的标签归一。"""
     raw = load_aggregate_config().get("model_aliases") or {}
     return {str(k): str(v) for k, v in raw.items()}
+
+
+def subscription_sources() -> list[str]:
+    """订阅制源名。这些源没有逐次成本，展示层金额列写「订阅」。"""
+    raw = load_aggregate_config().get("subscription_sources") or []
+    return [str(name) for name in raw]
 
 
 def normalize_model(model: str, aliases: dict[str, str] | None = None) -> str:

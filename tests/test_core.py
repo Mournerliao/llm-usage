@@ -18,6 +18,7 @@ import aggregate  # noqa: E402
 import ranking  # noqa: E402
 import render  # noqa: E402
 from collectors import CollectContext, Event, read_all_events, write_events  # noqa: E402
+from collectors import chatgpt as chatgpt_collector  # noqa: E402
 from collectors import cursor as cursor_collector  # noqa: E402
 from schema import validate_stats  # noqa: E402
 
@@ -232,6 +233,11 @@ class TestBuildWeekView(unittest.TestCase):
     def test_filters_to_the_week(self):
         view = ranking.build_week_view(self._daily(), WEEK)
         self.assertEqual({m["label"] for m in view["models"]}, {"big", "small"})
+        self.assertEqual(view["basis"], "tokens")
+        self.assertEqual([m["label"] for m in view["models"]], ["big", "small"])
+        self.assertAlmostEqual(view["models"][0]["pct"],
+                               (100 + 50 + 200 + 9000 + 50 + 25 + 100 + 4000)
+                               / view["tokens_total"] * 100)
 
     def test_totals_are_summed_over_the_week(self):
         view = ranking.build_week_view(self._daily(), WEEK)
@@ -240,11 +246,57 @@ class TestBuildWeekView(unittest.TestCase):
         self.assertEqual(view["tokens_total"], 100 + 50 + 200 + 9000
                          + 50 + 25 + 100 + 4000 + 10 + 5 + 20 + 900)
 
-    def test_ranks_by_cost_when_cost_is_available(self):
-        view = ranking.build_week_view(self._daily(), WEEK)
-        self.assertEqual(view["basis"], "cost")
-        self.assertEqual([m["label"] for m in view["models"]], ["big", "small"])
-        self.assertAlmostEqual(view["models"][0]["pct"], 1500 / 1600 * 100)
+    def test_ranks_by_tokens_even_when_cost_is_available(self):
+        """订阅源没有成本，排行必须按 token，不能再被 Cursor 的美元金额带走。"""
+        daily = aggregate.fold_events([
+            row("2026-08-10", "cheap-heavy", requests=1, cost_cents=1.0,
+                **tokens(i=10_000)),
+            row("2026-08-10", "pricey-light", requests=1, cost_cents=9_999.0,
+                **tokens(i=10)),
+        ])
+        view = ranking.build_week_view(daily, WEEK)
+        self.assertEqual(view["basis"], "tokens")
+        self.assertEqual([m["label"] for m in view["models"]],
+                         ["cheap-heavy", "pricey-light"])
+
+    def test_subscription_source_renders_as_label_not_dash(self):
+        daily = aggregate.fold_events([
+            row("2026-08-10", "gpt-5.6-sol", source="chatgpt", requests=3,
+                **tokens(i=100, o=20, cr=800)),
+        ])
+        view = ranking.build_week_view(daily, WEEK,
+                                       subscription_sources=["chatgpt"])
+        self.assertEqual(view["cost_display"], "订阅")
+        self.assertEqual(view["models"][0]["cost_display"], "订阅")
+
+    def test_paid_and_subscription_share_the_cost_cell(self):
+        daily = aggregate.fold_events([
+            row("2026-08-10", "opus", source="cursor", requests=1,
+                cost_cents=100.0, **tokens(i=10)),
+            row("2026-08-10", "gpt-5.6-sol", source="chatgpt", requests=1,
+                **tokens(i=20)),
+        ])
+        view = ranking.build_week_view(daily, WEEK,
+                                       subscription_sources=["chatgpt"])
+        self.assertEqual(view["cost_display"], "$1.00 · 订阅")
+        by_label = {m["label"]: m["cost_display"] for m in view["models"]}
+        self.assertEqual(by_label["opus"], "$1.00")
+        self.assertEqual(by_label["gpt-5.6-sol"], "订阅")
+
+    def test_same_model_from_two_sources_is_aggregated(self):
+        """展示层按模型聚合；chatgpt 与中转站的同名模型合成一行。"""
+        daily = aggregate.fold_events([
+            row("2026-08-10", "gpt-5.5", source="chatgpt", requests=2,
+                **tokens(i=100)),
+            row("2026-08-10", "gpt-5.5", source="krill", requests=3,
+                **tokens(i=50)),
+        ])
+        view = ranking.build_week_view(daily, WEEK,
+                                       subscription_sources=["chatgpt"])
+        self.assertEqual(len(view["models"]), 1)
+        self.assertEqual(view["models"][0]["requests"], 5)
+        self.assertEqual(view["models"][0]["tokens_total"], 150)
+        self.assertEqual(view["models"][0]["cost_display"], "订阅")
 
     def test_falls_back_to_requests_when_no_tokens_or_cost(self):
         daily = aggregate.fold_events([
@@ -346,6 +398,97 @@ class TestCursorCollector(unittest.TestCase):
         self.assertEqual(cursor_collector.to_events([], self._day_of), [])
 
 
+class TestChatgptCollector(unittest.TestCase):
+    def _day_of(self, ts):
+        return chatgpt_collector._day_of_timestamp(ts, TZ)
+
+    def _records(self, *, provider="openai", model="gpt-5.6-sol", usage=None):
+        usage = usage or {
+            "input_tokens": 80453,
+            "cached_input_tokens": 79616,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 179,
+            "reasoning_output_tokens": 41,
+            "total_tokens": 80632,
+        }
+        return [
+            {"type": "session_meta",
+             "payload": {"model_provider": provider}},
+            {"type": "turn_context", "payload": {"model": model}},
+            {"timestamp": "2026-08-17T08:39:50.890Z", "type": "event_msg",
+             "payload": {"type": "token_count",
+                         "info": {"last_token_usage": usage,
+                                  "total_token_usage": {
+                                      "input_tokens": 999999,
+                                      "output_tokens": 999999}}}},
+        ]
+
+    def test_openai_provider_becomes_chatgpt_source(self):
+        raw = chatgpt_collector.parse_rollout(self._records())
+        events = chatgpt_collector.to_events(raw, self._day_of)
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0].source, "chatgpt")
+        self.assertEqual(events[0].model, "gpt-5.6-sol")
+        self.assertEqual(events[0].date, "2026-08-17")
+
+    def test_input_does_not_double_count_cache(self):
+        raw = chatgpt_collector.parse_rollout(self._records())
+        e = chatgpt_collector.to_events(raw, self._day_of)[0]
+        self.assertEqual(e.tokens_in, 80453 - 79616)
+        self.assertEqual(e.cache_read, 79616)
+        self.assertEqual(e.tokens_out, 179)
+        self.assertEqual(e.cache_write, 0)
+        self.assertIsNone(e.cost_cents)
+        # reasoning 是 output 的子集，总量不应再加一次
+        self.assertEqual(e.tokens_total, (80453 - 79616) + 179 + 0 + 79616)
+
+    def test_relay_provider_is_its_own_source(self):
+        raw = chatgpt_collector.parse_rollout(
+            self._records(provider="krill", model="gpt-5.5"))
+        events = chatgpt_collector.to_events(raw, self._day_of)
+        self.assertEqual(events[0].source, "krill")
+        self.assertEqual(events[0].model, "gpt-5.5")
+
+    def test_skips_zero_token_counts(self):
+        raw = chatgpt_collector.parse_rollout(self._records(usage={
+            "input_tokens": 0, "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0, "output_tokens": 0,
+        }))
+        self.assertEqual(chatgpt_collector.to_events(raw, self._day_of), [])
+
+    def test_does_not_sum_cumulative_total(self):
+        """同一会话两条 last，总量应是两次 last 之和，不是 total_token_usage。"""
+        records = self._records(usage={
+            "input_tokens": 10, "cached_input_tokens": 0,
+            "cache_write_input_tokens": 0, "output_tokens": 2,
+        })
+        records.append({
+            "timestamp": "2026-08-17T09:00:00.000Z", "type": "event_msg",
+            "payload": {"type": "token_count", "info": {
+                "last_token_usage": {
+                    "input_tokens": 30, "cached_input_tokens": 20,
+                    "cache_write_input_tokens": 0, "output_tokens": 4,
+                },
+                "total_token_usage": {
+                    "input_tokens": 40, "output_tokens": 6,
+                },
+            }},
+        })
+        events = chatgpt_collector.to_events(
+            chatgpt_collector.parse_rollout(records), self._day_of)
+        self.assertEqual(events[0].requests, 2)
+        self.assertEqual(events[0].tokens_in, 10 + (30 - 20))
+        self.assertEqual(events[0].tokens_out, 6)
+        self.assertEqual(events[0].cache_read, 20)
+
+    def test_source_for_provider(self):
+        self.assertEqual(chatgpt_collector.source_for_provider("openai"),
+                         "chatgpt")
+        self.assertEqual(chatgpt_collector.source_for_provider("xiaomi-mimo"),
+                         "xiaomi-mimo")
+        self.assertEqual(chatgpt_collector.source_for_provider(None), "chatgpt")
+
+
 class TestRawLayer(unittest.TestCase):
     def _event(self, date="2026-08-17", requests=3):
         return Event(date=date, source="cursor", model="x", requests=requests)
@@ -398,6 +541,41 @@ class TestRawLayer(unittest.TestCase):
                        for p in root.glob("data/raw/*/*.json")),
                 ["data/raw/cursor/2026-08.json", "data/raw/deepseek/2026-08.json"])
             self.assertEqual(len(read_all_events(root)), 2)
+
+    def test_machine_shard_does_not_collide_with_account_level(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_events(root, "chatgpt", [Event(
+                date="2026-08-17", source="chatgpt", model="x", requests=1)],
+                ["2026-08-17"], shard="work-mac")
+            write_events(root, "chatgpt", [Event(
+                date="2026-08-17", source="chatgpt", model="x", requests=2)],
+                ["2026-08-17"], shard="home-win")
+            paths = sorted(p.relative_to(root).as_posix()
+                           for p in root.rglob("*.json"))
+            self.assertEqual(paths, [
+                "data/raw/chatgpt/home-win/2026-08.json",
+                "data/raw/chatgpt/work-mac/2026-08.json",
+            ])
+            self.assertEqual(sum(r["requests"] for r in read_all_events(root)), 3)
+
+    def test_legacy_machine_first_layout_is_ignored(self):
+        """旧的 data/raw/<machine>/<source>/ 不能再折进总量。"""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            path = root / "data" / "raw" / "work-mac" / "cursor" / "2026-08.json"
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps({
+                "source": "cursor", "month": "2026-08",
+                "days": {"2026-08-17": [{
+                    "date": "2026-08-17", "source": "cursor",
+                    "model": "x", "requests": 9,
+                }]},
+            }), encoding="utf-8")
+            write_events(root, "cursor", [self._event(requests=3)], ["2026-08-17"])
+            back = read_all_events(root)
+            self.assertEqual(len(back), 1)
+            self.assertEqual(back[0]["requests"], 3)
 
     def test_spans_month_boundary(self):
         with tempfile.TemporaryDirectory() as tmp:

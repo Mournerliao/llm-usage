@@ -74,6 +74,11 @@ def _events():
         # 只报输入输出、不报缓存的源
         e("2026-08-13", "openai", "gpt-5.6", requests=8,
           tokens_in=40_000, tokens_out=9_000),
+        # 订阅源：金额列应显示「订阅」，且同名模型跨源要能聚合
+        e("2026-08-12", "chatgpt", "gpt-5.6-sol", requests=4,
+          tokens_in=1_000, tokens_out=200, cache_write=0, cache_read=8_000),
+        e("2026-08-12", "krill", "gpt-5.6-sol", requests=1,
+          tokens_in=500, tokens_out=50, cache_write=0, cache_read=2_000),
         # 并列值：排序必须靠标签字典序决定，两边要一致
         e("2026-08-14", "cursor", "tie-b", requests=7, cost_cents=100.0),
         e("2026-08-14", "cursor", "tie-a", requests=7, cost_cents=100.0),
@@ -141,10 +146,14 @@ class TestCrossLanguageParity(unittest.TestCase):
         if tmp is not None:
             tmp.cleanup()
 
-    def _run_ts(self, daily, cases):
+    def _run_ts(self, daily, cases, subscription_sources=None):
         proc = subprocess.run(
             ["node", str(self.bundle)],
-            input=json.dumps({"daily": daily, "cases": cases}),
+            input=json.dumps({
+                "daily": daily,
+                "cases": cases,
+                "subscription_sources": subscription_sources or [],
+            }),
             capture_output=True, text=True, timeout=120, cwd=str(ROOT),
             env={**os.environ, "NODE_NO_WARNINGS": "1"},
         )
@@ -187,12 +196,13 @@ class TestCrossLanguageParity(unittest.TestCase):
 
     def test_views_match_field_by_field(self):
         daily = aggregate.fold_events(_events())
-        ts_views = self._run_ts(daily, CASES)
+        ts_views = self._run_ts(daily, CASES, ["chatgpt"])
 
         for case, ts_view in zip(CASES, ts_views):
             with self.subTest(week=(case["week"] or {}).get("week"),
                               limit=case["limit"]):
-                py_view = build_week_view(daily, case["week"], case["limit"])
+                py_view = build_week_view(daily, case["week"], case["limit"],
+                                          ["chatgpt"])
                 self._assert_views_match(py_view, ts_view)
 
     def test_real_stats_match(self):
@@ -206,11 +216,12 @@ class TestCrossLanguageParity(unittest.TestCase):
             _bail("stats.json 里没有可展示的周")
 
         cases = [{"week": w, "limit": 6} for w in weeks]
-        ts_views = self._run_ts(stats["daily"], cases)
+        subs = stats.get("subscription_sources") or []
+        ts_views = self._run_ts(stats["daily"], cases, subs)
 
         for case, ts_view in zip(cases, ts_views):
             with self.subTest(week=case["week"]["week"]):
-                py_view = build_week_view(stats["daily"], case["week"], 6)
+                py_view = build_week_view(stats["daily"], case["week"], 6, subs)
                 self._assert_views_match(py_view, ts_view)
 
 

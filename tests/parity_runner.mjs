@@ -15,7 +15,7 @@ const input = JSON.parse(await new Promise((resolve, reject) => {
 }));
 
 const out = input.cases.map(({ week, limit }) =>
-  buildWeekView(input.daily, week, limit),
+  buildWeekView(input.daily, week, limit, input.subscription_sources ?? []),
 );
 
 process.stdout.write(JSON.stringify(out));

@@ -78,7 +78,7 @@ web
 - 单周内模型集中度高：`gpt-5.5-medium`、`claude-opus-4-8-thinking-xhigh`、`claude-opus-5-thinking-high` 三者合计占总成本约 45%。
 - 历史设计取舍与已排除方案记录在 `docs/DESIGN.md`（含 WorkBuddy 采集器被摘除的实测依据）。
 - 已证明**不存在**的数据：Cursor 本机库（`ai-code-tracking.db`、`state.vscdb`）在当前时段的 token 覆盖率为 0%，`composerData.usageData.costInCents` 是停写于 2025-10 的遗留字段（覆盖率 0.9%）。未来不要再基于本机库编造 token 或成本口径。
-- 没有的东西：没有其他工具（Claude Code、Codex 等）的用量数据；没有 WorkBuddy 的可靠消耗口径。
+- 没有的东西：没有 Claude Code 的用量数据；没有 WorkBuddy 的可靠消耗口径。
 
 ## Product Principles
 

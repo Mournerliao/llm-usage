@@ -536,3 +536,22 @@ React 组件的断点是**容器查询**（`@container` + `@xl:`）而不是视�
 ### 8.8 WorkBuddy 仍未回来
 
 6.1 的状态不变：`credit_json` 的规律还没解出，采集器仍在摘除状态。这一轮没有推进它。
+
+---
+
+## 9. 接入 ChatGPT / Codex
+
+Cursor 之后的第二个真实 token 源。ChatGPT Plus 没有官方逐次用量接口，本机
+`state_5.sqlite.tokens_used` 又是会话累计、无拆分，所以走 `~/.codex/sessions`
+jsonl 里的 `token_count` / `last_token_usage`。
+
+三条和 Cursor 不同的约束：
+
+1. **本机源，必须按机器分片。** 路径是 `data/raw/<source>/<machine>/<月>.json`。
+   `Event` 仍然没有 machine 字段。旧的 `data/raw/<machine>/<source>/` 布局靠
+   「文件里的 source 对不上第一段路径」跳过，避免把第一轮残留折进总量。
+2. **排行永远按 token。** 订阅没有逐次成本，再按成本排会把 Codex 吃成 0%。金额列：
+   Cursor 仍是美元；`chatgpt` 显示「订阅」；两者同时出现时写成 `$X · 订阅`。
+3. **中转站分开采。** `model_provider=openai` → 源 `chatgpt`；其余 provider 各自
+   成源。展示层仍按模型名聚合，给以后「ADE vs 中转站」卡片留分片。
+

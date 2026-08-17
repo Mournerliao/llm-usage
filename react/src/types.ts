@@ -54,6 +54,8 @@ export interface UsageStats {
   latest_date: string | null;
   weeks: WeekRef[];
   sources: string[];
+  /** 订阅制源。没有逐次成本，金额列显示「订阅」而不是美元。 */
+  subscription_sources?: string[];
   daily: UsageRow[];
   year: YearSummary | null;
 }
@@ -61,7 +63,7 @@ export interface UsageStats {
 /** 主题模式：跟随系统，或强制浅色 / 深色。 */
 export type WidgetTheme = "auto" | "light" | "dark";
 
-/** 排序与占比的口径。有成本按成本，否则退到 token，再退到请求数。 */
+/** 排序与占比的口径。永远按 token，没有 token 时退到请求数。 */
 export type Basis = "cost" | "tokens" | "requests";
 
 export interface ModelRow {

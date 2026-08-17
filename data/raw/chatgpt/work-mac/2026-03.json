@@ -1,0 +1,235 @@
+{
+  "source": "chatgpt",
+  "month": "2026-03",
+  "days": {
+    "2026-03-01": [],
+    "2026-03-02": [],
+    "2026-03-03": [],
+    "2026-03-04": [
+      {
+        "date": "2026-03-04",
+        "source": "chatgpt",
+        "model": "gpt-5.3-codex",
+        "requests": 387,
+        "tokens_in": 4199372,
+        "tokens_out": 148618,
+        "cache_write": 0,
+        "cache_read": 41006336
+      }
+    ],
+    "2026-03-05": [
+      {
+        "date": "2026-03-05",
+        "source": "chatgpt",
+        "model": "gpt-5.3-codex",
+        "requests": 264,
+        "tokens_in": 1599243,
+        "tokens_out": 76609,
+        "cache_write": 0,
+        "cache_read": 15886976
+      }
+    ],
+    "2026-03-06": [
+      {
+        "date": "2026-03-06",
+        "source": "chatgpt",
+        "model": "gpt-5.3-codex",
+        "requests": 59,
+        "tokens_in": 1130274,
+        "tokens_out": 32002,
+        "cache_write": 0,
+        "cache_read": 6593792
+      }
+    ],
+    "2026-03-07": [],
+    "2026-03-08": [],
+    "2026-03-09": [
+      {
+        "date": "2026-03-09",
+        "source": "chatgpt",
+        "model": "gpt-5.3-codex",
+        "requests": 132,
+        "tokens_in": 1353026,
+        "tokens_out": 40119,
+        "cache_write": 0,
+        "cache_read": 8043776
+      }
+    ],
+    "2026-03-10": [
+      {
+        "date": "2026-03-10",
+        "source": "chatgpt",
+        "model": "gpt-5.4",
+        "requests": 47,
+        "tokens_in": 571457,
+        "tokens_out": 28056,
+        "cache_write": 0,
+        "cache_read": 3174016
+      }
+    ],
+    "2026-03-11": [
+      {
+        "date": "2026-03-11",
+        "source": "chatgpt",
+        "model": "gpt-5.4",
+        "requests": 48,
+        "tokens_in": 297628,
+        "tokens_out": 16882,
+        "cache_write": 0,
+        "cache_read": 3408256
+      }
+    ],
+    "2026-03-12": [
+      {
+        "date": "2026-03-12",
+        "source": "chatgpt",
+        "model": "gpt-5.4",
+        "requests": 154,
+        "tokens_in": 2588697,
+        "tokens_out": 99561,
+        "cache_write": 0,
+        "cache_read": 17196800
+      }
+    ],
+    "2026-03-13": [
+      {
+        "date": "2026-03-13",
+        "source": "chatgpt",
+        "model": "gpt-5.4",
+        "requests": 154,
+        "tokens_in": 3514135,
+        "tokens_out": 99338,
+        "cache_write": 0,
+        "cache_read": 22126720
+      }
+    ],
+    "2026-03-14": [],
+    "2026-03-15": [],
+    "2026-03-16": [
+      {
+        "date": "2026-03-16",
+        "source": "chatgpt",
+        "model": "gpt-5.4",
+        "requests": 427,
+        "tokens_in": 6102297,
+        "tokens_out": 180297,
+        "cache_write": 0,
+        "cache_read": 45355136
+      }
+    ],
+    "2026-03-17": [
+      {
+        "date": "2026-03-17",
+        "source": "chatgpt",
+        "model": "gpt-5.4",
+        "requests": 114,
+        "tokens_in": 2963982,
+        "tokens_out": 64841,
+        "cache_write": 0,
+        "cache_read": 11518080
+      }
+    ],
+    "2026-03-18": [
+      {
+        "date": "2026-03-18",
+        "source": "chatgpt",
+        "model": "gpt-5.4",
+        "requests": 93,
+        "tokens_in": 2168891,
+        "tokens_out": 63773,
+        "cache_write": 0,
+        "cache_read": 10104832
+      }
+    ],
+    "2026-03-19": [
+      {
+        "date": "2026-03-19",
+        "source": "chatgpt",
+        "model": "gpt-5.4",
+        "requests": 100,
+        "tokens_in": 2530098,
+        "tokens_out": 43992,
+        "cache_write": 0,
+        "cache_read": 10301056
+      }
+    ],
+    "2026-03-20": [
+      {
+        "date": "2026-03-20",
+        "source": "chatgpt",
+        "model": "gpt-5.4",
+        "requests": 79,
+        "tokens_in": 2304478,
+        "tokens_out": 33020,
+        "cache_write": 0,
+        "cache_read": 8517888
+      }
+    ],
+    "2026-03-21": [],
+    "2026-03-22": [],
+    "2026-03-23": [
+      {
+        "date": "2026-03-23",
+        "source": "chatgpt",
+        "model": "gpt-5.4",
+        "requests": 229,
+        "tokens_in": 2337937,
+        "tokens_out": 161608,
+        "cache_write": 0,
+        "cache_read": 20305920
+      }
+    ],
+    "2026-03-24": [
+      {
+        "date": "2026-03-24",
+        "source": "chatgpt",
+        "model": "gpt-5.4",
+        "requests": 80,
+        "tokens_in": 996015,
+        "tokens_out": 53780,
+        "cache_write": 0,
+        "cache_read": 7860480
+      }
+    ],
+    "2026-03-25": [
+      {
+        "date": "2026-03-25",
+        "source": "chatgpt",
+        "model": "gpt-5.4",
+        "requests": 43,
+        "tokens_in": 355832,
+        "tokens_out": 18032,
+        "cache_write": 0,
+        "cache_read": 2133888
+      }
+    ],
+    "2026-03-26": [
+      {
+        "date": "2026-03-26",
+        "source": "chatgpt",
+        "model": "gpt-5.4",
+        "requests": 658,
+        "tokens_in": 8973148,
+        "tokens_out": 436322,
+        "cache_write": 0,
+        "cache_read": 71500160
+      }
+    ],
+    "2026-03-27": [
+      {
+        "date": "2026-03-27",
+        "source": "chatgpt",
+        "model": "gpt-5.4",
+        "requests": 445,
+        "tokens_in": 7559554,
+        "tokens_out": 282661,
+        "cache_write": 0,
+        "cache_read": 42446976
+      }
+    ],
+    "2026-03-28": [],
+    "2026-03-29": [],
+    "2026-03-30": [],
+    "2026-03-31": []
+  }
+}

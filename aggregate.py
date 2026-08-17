@@ -136,7 +136,7 @@ def build_year(daily: list[dict], latest: str) -> dict:
 
     totals = _sum_rows(rows)
     models = [{"model": m, **_sum_rows(rs)} for m, rs in by_model.items()]
-    models.sort(key=lambda r: (-(r["cost_cents"] or 0), -(r["tokens_total"] or 0),
+    models.sort(key=lambda r: (-(r["tokens_total"] or 0), -(r["cost_cents"] or 0),
                                r["model"]))
     return {
         "year": year,
@@ -156,6 +156,7 @@ def build_stats(daily_all: list[dict]) -> dict:
         return {"schema_version": SCHEMA_VERSION,
                 "timezone": config.load_aggregate_config()["timezone"],
                 "latest_date": None, "weeks": [], "sources": [],
+                "subscription_sources": config.subscription_sources(),
                 "daily": [], "year": None}
 
     latest = dates[-1]
@@ -169,6 +170,7 @@ def build_stats(daily_all: list[dict]) -> dict:
         "latest_date": latest,
         "weeks": weeks,
         "sources": sorted({r["source"] for r in daily_all}),
+        "subscription_sources": config.subscription_sources(),
         "daily": daily,
         "year": build_year(daily_all, latest),
     }

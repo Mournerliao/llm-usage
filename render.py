@@ -177,12 +177,11 @@ def render_svg(view: dict[str, Any], theme_name: str = "light") -> str:
     y = y_bar + 46
     body.append(_rule(y, t))
 
-    # ---- 模型行。条形长度按占比，右侧两列是成本与 token 量。
-    basis_label = ranking.BASIS_LABELS.get(view.get("basis", "cost"), "占比")
+    # ---- 模型行。条形长度按 token 占比，右侧两列是计费与 token 量。
     # 表头上方留得比下方多，让它归属于下面的表格，而不是漂在两块之间。
     y += 28
     body.append(_text(PAD, y, "模型", size=11, fill=t["muted"], spacing=1.2))
-    body.append(_text(CARD_W - PAD - 96, y, basis_label, size=11, fill=t["muted"],
+    body.append(_text(CARD_W - PAD - 96, y, "成本", size=11, fill=t["muted"],
                       anchor="end", spacing=1.2))
     body.append(_text(CARD_W - PAD, y, "Tokens", size=11, fill=t["muted"],
                       anchor="end", spacing=1.2))
@@ -237,7 +236,9 @@ def render_files(stats: dict) -> list[Path]:
     weeks = stats.get("weeks") or []
     view = ranking.build_week_view(stats.get("daily", []),
                                    weeks[0] if weeks else None,
-                                   limit=MODEL_LIMIT)
+                                   limit=MODEL_LIMIT,
+                                   subscription_sources=stats.get(
+                                       "subscription_sources") or [])
     ASSETS.mkdir(exist_ok=True)
     written = []
     for theme in ("light", "dark"):

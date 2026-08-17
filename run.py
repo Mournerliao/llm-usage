@@ -18,7 +18,7 @@ import aggregate
 import config
 import render
 from collectors import CollectContext, write_events
-from collectors import cursor, openai_compatible
+from collectors import chatgpt, cursor, openai_compatible
 
 ROOT = Path(__file__).resolve().parent
 
@@ -26,7 +26,12 @@ ROOT = Path(__file__).resolve().parent
 COLLECTORS = {
     "cursor": cursor,
     "openai_compatible": openai_compatible,
+    "chatgpt": chatgpt,
 }
+
+# 会话只存在于本机的源：文件按 machine 分片，一次采集可能拆出多个 Event.source
+# （ChatGPT 订阅 vs 中转站）。
+LOCAL_TYPES = {"chatgpt"}
 
 
 def run_collect(ctx: CollectContext, sources: list[dict], only: str | None) -> int:
@@ -41,7 +46,19 @@ def run_collect(ctx: CollectContext, sources: list[dict], only: str | None) -> i
             continue
 
         events, days = module.collect(ctx, src)
-        if days:
+        if not days:
+            continue
+        if stype in LOCAL_TYPES:
+            if not ctx.machine:
+                raise SystemExit(
+                    f"{name}: 本机源需要在 sources.yaml 里设置 machine"
+                    "（如 work-mac / home-win），两台机器必须用不同的名字。")
+            grouped: dict[str, list] = {}
+            for event in events:
+                grouped.setdefault(event.source, []).append(event)
+            for source, group in grouped.items():
+                write_events(ctx.root, source, group, days, shard=ctx.machine)
+        else:
             write_events(ctx.root, name, events, days)
         total += len(events)
     return total
@@ -61,6 +78,7 @@ def main():
             tz=config.timezone(),
             root=ROOT,
             since=args.since or sources_cfg.get("since", "2026-01-01"),
+            machine=sources_cfg.get("machine"),
         )
         print(f"[start] tz={ctx.tz} since={ctx.since}")
         count = run_collect(ctx, sources_cfg["sources"], args.only)

@@ -34,13 +34,15 @@ TOKEN_LABELS = {
     "cache_read": "缓存读取",
 }
 
-# 排序与占比的口径。成本是稀缺资源，有成本就按成本排；拿不到成本的源退到 token，
-# 再退到请求数。视图里带 basis 字段，渲染层据此写对应的表头。
+# 排序与占比永远按 token（有 token 的源都在同一标尺上）。订阅制源没有逐次成本，
+# 金额列显示「订阅」而不是横线或估出来的单价。
 BASIS_LABELS = {
     "cost": "成本",
     "tokens": "Tokens",
     "requests": "请求",
 }
+
+SUBSCRIPTION_LABEL = "订阅"
 
 WEEKDAY_LABELS = ("一", "二", "三", "四", "五", "六", "日")
 
@@ -95,6 +97,19 @@ def format_cost(cents: float | None) -> str:
     return f"{'-' if neg else ''}${_group(intpart)}.{frac}"
 
 
+def format_billing(cost_cents: float | None, sources: set[str] | list[str],
+                   subscription_sources: set[str] | list[str]) -> str:
+    """金额列：有折算成本就写美元；有订阅源就标「订阅」；可以并存。"""
+    has_sub = bool(set(sources) & set(subscription_sources))
+    if cost_cents is not None and has_sub:
+        return f"{format_cost(cost_cents)} · {SUBSCRIPTION_LABEL}"
+    if cost_cents is not None:
+        return format_cost(cost_cents)
+    if has_sub:
+        return SUBSCRIPTION_LABEL
+    return "—"
+
+
 def format_count(value: int | None) -> str:
     if value is None:
         return "—"
@@ -134,8 +149,6 @@ def _totals(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def _basis_of(totals: dict[str, Any]) -> str:
-    if totals.get("cost_cents"):
-        return "cost"
     if totals.get("tokens_total"):
         return "tokens"
     return "requests"
@@ -153,14 +166,16 @@ def build_week_view(
     daily: list[dict[str, Any]],
     week: dict[str, str] | None,
     limit: int = 6,
+    subscription_sources: list[str] | None = None,
 ) -> dict[str, Any]:
     """构建某一周的展示视图。
 
     ``week`` 形如 ``{"week": "2026-W34", "start": "2026-08-17", "end": "2026-08-23"}``，
     直接取自 stats.json 的 ``weeks``。
 
-    ``models`` 按 ``basis`` 降序，``pct`` 是该行在本周内的占比（0~100）。
+    ``models`` 按 token 降序，``pct`` 是该行在本周内的 token 占比（0~100）。
     ``days`` 恒为 7 项（周一到周日），没有用量的那天补零，让日条形图的横轴稳定。
+    ``subscription_sources`` 里的源没有逐次成本，金额列显示「订阅」。
     """
     if not week:
         return {"week": None, "start": None, "end": None, "range_display": "",
@@ -170,6 +185,7 @@ def build_week_view(
 
     start, end = week["start"], week["end"]
     rows = [r for r in daily if start <= r.get("date", "") <= end]
+    sub_set = set(subscription_sources or ())
 
     totals = _totals(rows)
     basis = _basis_of(totals)
@@ -187,7 +203,9 @@ def build_week_view(
             "tokens_total": agg["tokens_total"],
             "cost_cents": agg["cost_cents"],
             "tokens_display": format_tokens(agg["tokens_total"]),
-            "cost_display": format_cost(agg["cost_cents"]),
+            "cost_display": format_billing(
+                agg["cost_cents"], {r.get("source") or "" for r in group},
+                sub_set),
             "requests_display": format_count(agg["requests"]),
         })
 
@@ -237,7 +255,8 @@ def build_week_view(
         "tokens_total": totals["tokens_total"],
         "cost_cents": totals["cost_cents"],
         "tokens_display": format_tokens(totals["tokens_total"]),
-        "cost_display": format_cost(totals["cost_cents"]),
+        "cost_display": format_billing(
+            totals["cost_cents"], {r.get("source") or "" for r in rows}, sub_set),
         "requests_display": format_count(totals["requests"]),
         "breakdown": breakdown,
         "models": model_rows[:limit],

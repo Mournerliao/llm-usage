@@ -1,0 +1,393 @@
+{
+  "source": "chatgpt",
+  "month": "2026-07",
+  "days": {
+    "2026-07-01": [],
+    "2026-07-02": [],
+    "2026-07-03": [
+      {
+        "date": "2026-07-03",
+        "source": "chatgpt",
+        "model": "codex-auto-review",
+        "requests": 10,
+        "tokens_in": 78619,
+        "tokens_out": 1220,
+        "cache_write": 0,
+        "cache_read": 104192
+      },
+      {
+        "date": "2026-07-03",
+        "source": "chatgpt",
+        "model": "gpt-5.5",
+        "requests": 368,
+        "tokens_in": 2653089,
+        "tokens_out": 181081,
+        "cache_write": 0,
+        "cache_read": 41588736
+      }
+    ],
+    "2026-07-04": [],
+    "2026-07-05": [],
+    "2026-07-06": [
+      {
+        "date": "2026-07-06",
+        "source": "chatgpt",
+        "model": "codex-auto-review",
+        "requests": 24,
+        "tokens_in": 191951,
+        "tokens_out": 2479,
+        "cache_write": 0,
+        "cache_read": 376320
+      },
+      {
+        "date": "2026-07-06",
+        "source": "chatgpt",
+        "model": "gpt-5.5",
+        "requests": 352,
+        "tokens_in": 3091528,
+        "tokens_out": 166061,
+        "cache_write": 0,
+        "cache_read": 31411712
+      }
+    ],
+    "2026-07-07": [
+      {
+        "date": "2026-07-07",
+        "source": "chatgpt",
+        "model": "codex-auto-review",
+        "requests": 11,
+        "tokens_in": 150718,
+        "tokens_out": 1127,
+        "cache_write": 0,
+        "cache_read": 203392
+      },
+      {
+        "date": "2026-07-07",
+        "source": "chatgpt",
+        "model": "gpt-5.5",
+        "requests": 192,
+        "tokens_in": 1112854,
+        "tokens_out": 96823,
+        "cache_write": 0,
+        "cache_read": 23562240
+      }
+    ],
+    "2026-07-08": [
+      {
+        "date": "2026-07-08",
+        "source": "chatgpt",
+        "model": "codex-auto-review",
+        "requests": 4,
+        "tokens_in": 45172,
+        "tokens_out": 331,
+        "cache_write": 0,
+        "cache_read": 99328
+      },
+      {
+        "date": "2026-07-08",
+        "source": "chatgpt",
+        "model": "gpt-5.5",
+        "requests": 102,
+        "tokens_in": 555872,
+        "tokens_out": 48826,
+        "cache_write": 0,
+        "cache_read": 13013760
+      }
+    ],
+    "2026-07-09": [],
+    "2026-07-10": [
+      {
+        "date": "2026-07-10",
+        "source": "chatgpt",
+        "model": "codex-auto-review",
+        "requests": 5,
+        "tokens_in": 63416,
+        "tokens_out": 782,
+        "cache_write": 0,
+        "cache_read": 61440
+      },
+      {
+        "date": "2026-07-10",
+        "source": "chatgpt",
+        "model": "gpt-5.6-sol",
+        "requests": 159,
+        "tokens_in": 884839,
+        "tokens_out": 82829,
+        "cache_write": 0,
+        "cache_read": 25533696
+      }
+    ],
+    "2026-07-11": [],
+    "2026-07-12": [],
+    "2026-07-13": [
+      {
+        "date": "2026-07-13",
+        "source": "chatgpt",
+        "model": "codex-auto-review",
+        "requests": 85,
+        "tokens_in": 647875,
+        "tokens_out": 9351,
+        "cache_write": 0,
+        "cache_read": 2493696
+      },
+      {
+        "date": "2026-07-13",
+        "source": "chatgpt",
+        "model": "gpt-5.6-sol",
+        "requests": 1051,
+        "tokens_in": 3521154,
+        "tokens_out": 389223,
+        "cache_write": 0,
+        "cache_read": 91599104
+      }
+    ],
+    "2026-07-14": [
+      {
+        "date": "2026-07-14",
+        "source": "chatgpt",
+        "model": "codex-auto-review",
+        "requests": 30,
+        "tokens_in": 279925,
+        "tokens_out": 2982,
+        "cache_write": 0,
+        "cache_read": 1164544
+      },
+      {
+        "date": "2026-07-14",
+        "source": "chatgpt",
+        "model": "gpt-5.6-sol",
+        "requests": 542,
+        "tokens_in": 4002120,
+        "tokens_out": 246791,
+        "cache_write": 0,
+        "cache_read": 70500864
+      }
+    ],
+    "2026-07-15": [
+      {
+        "date": "2026-07-15",
+        "source": "chatgpt",
+        "model": "codex-auto-review",
+        "requests": 41,
+        "tokens_in": 453114,
+        "tokens_out": 3263,
+        "cache_write": 0,
+        "cache_read": 1785216
+      },
+      {
+        "date": "2026-07-15",
+        "source": "chatgpt",
+        "model": "gpt-5.6-sol",
+        "requests": 1267,
+        "tokens_in": 5889092,
+        "tokens_out": 537708,
+        "cache_write": 0,
+        "cache_read": 154376448
+      },
+      {
+        "date": "2026-07-15",
+        "source": "chatgpt",
+        "model": "unknown",
+        "requests": 27,
+        "tokens_in": 233006,
+        "tokens_out": 27210,
+        "cache_write": 0,
+        "cache_read": 1684736
+      }
+    ],
+    "2026-07-16": [
+      {
+        "date": "2026-07-16",
+        "source": "chatgpt",
+        "model": "codex-auto-review",
+        "requests": 113,
+        "tokens_in": 546440,
+        "tokens_out": 10600,
+        "cache_write": 0,
+        "cache_read": 5878656
+      },
+      {
+        "date": "2026-07-16",
+        "source": "chatgpt",
+        "model": "gpt-5.6-sol",
+        "requests": 1285,
+        "tokens_in": 5198202,
+        "tokens_out": 468456,
+        "cache_write": 0,
+        "cache_read": 155133952
+      }
+    ],
+    "2026-07-17": [],
+    "2026-07-18": [],
+    "2026-07-19": [],
+    "2026-07-20": [
+      {
+        "date": "2026-07-20",
+        "source": "chatgpt",
+        "model": "gpt-5.6-sol",
+        "requests": 17,
+        "tokens_in": 82466,
+        "tokens_out": 6671,
+        "cache_write": 0,
+        "cache_read": 878336
+      }
+    ],
+    "2026-07-21": [],
+    "2026-07-22": [
+      {
+        "date": "2026-07-22",
+        "source": "chatgpt",
+        "model": "codex-auto-review",
+        "requests": 10,
+        "tokens_in": 71514,
+        "tokens_out": 1476,
+        "cache_write": 0,
+        "cache_read": 147968
+      },
+      {
+        "date": "2026-07-22",
+        "source": "chatgpt",
+        "model": "gpt-5.6-sol",
+        "requests": 216,
+        "tokens_in": 1187308,
+        "tokens_out": 97856,
+        "cache_write": 0,
+        "cache_read": 24439808
+      }
+    ],
+    "2026-07-23": [
+      {
+        "date": "2026-07-23",
+        "source": "chatgpt",
+        "model": "codex-auto-review",
+        "requests": 60,
+        "tokens_in": 384278,
+        "tokens_out": 7379,
+        "cache_write": 0,
+        "cache_read": 2336768
+      },
+      {
+        "date": "2026-07-23",
+        "source": "chatgpt",
+        "model": "gpt-5.6-sol",
+        "requests": 944,
+        "tokens_in": 4309267,
+        "tokens_out": 349921,
+        "cache_write": 0,
+        "cache_read": 125683456
+      }
+    ],
+    "2026-07-24": [
+      {
+        "date": "2026-07-24",
+        "source": "chatgpt",
+        "model": "codex-auto-review",
+        "requests": 16,
+        "tokens_in": 70501,
+        "tokens_out": 2217,
+        "cache_write": 0,
+        "cache_read": 517632
+      },
+      {
+        "date": "2026-07-24",
+        "source": "chatgpt",
+        "model": "gpt-5.6-sol",
+        "requests": 471,
+        "tokens_in": 1362336,
+        "tokens_out": 180096,
+        "cache_write": 0,
+        "cache_read": 61522944
+      }
+    ],
+    "2026-07-25": [],
+    "2026-07-26": [],
+    "2026-07-27": [
+      {
+        "date": "2026-07-27",
+        "source": "chatgpt",
+        "model": "codex-auto-review",
+        "requests": 10,
+        "tokens_in": 73799,
+        "tokens_out": 1401,
+        "cache_write": 0,
+        "cache_read": 161792
+      },
+      {
+        "date": "2026-07-27",
+        "source": "chatgpt",
+        "model": "gpt-5.6-sol",
+        "requests": 773,
+        "tokens_in": 5350509,
+        "tokens_out": 301310,
+        "cache_write": 4351125,
+        "cache_read": 104101046
+      }
+    ],
+    "2026-07-28": [
+      {
+        "date": "2026-07-28",
+        "source": "chatgpt",
+        "model": "codex-auto-review",
+        "requests": 73,
+        "tokens_in": 245744,
+        "tokens_out": 8097,
+        "cache_write": 0,
+        "cache_read": 2305024
+      },
+      {
+        "date": "2026-07-28",
+        "source": "chatgpt",
+        "model": "gpt-5.6-sol",
+        "requests": 1042,
+        "tokens_in": 4091501,
+        "tokens_out": 482805,
+        "cache_write": 3908091,
+        "cache_read": 127534503
+      },
+      {
+        "date": "2026-07-28",
+        "source": "chatgpt",
+        "model": "unknown",
+        "requests": 11,
+        "tokens_in": 113239,
+        "tokens_out": 2508,
+        "cache_write": 112431,
+        "cache_read": 449621
+      }
+    ],
+    "2026-07-29": [
+      {
+        "date": "2026-07-29",
+        "source": "chatgpt",
+        "model": "codex-auto-review",
+        "requests": 24,
+        "tokens_in": 130262,
+        "tokens_out": 1987,
+        "cache_write": 0,
+        "cache_read": 1365504
+      },
+      {
+        "date": "2026-07-29",
+        "source": "chatgpt",
+        "model": "gpt-5.6-sol",
+        "requests": 209,
+        "tokens_in": 1512721,
+        "tokens_out": 102155,
+        "cache_write": 639499,
+        "cache_read": 21008552
+      },
+      {
+        "date": "2026-07-29",
+        "source": "chatgpt",
+        "model": "gpt-5.6-terra",
+        "requests": 2,
+        "tokens_in": 24634,
+        "tokens_out": 1485,
+        "cache_write": 0,
+        "cache_read": 38400
+      }
+    ],
+    "2026-07-30": [],
+    "2026-07-31": []
+  }
+}
