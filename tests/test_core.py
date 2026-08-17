@@ -14,13 +14,18 @@ from zoneinfo import ZoneInfo
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-import aggregate  # noqa: E402
-import ranking  # noqa: E402
-import render  # noqa: E402
-from collectors import CollectContext, Event, read_all_events, write_events  # noqa: E402
-from collectors import chatgpt as chatgpt_collector  # noqa: E402
-from collectors import cursor as cursor_collector  # noqa: E402
-from schema import validate_stats  # noqa: E402
+from llm_usage import fold, render  # noqa: E402
+from llm_usage import view as weekview  # noqa: E402
+from llm_usage.collect import (  # noqa: E402
+    CollectContext,
+    Event,
+    persist,
+    read_all_events,
+    write_events,
+)
+from llm_usage.collect import chatgpt as chatgpt_collector  # noqa: E402
+from llm_usage.collect import cursor as cursor_collector  # noqa: E402
+from llm_usage.contract import TOKEN_KINDS, validate_stats  # noqa: E402
 
 TZ = ZoneInfo("Asia/Shanghai")
 
@@ -71,7 +76,7 @@ class TestEventContract(unittest.TestCase):
 
 class TestFoldEvents(unittest.TestCase):
     def test_sums_same_key(self):
-        daily = aggregate.fold_events([
+        daily = fold.fold_events([
             Event(date="d", source="cursor", model="m", requests=2,
                   **tokens(i=10)).to_dict(),
             Event(date="d", source="cursor", model="m", requests=3,
@@ -82,14 +87,14 @@ class TestFoldEvents(unittest.TestCase):
         self.assertEqual(daily[0]["tokens_in"], 15)
 
     def test_keeps_sources_separate(self):
-        daily = aggregate.fold_events([
+        daily = fold.fold_events([
             row("d", "m", source="cursor"),
             row("d", "m", source="deepseek"),
         ])
         self.assertEqual(len(daily), 2)
 
     def test_applies_model_aliases(self):
-        daily = aggregate.fold_events(
+        daily = fold.fold_events(
             [row("d", "hy3", requests=1), row("d", "hy3-ioa", requests=2)],
             aliases={"hy3-ioa": "hy3"},
         )
@@ -98,13 +103,13 @@ class TestFoldEvents(unittest.TestCase):
 
     def test_missing_field_stays_missing(self):
         """所有参与事件都不报 cost 时，结果里不该凭空出现一个 0。"""
-        daily = aggregate.fold_events([row("d", "m"), row("d", "m")])
+        daily = fold.fold_events([row("d", "m"), row("d", "m")])
         self.assertNotIn("cost_cents", daily[0])
         self.assertNotIn("cache_read", daily[0])
 
     def test_partial_report_is_summed_not_dropped(self):
         """一半的事件报了 cost，结果就是那一半之和——报了的数据不该因为别人没报而丢。"""
-        daily = aggregate.fold_events([
+        daily = fold.fold_events([
             row("d", "m", cost_cents=12.5),
             row("d", "m"),
         ])
@@ -112,57 +117,57 @@ class TestFoldEvents(unittest.TestCase):
 
     def test_cost_keeps_sub_cent_precision(self):
         """三次各 0.4 分的调用应得 1.2 分。若中途取整成 0，求和会系统性偏小。"""
-        daily = aggregate.fold_events([row("d", "m", cost_cents=0.4)] * 3)
+        daily = fold.fold_events([row("d", "m", cost_cents=0.4)] * 3)
         self.assertAlmostEqual(daily[0]["cost_cents"], 1.2, places=6)
 
     def test_empty(self):
-        self.assertEqual(aggregate.fold_events([]), [])
+        self.assertEqual(fold.fold_events([]), [])
 
 
 class TestWeekWindow(unittest.TestCase):
     def test_iso_week_start_is_monday(self):
         # 2026-08-17 是周一，2026-08-23 是周日，同属一周。
-        self.assertEqual(aggregate.iso_week_start("2026-08-17").isoformat(),
+        self.assertEqual(fold.iso_week_start("2026-08-17").isoformat(),
                          "2026-08-17")
-        self.assertEqual(aggregate.iso_week_start("2026-08-23").isoformat(),
+        self.assertEqual(fold.iso_week_start("2026-08-23").isoformat(),
                          "2026-08-17")
 
     def test_sunday_belongs_to_the_week_that_started_monday(self):
         """周日归上一个周一，而不是开启新的一周——这是 ISO 周与「自然周」的分歧点。"""
-        self.assertEqual(aggregate.iso_week_start("2026-08-16").isoformat(),
+        self.assertEqual(fold.iso_week_start("2026-08-16").isoformat(),
                          "2026-08-10")
 
     def test_recent_weeks_is_newest_first_and_contiguous(self):
-        weeks = aggregate.recent_weeks("2026-08-19", count=4)
+        weeks = fold.recent_weeks("2026-08-19", count=4)
         self.assertEqual([w["start"] for w in weeks],
                          ["2026-08-17", "2026-08-10", "2026-08-03", "2026-07-27"])
         for week in weeks:
-            self.assertEqual(aggregate.iso_week_start(week["end"]).isoformat(),
+            self.assertEqual(fold.iso_week_start(week["end"]).isoformat(),
                              week["start"])
 
     def test_weeks_are_derived_from_data_not_from_today(self):
         """周次由最新数据日推出，所以同一份 raw 在任何时刻重跑都得到同一批周。"""
-        daily = aggregate.fold_events([row("2026-05-06", "m")])
-        stats = aggregate.build_stats(daily)
+        daily = fold.fold_events([row("2026-05-06", "m")])
+        stats = fold.build_stats(daily)
         self.assertEqual(stats["weeks"][0]["start"], "2026-05-04")
 
     def test_daily_window_is_trimmed_to_the_four_weeks(self):
-        daily = aggregate.fold_events([
+        daily = fold.fold_events([
             row("2026-08-17", "m"),      # 本周
             row("2026-07-27", "m"),      # 窗口内最早一天
             row("2026-07-26", "m"),      # 窗口外，应被裁掉
         ])
-        stats = aggregate.build_stats(daily)
+        stats = fold.build_stats(daily)
         self.assertEqual(sorted(r["date"] for r in stats["daily"]),
                          ["2026-07-27", "2026-08-17"])
 
     def test_year_summary_keeps_data_outside_the_display_window(self):
         """裁掉的历史仍要进年度汇总，否则「先收集，后展示」就落空了。"""
-        daily = aggregate.fold_events([
+        daily = fold.fold_events([
             row("2026-04-09", "m", requests=7, cost_cents=100.0),
             row("2026-08-17", "m", requests=3, cost_cents=50.0),
         ])
-        stats = aggregate.build_stats(daily)
+        stats = fold.build_stats(daily)
         year = stats["year"]
         self.assertEqual(year["year"], "2026")
         self.assertEqual(year["start"], "2026-04-09")
@@ -173,29 +178,29 @@ class TestWeekWindow(unittest.TestCase):
                          ["2026-04", "2026-08"])
 
     def test_empty_stats_has_no_weeks(self):
-        stats = aggregate.build_stats([])
+        stats = fold.build_stats([])
         self.assertIsNone(stats["latest_date"])
         self.assertEqual(stats["weeks"], [])
 
 
 class TestFormatters(unittest.TestCase):
     def test_token_magnitudes(self):
-        self.assertEqual(ranking.format_tokens(0), "0")
-        self.assertEqual(ranking.format_tokens(999), "999")
-        self.assertEqual(ranking.format_tokens(1_000), "1.0K")
-        self.assertEqual(ranking.format_tokens(1_500_000), "1.5M")
-        self.assertEqual(ranking.format_tokens(479_000_000), "479.0M")
-        self.assertEqual(ranking.format_tokens(5_770_000_000), "5.77B")
+        self.assertEqual(weekview.format_tokens(0), "0")
+        self.assertEqual(weekview.format_tokens(999), "999")
+        self.assertEqual(weekview.format_tokens(1_000), "1.0K")
+        self.assertEqual(weekview.format_tokens(1_500_000), "1.5M")
+        self.assertEqual(weekview.format_tokens(479_000_000), "479.0M")
+        self.assertEqual(weekview.format_tokens(5_770_000_000), "5.77B")
 
     def test_missing_tokens_render_as_dash_not_zero(self):
         """不报 token 的源必须显示横线：显示 0 会被读成「一个 token 都没用」。"""
-        self.assertEqual(ranking.format_tokens(None), "—")
-        self.assertEqual(ranking.format_cost(None), "—")
+        self.assertEqual(weekview.format_tokens(None), "—")
+        self.assertEqual(weekview.format_cost(None), "—")
 
     def test_cost_is_cents_to_dollars_with_grouping(self):
-        self.assertEqual(ranking.format_cost(0), "$0.00")
-        self.assertEqual(ranking.format_cost(4056), "$40.56")
-        self.assertEqual(ranking.format_cost(405_519), "$4,055.19")
+        self.assertEqual(weekview.format_cost(0), "$0.00")
+        self.assertEqual(weekview.format_cost(4056), "$40.56")
+        self.assertEqual(weekview.format_cost(405_519), "$4,055.19")
 
     def test_rounds_half_away_from_zero(self):
         """定点格式化在半分位上远离零取整，与 TS 侧逐位一致。
@@ -205,19 +210,19 @@ class TestFormatters(unittest.TestCase):
         银行家舍入内建，两边若各用内建，边界值就会显示成不同的数。
         """
         self.assertEqual(f"{0.125:.2f}", "0.12")        # 内建的行为，作为对照
-        self.assertEqual(ranking._fixed(0.125, 2), "0.13")
-        self.assertEqual(ranking._fixed(0.25, 1), "0.3")
-        self.assertEqual(ranking._fixed(-0.25, 1), "-0.3")
+        self.assertEqual(weekview._fixed(0.125, 2), "0.13")
+        self.assertEqual(weekview._fixed(0.25, 1), "0.3")
+        self.assertEqual(weekview._fixed(-0.25, 1), "-0.3")
 
     def test_day_and_range(self):
-        self.assertEqual(ranking.format_day("2026-08-03"), "8月3日")
-        self.assertEqual(ranking.format_range("2026-08-10", "2026-08-16"),
+        self.assertEqual(weekview.format_day("2026-08-03"), "8月3日")
+        self.assertEqual(weekview.format_range("2026-08-10", "2026-08-16"),
                          "8月10日 – 8月16日")
 
 
 class TestBuildWeekView(unittest.TestCase):
     def _daily(self):
-        return aggregate.fold_events([
+        return fold.fold_events([
             # 周内
             row("2026-08-10", "big", requests=10, cost_cents=1000.0,
                 **tokens(i=100, o=50, cw=200, cr=9000)),
@@ -231,7 +236,7 @@ class TestBuildWeekView(unittest.TestCase):
         ])
 
     def test_filters_to_the_week(self):
-        view = ranking.build_week_view(self._daily(), WEEK)
+        view = weekview.build_week_view(self._daily(), WEEK)
         self.assertEqual({m["label"] for m in view["models"]}, {"big", "small"})
         self.assertEqual(view["basis"], "tokens")
         self.assertEqual([m["label"] for m in view["models"]], ["big", "small"])
@@ -240,7 +245,7 @@ class TestBuildWeekView(unittest.TestCase):
                                / view["tokens_total"] * 100)
 
     def test_totals_are_summed_over_the_week(self):
-        view = ranking.build_week_view(self._daily(), WEEK)
+        view = weekview.build_week_view(self._daily(), WEEK)
         self.assertEqual(view["requests"], 17)
         self.assertAlmostEqual(view["cost_cents"], 1600.0)
         self.assertEqual(view["tokens_total"], 100 + 50 + 200 + 9000
@@ -248,35 +253,35 @@ class TestBuildWeekView(unittest.TestCase):
 
     def test_ranks_by_tokens_even_when_cost_is_available(self):
         """订阅源没有成本，排行必须按 token，不能再被 Cursor 的美元金额带走。"""
-        daily = aggregate.fold_events([
+        daily = fold.fold_events([
             row("2026-08-10", "cheap-heavy", requests=1, cost_cents=1.0,
                 **tokens(i=10_000)),
             row("2026-08-10", "pricey-light", requests=1, cost_cents=9_999.0,
                 **tokens(i=10)),
         ])
-        view = ranking.build_week_view(daily, WEEK)
+        view = weekview.build_week_view(daily, WEEK)
         self.assertEqual(view["basis"], "tokens")
         self.assertEqual([m["label"] for m in view["models"]],
                          ["cheap-heavy", "pricey-light"])
 
     def test_subscription_source_renders_as_label_not_dash(self):
-        daily = aggregate.fold_events([
+        daily = fold.fold_events([
             row("2026-08-10", "gpt-5.6-sol", source="chatgpt", requests=3,
                 **tokens(i=100, o=20, cr=800)),
         ])
-        view = ranking.build_week_view(daily, WEEK,
+        view = weekview.build_week_view(daily, WEEK,
                                        subscription_sources=["chatgpt"])
         self.assertEqual(view["cost_display"], "订阅")
         self.assertEqual(view["models"][0]["cost_display"], "订阅")
 
     def test_paid_and_subscription_share_the_cost_cell(self):
-        daily = aggregate.fold_events([
+        daily = fold.fold_events([
             row("2026-08-10", "opus", source="cursor", requests=1,
                 cost_cents=100.0, **tokens(i=10)),
             row("2026-08-10", "gpt-5.6-sol", source="chatgpt", requests=1,
                 **tokens(i=20)),
         ])
-        view = ranking.build_week_view(daily, WEEK,
+        view = weekview.build_week_view(daily, WEEK,
                                        subscription_sources=["chatgpt"])
         self.assertEqual(view["cost_display"], "$1.00 · 订阅")
         by_label = {m["label"]: m["cost_display"] for m in view["models"]}
@@ -285,13 +290,13 @@ class TestBuildWeekView(unittest.TestCase):
 
     def test_same_model_from_two_sources_is_aggregated(self):
         """展示层按模型聚合；chatgpt 与中转站的同名模型合成一行。"""
-        daily = aggregate.fold_events([
+        daily = fold.fold_events([
             row("2026-08-10", "gpt-5.5", source="chatgpt", requests=2,
                 **tokens(i=100)),
             row("2026-08-10", "gpt-5.5", source="krill", requests=3,
                 **tokens(i=50)),
         ])
-        view = ranking.build_week_view(daily, WEEK,
+        view = weekview.build_week_view(daily, WEEK,
                                        subscription_sources=["chatgpt"])
         self.assertEqual(len(view["models"]), 1)
         self.assertEqual(view["models"][0]["requests"], 5)
@@ -299,51 +304,54 @@ class TestBuildWeekView(unittest.TestCase):
         self.assertEqual(view["models"][0]["cost_display"], "订阅")
 
     def test_falls_back_to_requests_when_no_tokens_or_cost(self):
-        daily = aggregate.fold_events([
+        daily = fold.fold_events([
             row("2026-08-10", "a", requests=3),
             row("2026-08-10", "b", requests=9),
         ])
-        view = ranking.build_week_view(daily, WEEK)
+        view = weekview.build_week_view(daily, WEEK)
         self.assertEqual(view["basis"], "requests")
         self.assertEqual([m["label"] for m in view["models"]], ["b", "a"])
         self.assertEqual(view["tokens_display"], "—")
 
     def test_breakdown_is_in_fixed_order_not_by_size(self):
         """配色按分类固定，不能因为某周缓存占比变了就换颜色。"""
-        view = ranking.build_week_view(self._daily(), WEEK)
+        view = weekview.build_week_view(self._daily(), WEEK)
         self.assertEqual([s["kind"] for s in view["breakdown"]],
-                         list(ranking.TOKEN_KINDS))
+                         list(TOKEN_KINDS))
         self.assertAlmostEqual(sum(s["pct"] for s in view["breakdown"]), 100.0)
 
     def test_days_always_has_seven_entries(self):
         """没有用量的那天也要在，否则日条形图的横轴会随数据伸缩。"""
-        view = ranking.build_week_view(self._daily(), WEEK)
+        view = weekview.build_week_view(self._daily(), WEEK)
         self.assertEqual(len(view["days"]), 7)
         self.assertEqual([d["date"] for d in view["days"]][0], "2026-08-10")
         self.assertEqual([d["date"] for d in view["days"]][-1], "2026-08-16")
         self.assertEqual(view["days"][1]["requests"], 0)      # 周二无用量
         self.assertEqual(view["days"][2]["requests"], 7)      # 周三 5 + 2
+        self.assertEqual(view["days"][2]["tokens_display"],
+                         weekview.format_tokens(view["days"][2]["tokens_total"]))
+        self.assertEqual(view["days"][1]["tokens_display"], "—")
 
     def test_limit_truncates_models(self):
-        view = ranking.build_week_view(self._daily(), WEEK, limit=1)
+        view = weekview.build_week_view(self._daily(), WEEK, limit=1)
         self.assertEqual([m["label"] for m in view["models"]], ["big"])
 
     def test_ties_break_on_label_so_both_languages_agree(self):
-        daily = aggregate.fold_events([
+        daily = fold.fold_events([
             row("2026-08-10", "tie-b", requests=7),
             row("2026-08-10", "tie-a", requests=7),
         ])
-        view = ranking.build_week_view(daily, WEEK)
+        view = weekview.build_week_view(daily, WEEK)
         self.assertEqual([m["label"] for m in view["models"]], ["tie-a", "tie-b"])
 
     def test_empty_week(self):
-        view = ranking.build_week_view(self._daily(), None)
+        view = weekview.build_week_view(self._daily(), None)
         self.assertIsNone(view["week"])
         self.assertEqual(view["models"], [])
         self.assertEqual(view["tokens_display"], "—")
 
     def test_week_with_no_usage(self):
-        view = ranking.build_week_view(
+        view = weekview.build_week_view(
             [], {"week": "x", "start": "2026-08-10", "end": "2026-08-16"})
         self.assertEqual(view["requests"], 0)
         self.assertEqual(len(view["days"]), 7)
@@ -489,6 +497,62 @@ class TestChatgptCollector(unittest.TestCase):
         self.assertEqual(chatgpt_collector.source_for_provider(None), "chatgpt")
 
 
+class TestCollectSeam(unittest.TestCase):
+    def test_cursor_collect_uses_injected_fetch(self):
+        ctx = CollectContext(tz=TZ, root=Path("."), since="2026-08-01")
+        raw = TestCursorCollector()._raw()
+        result = cursor_collector.collect(
+            ctx, {"name": "cursor"}, fetch=lambda start, end: raw)
+        self.assertFalse(result.machine_shard)
+        self.assertEqual(len(result.events), 1)
+        self.assertEqual(result.events[0].requests, 2)
+        self.assertIn("2026-08-17", result.days)
+
+    def test_chatgpt_collect_uses_injected_rollouts(self):
+        ctx = CollectContext(tz=TZ, root=Path("."), since="2026-08-01")
+        records = TestChatgptCollector()._records()
+        result = chatgpt_collector.collect(ctx, {}, rollouts=[records])
+        self.assertTrue(result.machine_shard)
+        self.assertEqual(result.events[0].source, "chatgpt")
+
+    def test_persist_account_level_writes_under_source(self):
+        ctx = CollectContext(tz=TZ, root=Path("."), since="2026-08-01")
+        with tempfile.TemporaryDirectory() as tmp:
+            ctx.root = Path(tmp)
+            result = cursor_collector.collect(
+                ctx, {"name": "cursor"},
+                fetch=lambda start, end: TestCursorCollector()._raw())
+            persist(ctx, result)
+            paths = sorted(p.relative_to(ctx.root).as_posix()
+                           for p in ctx.root.rglob("*.json"))
+            self.assertEqual(paths, ["data/raw/cursor/2026-08.json"])
+
+    def test_persist_machine_shard_groups_by_event_source(self):
+        ctx = CollectContext(tz=TZ, root=Path("."), since="2026-08-01",
+                             machine="work-mac")
+        chat = TestChatgptCollector()
+        with tempfile.TemporaryDirectory() as tmp:
+            ctx.root = Path(tmp)
+            result = chatgpt_collector.collect(
+                ctx, {},
+                rollouts=[chat._records(),
+                          chat._records(provider="krill", model="gpt-5.5")])
+            persist(ctx, result)
+            paths = sorted(p.relative_to(ctx.root).as_posix()
+                           for p in ctx.root.rglob("*.json"))
+            self.assertEqual(paths, [
+                "data/raw/chatgpt/work-mac/2026-08.json",
+                "data/raw/krill/work-mac/2026-08.json",
+            ])
+
+    def test_persist_machine_shard_requires_machine(self):
+        ctx = CollectContext(tz=TZ, root=Path("."), since="2026-08-01")
+        result = chatgpt_collector.collect(
+            ctx, {}, rollouts=[TestChatgptCollector()._records()])
+        with self.assertRaises(SystemExit):
+            persist(ctx, result)
+
+
 class TestRawLayer(unittest.TestCase):
     def _event(self, date="2026-08-17", requests=3):
         return Event(date=date, source="cursor", model="x", requests=requests)
@@ -620,11 +684,19 @@ class TestCollectContext(unittest.TestCase):
 
 class TestContract(unittest.TestCase):
     def _stats(self):
-        return aggregate.build_stats(aggregate.fold_events([
+        return fold.build_stats(fold.fold_events([
             row("2026-08-17", "m", requests=2, cost_cents=5.5, **tokens(i=1))]))
 
     def test_valid_stats_pass(self):
         self.assertEqual(validate_stats(self._stats()), [])
+
+    def test_build_stats_embeds_week_view(self):
+        stats = self._stats()
+        self.assertIn("view", stats["weeks"][0])
+        card = stats["weeks"][0]["view"]
+        self.assertEqual(card["week"], stats["weeks"][0]["week"])
+        self.assertIn("tokens_display", card)
+        self.assertIn("tokens_display", card["days"][0])
 
     def test_missing_fields_are_reported(self):
         self.assertTrue(validate_stats({"daily": []}))
@@ -653,20 +725,20 @@ class TestContract(unittest.TestCase):
     def test_generated_stats_conforms(self):
         path = os.path.join(ROOT, "data", "stats.json")
         if not os.path.exists(path):
-            self.skipTest("data/stats.json 尚未生成，先跑 run.py")
+            self.skipTest("data/stats.json 尚未生成，先跑 python -m llm_usage --skip-collect")
         with open(path, encoding="utf-8") as f:
             self.assertEqual(validate_stats(json.load(f)), [])
 
 
 class TestSvgRenderer(unittest.TestCase):
     def _view(self, **over):
-        daily = aggregate.fold_events([
+        daily = fold.fold_events([
             row("2026-08-10", "opus", requests=10, cost_cents=2650.0,
                 **tokens(i=100, o=50, cw=200, cr=9000)),
             row("2026-08-11", "grok <x>", requests=4, cost_cents=430.0,
                 **tokens(i=40, o=20, cw=80, cr=3000)),
         ])
-        return ranking.build_week_view(daily, WEEK, **over)
+        return weekview.build_week_view(daily, WEEK, **over)
 
     def test_escapes_labels(self):
         svg = render.render_svg(self._view())
@@ -686,8 +758,8 @@ class TestSvgRenderer(unittest.TestCase):
         self.assertNotIn("缓存读取占", svg)
 
     def test_height_grows_with_model_count(self):
-        few = render.render_svg(ranking.build_week_view(
-            aggregate.fold_events([row("2026-08-10", "only", cost_cents=1.0,
+        few = render.render_svg(weekview.build_week_view(
+            fold.fold_events([row("2026-08-10", "only", cost_cents=1.0,
                                        **tokens(i=1))]), WEEK))
         many = render.render_svg(self._view())
         self.assertGreater(_svg_height(many), _svg_height(few))
@@ -710,7 +782,7 @@ class TestSvgRenderer(unittest.TestCase):
         self.assertAlmostEqual(right, render.CARD_W - render.PAD, places=3)
 
     def test_empty_week_renders_placeholder(self):
-        svg = render.render_svg(ranking.build_week_view([], None))
+        svg = render.render_svg(weekview.build_week_view([], None))
         self.assertIn("暂无数据", svg)
 
     def test_has_accessible_label(self):
@@ -719,7 +791,7 @@ class TestSvgRenderer(unittest.TestCase):
         self.assertIn('role="img"', svg)
 
     def test_render_files_writes_both_themes(self):
-        stats = aggregate.build_stats(aggregate.fold_events([
+        stats = fold.build_stats(fold.fold_events([
             row("2026-08-10", "m", cost_cents=1.0, **tokens(i=1))]))
         original = render.ASSETS
         with tempfile.TemporaryDirectory() as tmp:

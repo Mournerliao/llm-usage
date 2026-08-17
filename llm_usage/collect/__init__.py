@@ -1,7 +1,8 @@
-"""采集层：数据契约（``Event``）与原始数据读写。
+"""采集层：Event 契约、落盘、adapter 登记。
 
-每个采集器暴露 ``collect(ctx, cfg) -> list[Event]``，只负责把某个源的用量翻译成
-``Event``，不碰文件系统。落盘、聚合、渲染都在采集器之外，方便单独测试。
+每个采集器暴露 ``collect(ctx, cfg, **ports) -> CollectResult``，只负责把某个源
+的用量翻译成 ``Event``。是否按机器分片由 ``CollectResult.machine_shard`` 声明，
+落盘走 ``persist``——编排不再识别源类型。
 
 == 为什么没有 unit 字段 ==
 
@@ -32,9 +33,18 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, tzinfo
 from pathlib import Path
 
-# token 的四个分类。缓存读写的单价与输入输出差一个量级，合成一个总数会掩盖真相，
-# 所以始终分开存，展示时再决定要不要合。
-TOKEN_KINDS = ("tokens_in", "tokens_out", "cache_write", "cache_read")
+from llm_usage.contract import TOKEN_KINDS
+
+__all__ = [
+    "TOKEN_KINDS",
+    "Event",
+    "CollectContext",
+    "CollectResult",
+    "write_events",
+    "read_all_events",
+    "persist",
+    "COLLECTORS",
+]
 
 
 @dataclass(frozen=True)
@@ -46,7 +56,7 @@ class Event:
     """
 
     date: str                        # YYYY-MM-DD，按配置时区计算
-    source: str                      # 源名，如 cursor / openai
+    source: str                      # 源名，如 cursor / chatgpt
     model: str
     requests: int = 0
     tokens_in: int | None = None
@@ -72,7 +82,7 @@ class Event:
 
 @dataclass
 class CollectContext:
-    """采集器需要的环境信息，由 run.py 组装后传入。"""
+    """采集器需要的环境信息，由 cli 组装后传入。"""
 
     tz: tzinfo
     root: Path
@@ -106,6 +116,16 @@ class CollectContext:
     def days_since(self) -> list[str]:
         """[since, 今天] 的日期列表，升序。"""
         return self.days_between(self.since, self.today())
+
+
+@dataclass(frozen=True)
+class CollectResult:
+    """一次采集的产物。``machine_shard`` 为真时按 ``ctx.machine`` 分片落盘，
+    并按 ``Event.source`` 分组（一次采集可能拆出 chatgpt / 中转站）。"""
+
+    events: list[Event]
+    days: list[str]
+    machine_shard: bool
 
 
 # ---------------------------------------------------------------- 原始数据读写
@@ -187,3 +207,30 @@ def read_all_events(root: Path) -> list[dict]:
                 row.setdefault("source", doc.get("source", "unknown"))
                 out.append(row)
     return out
+
+
+def persist(ctx: CollectContext, result: CollectResult) -> int:
+    """按 ``CollectResult`` 声明的策略把事件写入 raw。返回写入的事件数。"""
+    if not result.days:
+        return 0
+    shard = None
+    if result.machine_shard:
+        if not ctx.machine:
+            raise SystemExit(
+                "本机源需要在 sources.yaml 里设置 machine"
+                "（如 work-mac / home-win），两台机器必须用不同的名字。")
+        shard = ctx.machine
+    grouped: dict[str, list[Event]] = {}
+    for event in result.events:
+        grouped.setdefault(event.source, []).append(event)
+    for source, group in grouped.items():
+        write_events(ctx.root, source, group, result.days, shard=shard)
+    return len(result.events)
+
+
+from . import chatgpt, cursor  # noqa: E402
+
+COLLECTORS = {
+    "cursor": cursor,
+    "chatgpt": chatgpt,
+}

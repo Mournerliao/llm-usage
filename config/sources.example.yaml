@@ -29,11 +29,3 @@ sources:
   - name: chatgpt
     type: chatgpt
     # codex_home: ~/.codex
-
-  # OpenAI 兼容接口（OpenAI / DeepSeek / 各类中转站共用一个实现）。
-  # 这类接口只给输入输出两类 token，没有缓存拆分也没有成本，对应字段会留空。
-  # 不用时整段删掉或注释掉。
-  # - name: deepseek
-  #   type: openai_compatible
-  #   base_url: https://api.deepseek.com
-  #   api_key_env: DEEPSEEK_API_KEY

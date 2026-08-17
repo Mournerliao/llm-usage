@@ -36,7 +36,7 @@ from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
-from . import Event
+from . import CollectResult, Event
 
 # ChatGPT 订阅走的官方 provider。其余一律视为中转站 / 外部模型。
 OPENAI_PROVIDER = "openai"
@@ -170,20 +170,33 @@ def _load_records(path: Path) -> list[dict]:
     return records
 
 
-def collect(ctx, cfg: dict) -> tuple[list[Event], list[str]]:
-    """扫描本机 Codex 会话日志并翻译。负责范围从最早一条事件到今天。"""
-    home = Path(os.path.expanduser(cfg.get("codex_home") or "~/.codex"))
-    if not home.is_dir():
-        print(f"[chatgpt] 找不到 {home}，跳过")
-        return [], []
+def collect(ctx, cfg: dict, *, rollouts=None) -> CollectResult:
+    """扫描本机 Codex 会话日志并翻译。负责范围从最早一条事件到今天。
+
+    ``rollouts`` 是本机日志 adapter：可迭代的 jsonl 记录列表。默认扫磁盘；
+    测试传入内存里的会话，不必碰 ``~/.codex``。
+    """
+    n_files = 0
+    if rollouts is None:
+        home = Path(os.path.expanduser(cfg.get("codex_home") or "~/.codex"))
+        if not home.is_dir():
+            print(f"[chatgpt] 找不到 {home}，跳过")
+            return CollectResult(events=[], days=[], machine_shard=True)
+        files = _jsonl_files(home)
+        n_files = len(files)
+
+        def _from_disk():
+            for path in files:
+                try:
+                    yield _load_records(path)
+                except OSError as exc:
+                    print(f"[warn] 读取 {path.name} 失败: {exc}")
+
+        rollouts = _from_disk()
 
     raw: list[dict] = []
-    files = _jsonl_files(home)
-    for path in files:
-        try:
-            raw.extend(parse_rollout(_load_records(path)))
-        except OSError as exc:
-            print(f"[warn] 读取 {path.name} 失败: {exc}")
+    for records in rollouts:
+        raw.extend(parse_rollout(records))
 
     events = to_events(raw, lambda ts: _day_of_timestamp(ts, ctx.tz))
     events = [e for e in events if e.date >= ctx.since]
@@ -192,9 +205,13 @@ def collect(ctx, cfg: dict) -> tuple[list[Event], list[str]]:
     for e in events:
         by_source[e.source] += e.requests
     detail = "，".join(f"{name} {n} 次" for name, n in sorted(by_source.items()))
-    print(f"[chatgpt] {len(files)} 个会话文件 → {len(events)} 条日模型记录"
+    print(f"[chatgpt] {n_files or 'fixture'} 个会话 → {len(events)} 条日模型记录"
           + (f"（{detail}）" if detail else ""))
 
     if not events:
-        return [], []
-    return events, ctx.days_between(min(e.date for e in events), ctx.today())
+        return CollectResult(events=[], days=[], machine_shard=True)
+    return CollectResult(
+        events=events,
+        days=ctx.days_between(min(e.date for e in events), ctx.today()),
+        machine_shard=True,
+    )

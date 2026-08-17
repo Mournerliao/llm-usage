@@ -1,8 +1,8 @@
 """汇总：把 data/raw 下所有源的事件 fold 成 data/stats.json。
 
 这一层是纯粹的归约：读原始事件 → 归一模型名 → 按 (date, source, model) 累加 →
-切出展示窗口与年度汇总 → 写产物。不做采集、不访问网络、不读任何本机专属路径，
-所以 CI 拿着仓库就能重新生成产物，不需要配置任何密钥。
+切出展示窗口与年度汇总 → 为每个展示周写出 WeekView → 写产物。不做采集、不访问
+网络、不读任何本机专属路径，所以 CI 拿着仓库就能重新生成产物，不需要配置任何密钥。
 
 == 为什么周次由数据决定，而不是由「今天」决定 ==
 
@@ -25,12 +25,9 @@ from datetime import date as Date
 from datetime import timedelta
 from pathlib import Path
 
-import config
-from collectors import TOKEN_KINDS, read_all_events
-
-ROOT = Path(__file__).resolve().parent
-
-SCHEMA_VERSION = 3
+from llm_usage import REPO_ROOT, config, view
+from llm_usage.collect import read_all_events
+from llm_usage.contract import SCHEMA_VERSION, TOKEN_KINDS
 
 # 展示窗口的周数：本周加过去三周。博客组件的切换范围与这里一致。
 DISPLAY_WEEKS = 4
@@ -107,19 +104,6 @@ def recent_weeks(latest: str, count: int = DISPLAY_WEEKS) -> list[dict]:
     return weeks
 
 
-def _sum_rows(rows: list[dict]) -> dict:
-    """把若干日记录汇总成一组总量。token 全缺时保持 None。"""
-    out: dict = {"requests": sum(int(r.get("requests") or 0) for r in rows)}
-    for field in TOKEN_KINDS:
-        values = [r[field] for r in rows if r.get(field) is not None]
-        out[field] = sum(values) if values else None
-    costs = [r["cost_cents"] for r in rows if r.get("cost_cents") is not None]
-    out["cost_cents"] = round(sum(costs), 4) if costs else None
-    present = [out[f] for f in TOKEN_KINDS if out[f] is not None]
-    out["tokens_total"] = sum(present) if present else None
-    return out
-
-
 def build_year(daily: list[dict], latest: str) -> dict:
     """当年汇总：月度与模型两个口径。现在不展示，先存着。"""
     year = latest[:4]
@@ -134,8 +118,9 @@ def build_year(daily: list[dict], latest: str) -> dict:
         by_month[r["date"][:7]].append(r)
         by_model[r["model"]].append(r)
 
-    totals = _sum_rows(rows)
-    models = [{"model": m, **_sum_rows(rs)} for m, rs in by_model.items()]
+    totals = view.fold_rows(rows, round_cost=True)
+    models = [{"model": m, **view.fold_rows(rs, round_cost=True)}
+              for m, rs in by_model.items()]
     models.sort(key=lambda r: (-(r["tokens_total"] or 0), -(r["cost_cents"] or 0),
                                r["model"]))
     return {
@@ -144,25 +129,30 @@ def build_year(daily: list[dict], latest: str) -> dict:
         "end": max(r["date"] for r in rows),
         "days_active": len({r["date"] for r in rows}),
         **totals,
-        "months": [{"month": m, **_sum_rows(rs)} for m, rs in sorted(by_month.items())],
+        "months": [{"month": m, **view.fold_rows(rs, round_cost=True)}
+                   for m, rs in sorted(by_month.items())],
         "models": models,
     }
 
 
 def build_stats(daily_all: list[dict]) -> dict:
-    """把全量日记录切成 stats.json：展示窗口的明细 + 周次清单 + 年度汇总。"""
+    """把全量日记录切成 stats.json：展示窗口的明细 + 带视图的周次 + 年度汇总。"""
+    subs = config.subscription_sources()
     dates = sorted({r["date"] for r in daily_all})
     if not dates:
         return {"schema_version": SCHEMA_VERSION,
                 "timezone": config.load_aggregate_config()["timezone"],
                 "latest_date": None, "weeks": [], "sources": [],
-                "subscription_sources": config.subscription_sources(),
+                "subscription_sources": subs,
                 "daily": [], "year": None}
 
     latest = dates[-1]
     weeks = recent_weeks(latest)
     window_start = weeks[-1]["start"]
     daily = [r for r in daily_all if r["date"] >= window_start]
+    for week in weeks:
+        week["view"] = view.build_week_view(
+            daily, week, subscription_sources=subs)
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -170,13 +160,13 @@ def build_stats(daily_all: list[dict]) -> dict:
         "latest_date": latest,
         "weeks": weeks,
         "sources": sorted({r["source"] for r in daily_all}),
-        "subscription_sources": config.subscription_sources(),
+        "subscription_sources": subs,
         "daily": daily,
         "year": build_year(daily_all, latest),
     }
 
 
-def aggregate(root: Path = ROOT) -> dict:
+def aggregate(root: Path = REPO_ROOT) -> dict:
     events = read_all_events(root)
     daily_all = fold_events(events, config.model_aliases())
     stats = build_stats(daily_all)

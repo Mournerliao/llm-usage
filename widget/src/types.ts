@@ -1,10 +1,9 @@
-// TS 侧对数据契约的唯一镜像。单一事实源是仓库根的 stats.schema.json，
-// 字段名必须与 schema 完全一致；一旦漂移，isValidStats 会在运行时告警。
-// SVG 渲染器（render.py → ranking.build_week_view）与本组件消费同一份契约。
+// TS 侧对数据契约的镜像。单一事实源是仓库根的 stats.schema.json。
+// 展示口径已经物化在 weeks[].view 里，本文件只描述形状，不再重新计算。
 
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
-/** token 的四个分类。缓存读写与输入输出的单价差一个量级，永远分开存。 */
+/** token 的四个分类。只用于构成条配色；数字本身来自 view.breakdown。 */
 export const TOKEN_KINDS = [
   "tokens_in",
   "tokens_out",
@@ -27,41 +26,6 @@ export interface UsageRow {
   /** token 按各模型单价折算出的成本，单位为分。不是账单金额。 */
   cost_cents?: number;
 }
-
-/** 可切换的一周。取自 stats.json 的 weeks，新的在前。 */
-export interface WeekRef {
-  week: string;
-  start: string;
-  end: string;
-}
-
-/** 年度汇总。现在不展示，先存着。 */
-export interface YearSummary {
-  year: string;
-  start: string | null;
-  end: string | null;
-  days_active: number;
-  requests?: number;
-  tokens_total?: number | null;
-  cost_cents?: number | null;
-  months: { month: string; requests: number; tokens_total: number | null }[];
-  models: { model: string; requests: number; tokens_total: number | null }[];
-}
-
-export interface UsageStats {
-  schema_version: number;
-  timezone: string;
-  latest_date: string | null;
-  weeks: WeekRef[];
-  sources: string[];
-  /** 订阅制源。没有逐次成本，金额列显示「订阅」而不是美元。 */
-  subscription_sources?: string[];
-  daily: UsageRow[];
-  year: YearSummary | null;
-}
-
-/** 主题模式：跟随系统，或强制浅色 / 深色。 */
-export type WidgetTheme = "auto" | "light" | "dark";
 
 /** 排序与占比的口径。永远按 token，没有 token 时退到请求数。 */
 export type Basis = "cost" | "tokens" | "requests";
@@ -92,6 +56,7 @@ export interface DayCell {
   requests: number;
   tokens_total: number | null;
   cost_cents: number | null;
+  tokens_display: string;
 }
 
 export interface WeekView {
@@ -111,6 +76,42 @@ export interface WeekView {
   days: DayCell[];
 }
 
+/** 可切换的一周。取自 stats.json 的 weeks，新的在前。view 已在 fold 时算好。 */
+export interface WeekRef {
+  week: string;
+  start: string;
+  end: string;
+  view: WeekView;
+}
+
+/** 年度汇总。现在不展示，先存着。 */
+export interface YearSummary {
+  year: string;
+  start: string | null;
+  end: string | null;
+  days_active: number;
+  requests?: number;
+  tokens_total?: number | null;
+  cost_cents?: number | null;
+  months: { month: string; requests: number; tokens_total: number | null }[];
+  models: { model: string; requests: number; tokens_total: number | null }[];
+}
+
+export interface UsageStats {
+  schema_version: number;
+  timezone: string;
+  latest_date: string | null;
+  weeks: WeekRef[];
+  sources: string[];
+  /** 订阅制源。没有逐次成本，金额列显示「订阅」而不是美元。 */
+  subscription_sources?: string[];
+  daily: UsageRow[];
+  year: YearSummary | null;
+}
+
+/** 主题模式：跟随系统，或强制浅色 / 深色。 */
+export type WidgetTheme = "auto" | "light" | "dark";
+
 export interface UsageWidgetProps {
   /** 运行时拉取的数据地址（如 jsDelivr / GitHub raw）。与 data 二选一。 */
   dataUrl?: string;
@@ -118,14 +119,41 @@ export interface UsageWidgetProps {
   data?: UsageStats;
   /** 指定初始展示哪一周（ISO 周编号，如 2026-W34），默认最新一周。 */
   week?: string;
-  /** 模型行展示前 N 个，默认 6。 */
-  limit?: number;
   /** 卡片标题，默认 “LLM 用量”。 */
   title?: string;
   /** 卡片最大宽度（px），默认 760；窄容器中自动收缩。 */
   width?: number;
   /** 主题模式，默认跟随系统。 */
   theme?: WidgetTheme;
+}
+
+const EMPTY_VIEW: WeekView = {
+  week: null,
+  start: null,
+  end: null,
+  range_display: "",
+  basis: "requests",
+  requests: 0,
+  tokens_total: null,
+  cost_cents: null,
+  tokens_display: "—",
+  cost_display: "—",
+  requests_display: "0",
+  breakdown: [],
+  models: [],
+  days: [],
+};
+
+function isWeekView(v: unknown): v is WeekView {
+  if (!v || typeof v !== "object") return false;
+  const view = v as Record<string, unknown>;
+  return (
+    typeof view.tokens_display === "string" &&
+    typeof view.cost_display === "string" &&
+    Array.isArray(view.models) &&
+    Array.isArray(view.days) &&
+    Array.isArray(view.breakdown)
+  );
 }
 
 /** 运行时契约校验：stats.json 一旦不匹配契约，组件不再静默渲染错乱数据。 */
@@ -139,7 +167,8 @@ export function isValidStats(v: unknown): v is UsageStats {
     return (
       typeof week?.week === "string" &&
       typeof week?.start === "string" &&
-      typeof week?.end === "string"
+      typeof week?.end === "string" &&
+      isWeekView(week.view)
     );
   });
   if (!weeksOk) return false;
@@ -155,19 +184,4 @@ export function isValidStats(v: unknown): v is UsageStats {
   });
 }
 
-/** token 分类的中文名。与 Python 侧 ranking.TOKEN_LABELS 一致。 */
-export const TOKEN_LABELS: Record<TokenKind, string> = {
-  tokens_in: "输入",
-  tokens_out: "输出",
-  cache_write: "缓存写入",
-  cache_read: "缓存读取",
-};
-
-/** 排序口径的表头文案。与 Python 侧 ranking.BASIS_LABELS 一致。 */
-export const BASIS_LABELS: Record<Basis, string> = {
-  cost: "成本",
-  tokens: "Tokens",
-  requests: "请求",
-};
-
-export const WEEKDAY_LABELS = ["一", "二", "三", "四", "五", "六", "日"] as const;
+export { EMPTY_VIEW };
