@@ -53,7 +53,7 @@ http://localhost:5173/?w=380&theme=light&week=2026-W33
 | `dataUrl` | `string` | — | 运行时数据地址 |
 | `data` | `UsageStats` | — | 构建时注入的数据 |
 | `week` | `string` | 最新一周 | 初始周次，ISO 周编号如 `2026-W34` |
-| `title` | `string` | `LLM 用量` | 卡片标题 |
+| `title` | `string` | `LLM usage` | 卡片标题 |
 | `width` | `number` | `760` | 最大宽度 (px)，窄容器自动收缩 |
 | `theme` | `"auto" \| "light" \| "dark"` | `"auto"` | 主题模式 |
 

@@ -22,23 +22,26 @@ from typing import Any
 from llm_usage.contract import TOKEN_KINDS
 
 TOKEN_LABELS = {
-    "tokens_in": "输入",
-    "tokens_out": "输出",
-    "cache_write": "缓存写入",
-    "cache_read": "缓存读取",
+    "tokens_in": "Input",
+    "tokens_out": "Output",
+    "cache_write": "Cache write",
+    "cache_read": "Cache read",
 }
 
 # 排序与占比永远按 token（有 token 的源都在同一标尺上）。订阅制源没有逐次成本，
-# 金额列显示「订阅」而不是横线或估出来的单价。
+# 金额列显示 Subscription 而不是横线或估出来的单价。
 BASIS_LABELS = {
-    "cost": "成本",
+    "cost": "Cost",
     "tokens": "Tokens",
-    "requests": "请求",
+    "requests": "Requests",
 }
 
-SUBSCRIPTION_LABEL = "订阅"
+SUBSCRIPTION_LABEL = "Subscription"
 
-WEEKDAY_LABELS = ("一", "二", "三", "四", "五", "六", "日")
+WEEKDAY_LABELS = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+
+MONTH_ABBR = ("Jan", "Feb", "Mar", "Apr", "May", "Jun",
+              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
 # 模型行展示前 N 个。只活在这一层，渲染器不再各自截断。
 MODEL_LIMIT = 6
@@ -96,7 +99,7 @@ def format_cost(cents: float | None) -> str:
 
 def format_billing(cost_cents: float | None, sources: set[str] | list[str],
                    subscription_sources: set[str] | list[str]) -> str:
-    """金额列：有折算成本就写美元；有订阅源就标「订阅」；可以并存。"""
+    """金额列：有折算成本就写美元；有订阅源就标 Subscription；可以并存。"""
     has_sub = bool(set(sources) & set(subscription_sources))
     if cost_cents is not None and has_sub:
         return f"{format_cost(cost_cents)} · {SUBSCRIPTION_LABEL}"
@@ -114,9 +117,9 @@ def format_count(value: int | None) -> str:
 
 
 def format_day(day: str) -> str:
-    """2026-08-17 → 8月17日。"""
+    """2026-08-17 → Aug 17."""
     _, month, dom = day.split("-")
-    return f"{int(month)}月{int(dom)}日"
+    return f"{MONTH_ABBR[int(month) - 1]} {int(dom)}"
 
 
 def format_range(start: str, end: str) -> str:
@@ -174,7 +177,7 @@ def build_week_view(
 
     ``models`` 按 token 降序，``pct`` 是该行在本周内的 token 占比（0~100）。
     ``days`` 恒为 7 项（周一到周日），没有用量的那天补零，让日条形图的横轴稳定。
-    ``subscription_sources`` 里的源没有逐次成本，金额列显示「订阅」。
+    ``subscription_sources`` 里的源没有逐次成本，金额列显示 Subscription。
     """
     if not week:
         return {"week": None, "start": None, "end": None, "range_display": "",

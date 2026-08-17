@@ -59,7 +59,7 @@ def model_aliases() -> dict[str, str]:
 
 
 def subscription_sources() -> list[str]:
-    """订阅制源名。这些源没有逐次成本，展示层金额列写「订阅」。"""
+    """订阅制源名。这些源没有逐次成本，展示层金额列写 Subscription。"""
     raw = load_aggregate_config().get("subscription_sources") or []
     return [str(name) for name in raw]
 

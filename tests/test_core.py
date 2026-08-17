@@ -215,9 +215,9 @@ class TestFormatters(unittest.TestCase):
         self.assertEqual(weekview._fixed(-0.25, 1), "-0.3")
 
     def test_day_and_range(self):
-        self.assertEqual(weekview.format_day("2026-08-03"), "8月3日")
+        self.assertEqual(weekview.format_day("2026-08-03"), "Aug 3")
         self.assertEqual(weekview.format_range("2026-08-10", "2026-08-16"),
-                         "8月10日 – 8月16日")
+                         "Aug 10 – Aug 16")
 
 
 class TestBuildWeekView(unittest.TestCase):
@@ -271,8 +271,8 @@ class TestBuildWeekView(unittest.TestCase):
         ])
         view = weekview.build_week_view(daily, WEEK,
                                        subscription_sources=["chatgpt"])
-        self.assertEqual(view["cost_display"], "订阅")
-        self.assertEqual(view["models"][0]["cost_display"], "订阅")
+        self.assertEqual(view["cost_display"], "Subscription")
+        self.assertEqual(view["models"][0]["cost_display"], "Subscription")
 
     def test_paid_and_subscription_share_the_cost_cell(self):
         daily = fold.fold_events([
@@ -283,10 +283,10 @@ class TestBuildWeekView(unittest.TestCase):
         ])
         view = weekview.build_week_view(daily, WEEK,
                                        subscription_sources=["chatgpt"])
-        self.assertEqual(view["cost_display"], "$1.00 · 订阅")
+        self.assertEqual(view["cost_display"], "$1.00 · Subscription")
         by_label = {m["label"]: m["cost_display"] for m in view["models"]}
         self.assertEqual(by_label["opus"], "$1.00")
-        self.assertEqual(by_label["gpt-5.6-sol"], "订阅")
+        self.assertEqual(by_label["gpt-5.6-sol"], "Subscription")
 
     def test_same_model_from_two_sources_is_aggregated(self):
         """展示层按模型聚合；chatgpt 与中转站的同名模型合成一行。"""
@@ -301,7 +301,7 @@ class TestBuildWeekView(unittest.TestCase):
         self.assertEqual(len(view["models"]), 1)
         self.assertEqual(view["models"][0]["requests"], 5)
         self.assertEqual(view["models"][0]["tokens_total"], 150)
-        self.assertEqual(view["models"][0]["cost_display"], "订阅")
+        self.assertEqual(view["models"][0]["cost_display"], "Subscription")
 
     def test_falls_back_to_requests_when_no_tokens_or_cost(self):
         daily = fold.fold_events([
@@ -318,6 +318,8 @@ class TestBuildWeekView(unittest.TestCase):
         view = weekview.build_week_view(self._daily(), WEEK)
         self.assertEqual([s["kind"] for s in view["breakdown"]],
                          list(TOKEN_KINDS))
+        self.assertEqual([s["label"] for s in view["breakdown"]],
+                         ["Input", "Output", "Cache write", "Cache read"])
         self.assertAlmostEqual(sum(s["pct"] for s in view["breakdown"]), 100.0)
 
     def test_days_always_has_seven_entries(self):
@@ -331,6 +333,8 @@ class TestBuildWeekView(unittest.TestCase):
         self.assertEqual(view["days"][2]["tokens_display"],
                          weekview.format_tokens(view["days"][2]["tokens_total"]))
         self.assertEqual(view["days"][1]["tokens_display"], "—")
+        self.assertEqual([d["weekday"] for d in view["days"]],
+                         ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
 
     def test_limit_truncates_models(self):
         view = weekview.build_week_view(self._daily(), WEEK, limit=1)
@@ -749,13 +753,19 @@ class TestSvgRenderer(unittest.TestCase):
         svg = render.render_svg(self._view())
         self.assertIn("12.5K", svg)          # token 总量 12,490
         self.assertIn("$30.80", svg)         # 折算成本
-        self.assertIn("14 次请求", svg)
+        self.assertIn("14 requests", svg)
+        self.assertIn("This week", svg)
+        self.assertIn("Model cost", svg)
 
     def test_omits_cost_disclaimer(self):
         """口径说明放在 README，不印在卡片上。"""
         svg = render.render_svg(self._view())
         self.assertNotIn("非账单金额", svg)
         self.assertNotIn("缓存读取占", svg)
+        self.assertNotIn("not a bill", svg.lower())
+        import re
+        self.assertIsNone(re.search(r"[\u4e00-\u9fff]", svg),
+                          "card copy should be English")
 
     def test_height_grows_with_model_count(self):
         few = render.render_svg(weekview.build_week_view(
@@ -783,7 +793,7 @@ class TestSvgRenderer(unittest.TestCase):
 
     def test_empty_week_renders_placeholder(self):
         svg = render.render_svg(weekview.build_week_view([], None))
-        self.assertIn("暂无数据", svg)
+        self.assertIn("No data", svg)
 
     def test_has_accessible_label(self):
         svg = render.render_svg(self._view())

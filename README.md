@@ -1,120 +1,133 @@
-# LLM 用量
+# LLM usage
 
-> 自动展示我每周在 AI 编码工具上的 token 消耗与折算成本。数据从 Cursor 官方接口
-> 和本机 Codex 会话日志采集后推回本仓库，GitHub Actions 据此重新生成下面这张卡片。
+> Automatic weekly token usage and model cost from my AI coding tools. Data is
+> collected from Cursor's official API and local Codex session logs, then GitHub
+> Actions rebuilds the card below.
 
 <!-- WIDGET_START -->
 <div>
-<img src="assets/widget-light.svg#gh-light-mode-only" alt="本周 LLM 用量" width="100%">
-<img src="assets/widget-dark.svg#gh-dark-mode-only" alt="本周 LLM 用量" width="100%">
+<img src="assets/widget-light.svg#gh-light-mode-only" alt="This week's LLM usage" width="100%">
+<img src="assets/widget-dark.svg#gh-dark-mode-only" alt="This week's LLM usage" width="100%">
 </div>
 <!-- WIDGET_END -->
 
-这里只放**本周**一张静态图。要翻看过去几周，用博客里的 [widget](widget/)，它支持在
-本周与过去三周之间切换。
+This page only shows **this week**. To browse the last few weeks, use the blog
+[widget](widget/), which can switch between this week and the previous three.
 
-## 关于「模型成本」
+## About "model cost"
 
-卡片上的金额是 **token 按各模型单价折算出的成本**，反映我用掉了多少算力。
+The amount on the card is **token usage priced at each model's unit rate**. It
+shows how much compute I actually used.
 
-它**不是账单金额**：不含套餐、折扣与平台抽成，也和谁付钱无关——套餐内消耗的算力同样
-计入，因为本项目量的是消耗而不是账单。接口另外返回的实际计费额与抽成字段不进入本仓库
-的任何提交物。
+It is **not a bill**: it excludes plan fees, discounts, and platform markup, and
+it does not care who pays. Included-in-plan usage still counts, because this
+project measures consumption, not invoices. The billed amount and markup fields
+from the API never enter this repository.
 
-## 原理
+## How it works
 
 ```
-Cursor 官方接口 / Codex 本机日志 → data/raw/<源>/…    （原始事件，本机采集）
-                → data/stats.json            （CI 聚合产物，含四周 WeekView）
-                → assets/*.svg + widget      （两个渲染器只消费 weeks[].view）
+Cursor official API / Codex local logs → data/raw/<source>/…   (raw events, collected locally)
+                → data/stats.json            (CI fold output, with four WeekViews)
+                → assets/*.svg + widget      (both renderers only consume weeks[].view)
 ```
 
-采集需要本机 Cursor 的登录态，以及本机的 Codex 会话目录（`~/.codex`），只能在本机
-跑。聚合与渲染是纯归约，只读仓库内的文件，所以放在 CI 单点生成，两台机器都不必碰
-产物文件。
+Collection needs a local Cursor login and the local Codex session directory
+(`~/.codex`), so it only runs on the machines that produced the usage. Fold and
+render are pure reductions over files in the repo, so CI can regenerate artifacts
+without either machine touching them.
 
-**采集幂等**：每次重采「起点到今天」的全部数据并覆盖写回，跑一次和跑十次结果相同。
-漏跑几天补跑一次即可，不会产生重复记录——用量历史在 Cursor 账号侧，不会因为本机没采
-而丢失。
+**Collection is idempotent**: each run re-fetches `[since, today]` and overwrites.
+Running once or ten times yields the same files. Miss a few days, run again — no
+duplicates. Cursor keeps the usage history on the account, so a missed local run
+does not lose data.
 
-**产物由数据决定，不由时钟决定**：「本周」取的是最近有用量的那天所在的 ISO 周，不是
-运行时的当天。所以同一份原始数据在任何时刻重跑都得到同一份产物。
+**Artifacts are determined by data, not by the clock.** "This week" is the ISO
+week of the most recent day that has usage, not the runtime calendar. The same
+raw files always produce the same artifacts.
 
-## 两台机器
+## Two machines
 
-**两台机器**：Cursor 的用量来自账号级接口，两台机器采到的是同一份数据。Codex
-会话只存在于产生它的那台机器，公司 Mac 和家里 Windows 都要跑采集；文件按
-`data/raw/<源>/<机器>/` 分片，不会互相覆盖。
+Cursor usage comes from an account-level API, so both machines collect the same
+payload. Codex sessions exist only on the machine that produced them, so both the
+work Mac and the home Windows box need to collect; files are sharded as
+`data/raw/<source>/<machine>/` and do not overwrite each other.
 
-## 采什么，不采什么
+## What is collected, and what is not
 
-| 源 | token 明细 | 成本 | 说明 |
+| Source | Token detail | Cost | Notes |
 | --- | --- | --- | --- |
-| `cursor` | 输入 / 输出 / 缓存写入 / 缓存读取 | 有 | 官方 dashboard 接口，可回溯到账号开通日 |
-| `chatgpt` | 输入 / 输出 / 缓存写入 / 缓存读取 | 订阅 | Codex 本机会话日志；ChatGPT Plus 不计逐次成本 |
-| 中转站（Codex 的其他 provider） | 同上 | 无 | 与 chatgpt 分开落盘，展示层同名模型仍聚合 |
+| `cursor` | input / output / cache write / cache read | yes | Official dashboard API, back to account creation |
+| `chatgpt` | input / output / cache write / cache read | Subscription | Codex local session logs; ChatGPT Plus has no per-request cost |
+| Relays (other Codex providers) | same | none | Stored separately from chatgpt; same model names still fold together in the view |
 
-拿不到某个口径时字段**缺失**而不是填 0，展示层据此显示横线。「不报 token」和「报了但
-确实是零」是两件事。
+When a source cannot report a metric, the field is **omitted**, not filled with 0.
+The view then shows a dash. "Does not report tokens" and "reported zero" are
+different.
 
-缓存读取通常占总 token 的九成以上，所以四类 token 始终分开存，绝不合并成一个总数。
+Cache reads are usually more than 90% of total tokens, so the four kinds are
+always stored separately and never merged into one total.
 
-已排除的数据源，以及排除的实测依据，见 `llm_usage/collect/cursor.py` 的模块文档与
-[`docs/DESIGN.md`](docs/DESIGN.md)：
+Excluded sources, and the measurements that excluded them, are in the module docs
+of `llm_usage/collect/cursor.py` and [`docs/DESIGN.md`](docs/DESIGN.md):
 
-- Cursor 本机的 `ai-code-tracking.db`：只有请求数，没有任何 token 或成本字段。
-- Cursor 本机的 `state.vscdb`：token 字段当前时段覆盖率为 0%，是旧版本残留。
-- WorkBuddy：`session_usage.used` 实为上下文占用，不是 token 消耗，展示它会误导。
+- Cursor's local `ai-code-tracking.db`: request counts only, no token or cost fields.
+- Cursor's local `state.vscdb`: token fields have 0% coverage in the current window; leftover from an older version.
+- WorkBuddy: `session_usage.used` is context occupancy, not token consumption. Showing it would mislead.
 
-## 运行
+## Running
 
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 cp config/sources.example.yaml sources.yaml
-.venv/bin/python run.py                       # 采集 + 汇总 + 渲染
-# 等价：python -m llm_usage
+.venv/bin/python run.py                       # collect + fold + render
+# equivalent: python -m llm_usage
 ```
 
-采集默认从本机 Cursor 的登录态读凭据，本机登录着 Cursor 就不用配任何东西。换机时可设
-`CURSOR_SESSION_TOKEN=<sub>::<jwt>`（值从 dashboard 请求的 `WorkosCursorSessionToken`
-cookie 复制）。
+Collection reads credentials from the local Cursor login by default. If Cursor is
+signed in, nothing else is needed. On a new machine, set
+`CURSOR_SESSION_TOKEN=<sub>::<jwt>` (copy the `WorkosCursorSessionToken` cookie
+from a dashboard request).
 
-常用参数：
+Common flags:
 
-- `--only cursor` 只采某个源
-- `--since 2026-07-01` 覆盖采集起点
-- `--skip-collect` 只重跑汇总与渲染，CI 用的就是这条
+- `--only cursor` collect one source
+- `--since 2026-07-01` override the collection start
+- `--skip-collect` fold and render only; this is what CI runs
 
-日常自动更新：用 cron / 任务计划程序每天跑一次 `./update-local.sh`，它会采集、推送原始
-数据，剩下的交给 CI。
+For daily updates, cron / Task Scheduler can run `./update-local.sh`. It collects
+and pushes raw data; CI builds the rest.
 
-## 配置分两份
+## Config is two files
 
-| 文件 | 是否提交 | 内容 |
+| File | Committed | Contents |
 | --- | --- | --- |
-| `sources.yaml` | 否 | 采集起点、各源的 `base_url` 与凭据环境变量名 |
-| `config/aggregate.yaml` | 是 | 时区、模型别名表 |
+| `sources.yaml` | no | Collection start, each source's `base_url` and credential env var names |
+| `config/aggregate.yaml` | yes | Timezone and model alias table |
 
-拆开是因为读者不同：采集只在本机跑，而 CI 需要时区和别名表才能重新聚合，又不该拿到任
-何凭据。
+They are split because the readers differ: collection runs only locally, while CI
+needs the timezone and aliases to fold, and must not receive any credentials.
 
-模型别名表用来把同一模型的不同标签归一，否则模型排行会把同一个模型拆成多行。原始事件
-保留原名，归一只在聚合阶段做，映射改错了重跑即可修正。
+The alias table normalizes the same model under different labels; otherwise the
+ranking splits one model into several rows. Raw events keep the original name.
+Normalization happens only at fold time, so a bad mapping is fixed by re-running.
 
-## 数据契约
+## Data contract
 
-`stats.schema.json` 是单一事实源，当前为 v4。`schema_version` 供消费方校验，避免字段
-语义变更后静默渲染错误数据。每个展示周带已经算好的 `view`（排序、占比、显示字符串），
-SVG 与博客 widget 只渲染，不再各自计算。
+`stats.schema.json` is the single source of truth, currently v4. Consumers should
+check `schema_version` so a semantic change cannot silently render wrong data.
+Each display week carries a precomputed `view` (sort, share, display strings).
+The SVG and the blog widget only render; they do not recompute.
 
-`daily` 只保留最近四个 ISO 周的明细；`year` 是当年汇总，**目前不展示，先存着**，等数据
-攒够一年再用。完整历史始终在 `data/raw` 里，随时可以重新切窗口。
+`daily` keeps detail for the last four ISO weeks; `year` is the year-to-date
+summary, **stored but not shown yet**, until a full year of data exists. Full
+history always lives in `data/raw` and can be re-windowed at any time.
 
-## 测试
+## Tests
 
 ```bash
 .venv/bin/python tests/test_core.py
 ```
 
-设计取舍与实现偏差见 [`docs/DESIGN.md`](docs/DESIGN.md)，产品前提见
-[`PRODUCT.md`](PRODUCT.md)。
+Design tradeoffs are in [`docs/DESIGN.md`](docs/DESIGN.md); product premises are
+in [`PRODUCT.md`](PRODUCT.md).

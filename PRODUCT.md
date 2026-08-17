@@ -44,7 +44,7 @@ web
 
 | 口径 | 含义 | 本项目的用法 |
 | --- | --- | --- |
-| `tokenUsage.totalCents` | token 按模型单价折算的成本 | **对外展示用这个**，称「模型成本」 |
+| `tokenUsage.totalCents` | token 按模型单价折算的成本 | **对外展示用这个**，称 model cost |
 | `chargedCents` | 实际计费额，含 Cursor 抽成 | 不对外展示 |
 | `cursorTokenFee` | Cursor 在按量计费上的加价 | 不对外展示 |
 
@@ -67,7 +67,7 @@ web
 
 ## Brand Commitments
 
-项目名与仓库名 `llm-usage`。文案语言为中文。
+项目名与仓库名 `llm-usage`。文案语言为英文。
 
 作者提供了一张参考图（`.cursor/.../image-28c9408f-*.png`，Claude Code 用量卡片）作为**能力参照**——证明「展示具体 token 量与花费」可行——并明确把视觉设计交给执行方。因此该图约束的是内容项（token 量、花费、模型明细、周节奏），不约束视觉语言。
 
