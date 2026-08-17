@@ -4,8 +4,10 @@
 > 后推回本仓库，GitHub Actions 据此重新生成下面这张卡片。
 
 <!-- WIDGET_START -->
+<div>
 <img src="assets/widget-light.svg#gh-light-mode-only" alt="本周 LLM 用量" width="760">
 <img src="assets/widget-dark.svg#gh-dark-mode-only" alt="本周 LLM 用量" width="760">
+</div>
 <!-- WIDGET_END -->
 
 这里只放**本周**一张静态图。要翻看过去几周，用博客里的 [React 版本](react/)，它支持在
