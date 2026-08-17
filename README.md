@@ -5,8 +5,8 @@
 
 <!-- WIDGET_START -->
 <div>
-<img src="assets/widget-light.svg#gh-light-mode-only" alt="本周 LLM 用量" width="760">
-<img src="assets/widget-dark.svg#gh-dark-mode-only" alt="本周 LLM 用量" width="760">
+<img src="assets/widget-light.svg#gh-light-mode-only" alt="本周 LLM 用量" width="100%">
+<img src="assets/widget-dark.svg#gh-dark-mode-only" alt="本周 LLM 用量" width="100%">
 </div>
 <!-- WIDGET_END -->
 

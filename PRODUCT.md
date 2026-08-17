@@ -53,7 +53,7 @@ web
 - 仓库 `Mournerliao/llm-usage` 是 public。账号是 enterprise、账单挂在公司 team 下，所以实际计费额与套餐信息不进入任何提交物；只公开「模型成本」折算值。原始事件落盘时同样要剥掉 `conversationId`、`owningTeam`、`owningUser`。
 - 事件的 `kind` 有五种。`ERRORED_NOT_CHARGED` 与 `ABORTED_NOT_CHARGED` 没有 token 也没有成本，`FREE_CREDIT` 有 token 无计费。展示时不能把它们和正常请求混为一谈。
 - token 总量里 cache read 占约 92%（5.32B / 5.76B）。只报一个总数会误导，必须能看到四类拆分。
-- GitHub README 里的图是静态 SVG，无 JS、无 hover、无外链字体，且需要亮暗两套。已定为 760px 宽，按实际显示宽度设计、不缩放（viewBox 宽于 `<img width>` 会把小字压到读不清）。
+- GitHub README 里的图是静态 SVG，无 JS、无 hover、无外链字体，且需要亮暗两套。排版按 760 个用户单位，用 `<img width="100%">` 拉满栏宽。
 - 博客组件的宽度由正文栏决定，不是视口，所以断点必须是容器查询。常见正文栏在 560–760 之间，窄栏（380）要能退化得体。
 - 博客组件读同一份 `data/stats.json`，与 SVG 共用一份计算逻辑（已有跨语言 parity 测试锁住两边口径）。
 

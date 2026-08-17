@@ -12,8 +12,9 @@ GitHub 会把 README 里的 SVG 当图片渲染（camo 代理），所以：**�
 自然对齐；二是它在三个平台上都存在，不会退化成后备字体导致排版错位。语言文字
 （标签、模型名）用系统无衬线栈。
 
-宽度按 README 的实际显示宽度设计（``CARD_W``），不做缩放。若 viewBox 宽度大于
-``<img width>``，所有字号会被等比缩小，13px 的注解会变成读不清的 8px。
+宽度按 760 个用户单位排版（``CARD_W``），``viewBox`` 钉死这个坐标系。真正显示时
+由 ``<img width="100%">`` 拉满 README 栏宽——放大没事，缩小才会把 13px 注解压糊，
+那是 GitHub 窄屏自己的 ``max-width: 100%``，拦不住。
 """
 from __future__ import annotations
 
@@ -216,7 +217,7 @@ def render_svg(view: dict[str, Any], theme_name: str = "light") -> str:
 def _wrap(body: list[str], height: float, theme: dict, alt: str,
           clip_w: float = 236) -> str:
     parts = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{CARD_W}" '
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="100%" '
         f'height="{height:g}" viewBox="0 0 {CARD_W} {height:g}" role="img" '
         f'aria-label="{esc(alt)}">',
         f"<title>{esc(alt)}</title>",
