@@ -109,9 +109,26 @@ Common flags:
 - `--since 2026-07-01` override the collection start
 - `--skip-collect` fold and render only; this is what CI runs
 
-For automatic updates, cron can run `./update-local.sh`; Windows Task Scheduler can
-run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File update-local.ps1`.
-Both scripts collect and push raw data; CI builds the rest.
+For automatic updates, macOS launchd can run `./update-local.sh`; Windows Task
+Scheduler can run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File
+update-local.ps1`. Both scripts collect and push raw data; CI builds the rest.
+
+On the work Mac (hourly at minute 0; a missed hour runs on wake):
+
+```bash
+./install-scheduled-task.sh
+./install-scheduled-task.sh --run-now          # install and collect immediately
+```
+
+Manage it with `launchctl` or the same script:
+
+```bash
+launchctl print gui/$(id -u)/com.llm-usage.update              # inspect
+launchctl kickstart -k gui/$(id -u)/com.llm-usage.update       # run now
+./install-scheduled-task.sh --uninstall                        # remove
+```
+
+Logs go to `~/Library/Logs/llm-usage-update.log`.
 
 To install the recommended Windows schedule (daily at midnight, catch up after
 a missed run, and retry failures every 30 minutes), run once in PowerShell:

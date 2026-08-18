@@ -18,6 +18,10 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+# launchd / cron 的 PATH 很窄。本机 git 和 python3 都在 Homebrew 前缀下。
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+export GIT_TERMINAL_PROMPT=0
+
 if [ -x .venv/bin/python ]; then
   PY=.venv/bin/python
 elif command -v python3 >/dev/null 2>&1; then
