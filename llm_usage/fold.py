@@ -25,7 +25,7 @@ from datetime import date as Date
 from datetime import timedelta
 from pathlib import Path
 
-from llm_usage import REPO_ROOT, config, view
+from llm_usage import REPO_ROOT, config, pricing, view
 from llm_usage.collect import read_all_events
 from llm_usage.contract import SCHEMA_VERSION, TOKEN_KINDS
 
@@ -147,9 +147,11 @@ def build_stats(daily_all: list[dict]) -> dict:
                 "daily": [], "year": None}
 
     latest = dates[-1]
+    priced = pricing.fill_list_prices(
+        daily_all, config.list_prices(), config.price_aliases())
     weeks = recent_weeks(latest)
     window_start = weeks[-1]["start"]
-    daily = [r for r in daily_all if r["date"] >= window_start]
+    daily = [r for r in priced if r["date"] >= window_start]
     for week in weeks:
         week["view"] = view.build_week_view(
             daily, week, subscription_sources=subs)
@@ -162,7 +164,7 @@ def build_stats(daily_all: list[dict]) -> dict:
         "sources": sorted({r["source"] for r in daily_all}),
         "subscription_sources": subs,
         "daily": daily,
-        "year": build_year(daily_all, latest),
+        "year": build_year(priced, latest),
     }
 
 

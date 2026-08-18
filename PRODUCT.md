@@ -45,7 +45,8 @@ web
 
 | 口径 | 含义 | 本项目的用法 |
 | --- | --- | --- |
-| `tokenUsage.totalCents` | token 按模型单价折算的成本 | **对外展示用这个**，称 model cost |
+| `tokenUsage.totalCents` | token 按模型单价折算的成本（Cursor 接口） | **对外展示用这个**，称 model cost |
+| 公开 API 牌价 × token | Codex 没有 `totalCents` 时的替代折算 | 同样称 model cost，在 fold 时补上 |
 | `chargedCents` | 实际计费额，含 Cursor 抽成 | 不对外展示 |
 | `cursorTokenFee` | Cursor 在按量计费上的加价 | 不对外展示 |
 

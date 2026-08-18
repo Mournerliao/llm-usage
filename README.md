@@ -19,6 +19,10 @@ This page only shows **this week**. To browse the last few weeks, use the blog
 The amount on the card is **token usage priced at each model's unit rate**. It
 shows how much compute I actually used.
 
+Cursor supplies that number per request (`tokenUsage.totalCents`). Codex does
+not, so those rows are priced at OpenAI's published API rates for the same
+models — an API-equivalent figure, not a ChatGPT bill or credit balance.
+
 It is **not a bill**: it excludes plan fees, discounts, and platform markup, and
 it does not care who pays. Included-in-plan usage still counts, because this
 project measures consumption, not invoices. The billed amount and markup fields
@@ -58,7 +62,7 @@ work Mac and the home Windows box need to collect; files are sharded as
 | Source | Token detail | Cost | Notes |
 | --- | --- | --- | --- |
 | `cursor` | input / output / cache write / cache read | yes | Official dashboard API, back to account creation |
-| `codex` | input / output / cache write / cache read | Subscription | Codex local session logs. ChatGPT Plus and relays both belong to this ADE; Plus has no per-request cost |
+| `codex` | input / output / cache write / cache read | API list price | Codex local session logs. ChatGPT Plus and relays both belong to this ADE; cost is filled at fold time from published OpenAI rates |
 
 When a source cannot report a metric, the field is **omitted**, not filled with 0.
 The view then shows a dash. "Does not report tokens" and "reported zero" are

@@ -3,7 +3,7 @@
 > 目标读者：本人
 > 关联：日常使用说明见仓库根 `README.md`，产品前提见 `PRODUCT.md`
 
-本文是按时间累积的设计日志，不是当前架构的说明书。**当前架构以第 10 节为准。**
+本文是按时间累积的设计日志，不是当前架构的说明书。**当前架构以第 10、11 节为准。**
 
 - 第 2 节：第一轮重构前的问题，含实测证据。仍然有效，是很多决定的依据。
 - 第 3 节：第一轮的目标架构。**其中 3.1、3.3、3.5、3.6 已被第 8 节推翻**，见下表。
@@ -11,7 +11,8 @@
 - 第 7 节：第一轮实现后与计划的偏差。**7.1、7.3 已被第 8 节推翻。**
 - 第 8 节：第二轮（v3）的架构与推翻的理由。
 - 第 9 节：接入 ChatGPT / Codex。
-- 第 10 节：第三轮（v4）：WeekView 物化、采集 seam、目录收成 `llm_usage/`。**这是现状。**
+- 第 10 节：第三轮（v4）：WeekView 物化、采集 seam、目录收成 `llm_usage/`。
+- 第 11 节：Codex 按公开 API 牌价补 model cost。**金额列的现状以这一节为准。**
 
 被推翻的部分不删，因为「为什么放弃它」本身是有用的记录。但别照着它们实现：
 
@@ -22,7 +23,7 @@
 | 3.5 `unit` + `amount` 分桶 | 具名 token 字段 + `cost_cents` | 8.3 |
 | 3.6 `machine` 展示维度 | 无此维度（接口不提供） | 8.2 |
 | 7.1 Cursor 走本机 `ai-code-tracking.db` | 走官方 dashboard 接口 | 8.1 |
-| 7.3 `unit` 的两套中文标签 | 无 `unit`，不需要 | 8.3 |
+| 9.2 `$X · 订阅` | 有牌价就写美元；对不上才写 Subscription | 11 |
 
 ---
 
@@ -578,5 +579,21 @@ parity 测试钉住。ChatGPT 接入时改一次订阅文案就要抄三处。�
 3. **目录。** Python 管线收进 `llm_usage/`（`collect/`、`fold`、`view`、
    `render`、`contract`）；React 目录改名 `widget/`。根上留三行 `run.py`。
    契约常量从 `stats.schema.json` 读出，不再手抄 `TOKEN_KINDS`。
+
+---
+
+## 11. Codex 按 API 牌价补 model cost
+
+第 9 节把金额列写成 `$X · Subscription`，是因为当时决定不估 Codex 的单价。
+社区里 ccusage / ai-coding-usage-card 的做法是：有官方预计价就用官方的，没有
+就按公开 API 牌价乘 token，并标明这是 API-equivalent，不是账单。
+
+本项目的 model cost 本来就是「token × 单价」，不是发票。Cursor 的单价来自
+`totalCents`；Codex 的 raw 没有这个字段，所以在 fold 时用
+`config/aggregate.yaml` 里的 `list_prices` 补上。raw 不改，牌价变了重跑
+`--skip-collect` 即可。
+
+对不上牌价的模型（`unknown`、中转站私有名）仍显示 Subscription。主数字有金额
+时只写美元，不再和 Subscription 拼在同一个格子里。
 
 

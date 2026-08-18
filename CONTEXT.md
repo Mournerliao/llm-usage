@@ -30,10 +30,10 @@ _Avoid_: provider, chatgpt, krill, custom, headroom（Codex `model_provider` 不
 _Avoid_: 视图函数（渲染器不再计算）
 
 **模型成本**:
-token 按各模型单价折算出的成本，单位为分（`cost_cents`）。不是账单金额。
+token 按各模型单价折算出的成本，单位为分（`cost_cents`）。Cursor 用接口返回的 `totalCents`；Codex 用公开 API 牌价在 fold 时补上。都不是账单金额。
 
 **Subscription source**:
-没有逐次成本的源。金额列显示 Subscription 而不是横线或估出来的单价。
+raw 里没有官方成本的源。fold 时按 API 牌价补金额；对不上牌价的模型，金额列仍显示 Subscription。
 
 **Machine**:
 本机标识。只当 raw 分片键，不进 Event，也不进公开展示。

@@ -103,7 +103,7 @@ export interface UsageStats {
   latest_date: string | null;
   weeks: WeekRef[];
   sources: string[];
-  /** 订阅制源。没有逐次成本，金额列显示 Subscription 而不是美元。 */
+  /** 订阅制源。raw 没有官方成本；对不上牌价的模型金额列显示 Subscription。 */
   subscription_sources?: string[];
   daily: UsageRow[];
   year: YearSummary | null;

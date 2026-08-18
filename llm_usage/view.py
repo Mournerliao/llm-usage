@@ -28,8 +28,8 @@ TOKEN_LABELS = {
     "cache_read": "Cache read",
 }
 
-# 排序与占比永远按 token（有 token 的源都在同一标尺上）。订阅制源没有逐次成本，
-# 金额列显示 Subscription 而不是横线或估出来的单价。
+# 排序与占比永远按 token（有 token 的源都在同一标尺上）。订阅制源若已按 API 牌价
+# 补上成本，金额列写美元；对不上牌价的才写 Subscription。
 BASIS_LABELS = {
     "cost": "Cost",
     "tokens": "Tokens",
@@ -99,13 +99,10 @@ def format_cost(cents: float | None) -> str:
 
 def format_billing(cost_cents: float | None, sources: set[str] | list[str],
                    subscription_sources: set[str] | list[str]) -> str:
-    """金额列：有折算成本就写美元；有订阅源就标 Subscription；可以并存。"""
-    has_sub = bool(set(sources) & set(subscription_sources))
-    if cost_cents is not None and has_sub:
-        return f"{format_cost(cost_cents)} · {SUBSCRIPTION_LABEL}"
+    """金额列：有折算成本就只写美元，不和 Subscription 拼在同一个格子里。"""
     if cost_cents is not None:
         return format_cost(cost_cents)
-    if has_sub:
+    if set(sources) & set(subscription_sources):
         return SUBSCRIPTION_LABEL
     return "—"
 
@@ -177,7 +174,7 @@ def build_week_view(
 
     ``models`` 按 token 降序，``pct`` 是该行在本周内的 token 占比（0~100）。
     ``days`` 恒为 7 项（周一到周日），没有用量的那天补零，让日条形图的横轴稳定。
-    ``subscription_sources`` 里的源没有逐次成本，金额列显示 Subscription。
+    ``subscription_sources`` 里对不上牌价的模型，金额列显示 Subscription。
     """
     if not week:
         return {"week": None, "start": None, "end": None, "range_display": "",

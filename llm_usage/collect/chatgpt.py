@@ -104,7 +104,8 @@ def _uncached_input(usage: dict) -> int:
 def to_events(raw: list[dict], day_of) -> list[Event]:
     """把 ``parse_rollout`` 的结果按 (日期, 源, 模型) 聚合成 ``Event``。
 
-    不填 ``cost_cents``：Plus / Pro 是订阅配额，没有官方单价。
+    不填 ``cost_cents``：Plus / Pro 是订阅配额，接口不给官方单价。fold 阶段按
+    公开 API 牌价补 API-equivalent 的 model cost，raw 保持原样。
     """
     buckets: dict[tuple[str, str, str], dict] = defaultdict(
         lambda: {"requests": 0, "tokens_in": 0, "tokens_out": 0,

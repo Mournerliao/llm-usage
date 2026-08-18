@@ -15,7 +15,7 @@ from zoneinfo import ZoneInfo
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
-from llm_usage import fold, render  # noqa: E402
+from llm_usage import fold, pricing, render  # noqa: E402
 from llm_usage import view as weekview  # noqa: E402
 from llm_usage.collect import (  # noqa: E402
     CollectContext,
@@ -184,6 +184,84 @@ class TestWeekWindow(unittest.TestCase):
         self.assertEqual(stats["weeks"], [])
 
 
+# OpenAI 公开 API 牌价（美元 / 百万 token，短上下文）。测试里用字面量当独立预期值，
+# 不从实现倒推。来源：https://developers.openai.com/api/docs/pricing
+SOL = {"input": 5.00, "cache_read": 0.50, "cache_write": 6.25, "output": 30.00}
+
+
+class TestListPrices(unittest.TestCase):
+    def test_one_million_input_tokens_is_five_dollars(self):
+        cents = pricing.cost_cents_from_tokens(
+            tokens_in=1_000_000, tokens_out=0, cache_write=0, cache_read=0,
+            rates=SOL)
+        self.assertAlmostEqual(cents, 500.0)
+
+    def test_cache_write_replaces_overlapping_input_not_adds(self):
+        """写入缓存的那部分按 1.25x 计价，不再按 1x 加一遍。"""
+        cents = pricing.cost_cents_from_tokens(
+            tokens_in=800_000, tokens_out=0, cache_write=800_000, cache_read=0,
+            rates=SOL)
+        self.assertAlmostEqual(cents, 500.0)  # 0.8M × $6.25
+
+    def test_four_kinds_use_their_own_rates(self):
+        # 1M 未写入的输入 $5 + 1M 写入 $6.25 + 10M 缓存读 $5 + 0.1M 输出 $3
+        cents = pricing.cost_cents_from_tokens(
+            tokens_in=2_000_000, tokens_out=100_000,
+            cache_write=1_000_000, cache_read=10_000_000, rates=SOL)
+        self.assertAlmostEqual(cents, 1925.0)
+
+    def test_does_not_overwrite_vendor_cost(self):
+        daily = [row("2026-08-10", "gpt-5.6-sol", source="cursor",
+                     cost_cents=12.0, **tokens(i=1_000_000))]
+        filled = pricing.fill_list_prices(
+            daily, {"gpt-5.6-sol": SOL}, {})
+        self.assertAlmostEqual(filled[0]["cost_cents"], 12.0)
+
+    def test_fills_missing_cost_from_the_price_table(self):
+        daily = [row("2026-08-10", "gpt-5.6-sol", source="codex",
+                     **tokens(i=1_000_000))]
+        filled = pricing.fill_list_prices(
+            daily, {"gpt-5.6-sol": SOL}, {})
+        self.assertAlmostEqual(filled[0]["cost_cents"], 500.0)
+
+    def test_price_alias_does_not_rename_the_model(self):
+        daily = [row("2026-08-10", "codex-auto-review", source="codex",
+                     **tokens(i=1_000_000))]
+        filled = pricing.fill_list_prices(
+            daily, {"gpt-5.6-sol": SOL},
+            {"codex-auto-review": "gpt-5.6-sol"})
+        self.assertEqual(filled[0]["model"], "codex-auto-review")
+        self.assertAlmostEqual(filled[0]["cost_cents"], 500.0)
+
+    def test_unknown_model_stays_unpriced(self):
+        daily = [row("2026-08-10", "unknown", source="codex", **tokens(i=10))]
+        filled = pricing.fill_list_prices(daily, {"gpt-5.6-sol": SOL}, {})
+        self.assertNotIn("cost_cents", filled[0])
+
+    def test_mixed_week_hero_is_a_single_dollar_amount(self):
+        """有官方折算的和按牌价补上的加在同一个数字里，不再拼 Subscription。"""
+        daily = pricing.fill_list_prices([
+            row("2026-08-10", "opus", source="cursor", requests=1,
+                cost_cents=100.0, **tokens(i=10)),
+            row("2026-08-10", "gpt-5.6-sol", source="codex", requests=1,
+                **tokens(i=1_000_000)),
+        ], {"gpt-5.6-sol": SOL}, {})
+        view = weekview.build_week_view(daily, WEEK, subscription_sources=["codex"])
+        self.assertEqual(view["cost_display"], "$6.00")
+        by_label = {m["label"]: m["cost_display"] for m in view["models"]}
+        self.assertEqual(by_label["opus"], "$1.00")
+        self.assertEqual(by_label["gpt-5.6-sol"], "$5.00")
+
+    def test_build_stats_uses_committed_sol_list_price(self):
+        daily = fold.fold_events([
+            row("2026-08-10", "gpt-5.6-sol", source="codex",
+                **tokens(i=1_000_000)),
+        ])
+        stats = fold.build_stats(daily)
+        self.assertEqual(stats["weeks"][0]["view"]["cost_display"], "$5.00")
+        self.assertAlmostEqual(stats["daily"][0]["cost_cents"], 500.0)
+
+
 class TestFormatters(unittest.TestCase):
     def test_token_magnitudes(self):
         self.assertEqual(weekview.format_tokens(0), "0")
@@ -265,9 +343,10 @@ class TestBuildWeekView(unittest.TestCase):
         self.assertEqual([m["label"] for m in view["models"]],
                          ["cheap-heavy", "pricey-light"])
 
-    def test_subscription_source_renders_as_label_not_dash(self):
+    def test_unpriced_subscription_source_renders_as_label_not_dash(self):
+        """牌价表里没有的模型才退回 Subscription，不能写成横线或 $0。"""
         daily = fold.fold_events([
-            row("2026-08-10", "gpt-5.6-sol", source="codex", requests=3,
+            row("2026-08-10", "unknown", source="codex", requests=3,
                 **tokens(i=100, o=20, cr=800)),
         ])
         view = weekview.build_week_view(daily, WEEK,
@@ -275,19 +354,20 @@ class TestBuildWeekView(unittest.TestCase):
         self.assertEqual(view["cost_display"], "Subscription")
         self.assertEqual(view["models"][0]["cost_display"], "Subscription")
 
-    def test_paid_and_subscription_share_the_cost_cell(self):
+    def test_priced_subscription_does_not_join_the_hero_cell(self):
+        """有金额时主数字只留美元。未入表的订阅模型仍在行里标 Subscription。"""
         daily = fold.fold_events([
             row("2026-08-10", "opus", source="cursor", requests=1,
                 cost_cents=100.0, **tokens(i=10)),
-            row("2026-08-10", "gpt-5.6-sol", source="codex", requests=1,
+            row("2026-08-10", "mimo-v2.5", source="codex", requests=1,
                 **tokens(i=20)),
         ])
         view = weekview.build_week_view(daily, WEEK,
                                        subscription_sources=["codex"])
-        self.assertEqual(view["cost_display"], "$1.00 · Subscription")
+        self.assertEqual(view["cost_display"], "$1.00")
         by_label = {m["label"]: m["cost_display"] for m in view["models"]}
         self.assertEqual(by_label["opus"], "$1.00")
-        self.assertEqual(by_label["gpt-5.6-sol"], "Subscription")
+        self.assertEqual(by_label["mimo-v2.5"], "Subscription")
 
     def test_same_model_from_two_sources_is_aggregated(self):
         """展示层按模型聚合；两个 ADE 的同名模型合成一行。"""
@@ -302,7 +382,6 @@ class TestBuildWeekView(unittest.TestCase):
         self.assertEqual(len(view["models"]), 1)
         self.assertEqual(view["models"][0]["requests"], 5)
         self.assertEqual(view["models"][0]["tokens_total"], 150)
-        self.assertEqual(view["models"][0]["cost_display"], "Subscription")
 
     def test_falls_back_to_requests_when_no_tokens_or_cost(self):
         daily = fold.fold_events([
