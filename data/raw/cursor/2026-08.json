@@ -552,12 +552,12 @@
         "date": "2026-08-18",
         "source": "cursor",
         "model": "cursor-grok-4.6-high",
-        "requests": 78,
-        "tokens_in": 8499538,
-        "tokens_out": 486134,
+        "requests": 105,
+        "tokens_in": 14077736,
+        "tokens_out": 736811,
         "cache_write": 0,
-        "cache_read": 92327040,
-        "cost_cents": 6592.275
+        "cache_read": 142591360,
+        "cost_cents": 10369.5383
       }
     ]
   }
