@@ -8,9 +8,13 @@
 某一天、某个源、某个模型上的用量。`requests` 必填；四类 token 与 `cost_cents` 可缺席（缺席 ≠ 0）。
 _Avoid_: Record, unit/amount
 
+**ADE**:
+产生用量的编码工具。当前是 Cursor 和 Codex。接自己的订阅还是接中转站，都不改变它是哪一个 ADE。
+_Avoid_: provider, 中转站, ChatGPT（那是 Codex 可能使用的订阅，不是 ADE）
+
 **Source**:
-用量来源身份，落在 `Event.source` 与 raw 路径第一段。如 `cursor`、`chatgpt`、中转站名。
-_Avoid_: provider（那是 Codex 日志里的字段，翻译成 Source 之后才进契约）
+用量归属的 ADE，落在 `Event.source` 与 raw 路径第一段。当前是 `cursor`、`codex`。
+_Avoid_: provider, chatgpt, krill, custom, headroom（Codex `model_provider` 不是 Source）
 
 **Collector**:
 把某源的外部形态翻译成 Event 的 adapter。声明是否按机器分片，不自己碰文件系统。

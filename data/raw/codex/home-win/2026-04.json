@@ -1,11 +1,11 @@
 {
-  "source": "chatgpt",
+  "source": "codex",
   "month": "2026-04",
   "days": {
     "2026-04-23": [
       {
         "date": "2026-04-23",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "gpt-5.4-mini",
         "requests": 23,
         "tokens_in": 146148,
@@ -17,7 +17,7 @@
     "2026-04-24": [
       {
         "date": "2026-04-24",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "gpt-5.5",
         "requests": 76,
         "tokens_in": 753768,

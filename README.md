@@ -58,8 +58,7 @@ work Mac and the home Windows box need to collect; files are sharded as
 | Source | Token detail | Cost | Notes |
 | --- | --- | --- | --- |
 | `cursor` | input / output / cache write / cache read | yes | Official dashboard API, back to account creation |
-| `chatgpt` | input / output / cache write / cache read | Subscription | Codex local session logs; ChatGPT Plus has no per-request cost |
-| Relays (other Codex providers) | same | none | Stored separately from chatgpt; same model names still fold together in the view |
+| `codex` | input / output / cache write / cache read | Subscription | Codex local session logs. ChatGPT Plus and relays both belong to this ADE; Plus has no per-request cost |
 
 When a source cannot report a metric, the field is **omitted**, not filled with 0.
 The view then shows a dash. "Does not report tokens" and "reported zero" are

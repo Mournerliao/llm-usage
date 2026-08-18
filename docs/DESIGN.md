@@ -553,9 +553,8 @@ jsonl 里的 `token_count` / `last_token_usage`。
    `Event` 仍然没有 machine 字段。旧的 `data/raw/<machine>/<source>/` 布局靠
    「文件里的 source 对不上第一段路径」跳过，避免把第一轮残留折进总量。
 2. **排行永远按 token。** 订阅没有逐次成本，再按成本排会把 Codex 吃成 0%。金额列：
-   Cursor 仍是美元；`chatgpt` 显示「订阅」；两者同时出现时写成 `$X · 订阅`。
-3. **中转站分开采。** `model_provider=openai` → 源 `chatgpt`；其余 provider 各自
-   成源。展示层仍按模型名聚合，给以后「ADE vs 中转站」卡片留分片。
+   Cursor 仍是美元；`codex` 显示「订阅」；两者同时出现时写成 `$X · 订阅`。
+3. **Source 是 ADE。** 已由 [ADR 0002](adr/0002-source-is-ade.md) 取代：`model_provider=openai` 与中转站都归 `codex`，不再按 provider 分源。
 
 ---
 

@@ -5,10 +5,10 @@
 # 归到不同天。
 timezone: Asia/Shanghai
 
-# 订阅制源：没有逐次折算成本，卡片金额列显示「订阅」而不是美元。
-# ChatGPT Plus / Pro 走 Codex 官方 provider 时记入 chatgpt。
+# 订阅制 ADE：没有逐次折算成本，卡片金额列显示「订阅」而不是美元。
+# Codex 走 ChatGPT Plus 或中转站都不填 cost_cents。
 subscription_sources:
-  - chatgpt
+  - codex
 
 # 模型名归一表：同一模型在不同工具下的标签可能不同，
 # 不归一的话模型排行会把同一个模型拆成多行。

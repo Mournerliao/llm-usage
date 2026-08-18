@@ -1,5 +1,5 @@
 {
-  "source": "chatgpt",
+  "source": "codex",
   "month": "2026-08",
   "days": {
     "2026-08-01": [],
@@ -7,7 +7,7 @@
     "2026-08-03": [
       {
         "date": "2026-08-03",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "codex-auto-review",
         "requests": 8,
         "tokens_in": 51431,
@@ -17,7 +17,7 @@
       },
       {
         "date": "2026-08-03",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "gpt-5.6-sol",
         "requests": 259,
         "tokens_in": 1760644,
@@ -29,7 +29,7 @@
     "2026-08-04": [
       {
         "date": "2026-08-04",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "codex-auto-review",
         "requests": 26,
         "tokens_in": 241007,
@@ -39,7 +39,7 @@
       },
       {
         "date": "2026-08-04",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "gpt-5.6-sol",
         "requests": 729,
         "tokens_in": 2692558,
@@ -49,14 +49,35 @@
       }
     ],
     "2026-08-05": [],
-    "2026-08-06": [],
+    "2026-08-06": [
+      {
+        "date": "2026-08-06",
+        "source": "codex",
+        "model": "codex-auto-review",
+        "requests": 22,
+        "tokens_in": 179976,
+        "tokens_out": 3041,
+        "cache_write": 0,
+        "cache_read": 388608
+      },
+      {
+        "date": "2026-08-06",
+        "source": "codex",
+        "model": "gpt-5.6-sol",
+        "requests": 213,
+        "tokens_in": 2432816,
+        "tokens_out": 104785,
+        "cache_write": 0,
+        "cache_read": 17108106
+      }
+    ],
     "2026-08-07": [],
     "2026-08-08": [],
     "2026-08-09": [],
     "2026-08-10": [
       {
         "date": "2026-08-10",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "codex-auto-review",
         "requests": 12,
         "tokens_in": 142465,
@@ -66,7 +87,7 @@
       },
       {
         "date": "2026-08-10",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "gpt-5.6-sol",
         "requests": 130,
         "tokens_in": 749855,
@@ -78,7 +99,7 @@
     "2026-08-11": [
       {
         "date": "2026-08-11",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "codex-auto-review",
         "requests": 8,
         "tokens_in": 57731,
@@ -88,7 +109,7 @@
       },
       {
         "date": "2026-08-11",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "gpt-5.6-sol",
         "requests": 36,
         "tokens_in": 181132,
@@ -100,7 +121,7 @@
     "2026-08-12": [
       {
         "date": "2026-08-12",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "codex-auto-review",
         "requests": 69,
         "tokens_in": 1849538,
@@ -110,7 +131,7 @@
       },
       {
         "date": "2026-08-12",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "gpt-5.6-sol",
         "requests": 981,
         "tokens_in": 5792085,
@@ -122,7 +143,7 @@
     "2026-08-13": [
       {
         "date": "2026-08-13",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "codex-auto-review",
         "requests": 36,
         "tokens_in": 1075869,
@@ -132,7 +153,7 @@
       },
       {
         "date": "2026-08-13",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "gpt-5.6-sol",
         "requests": 565,
         "tokens_in": 2379413,
@@ -144,7 +165,7 @@
     "2026-08-14": [
       {
         "date": "2026-08-14",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "codex-auto-review",
         "requests": 46,
         "tokens_in": 577598,
@@ -154,7 +175,7 @@
       },
       {
         "date": "2026-08-14",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "gpt-5.6-sol",
         "requests": 1180,
         "tokens_in": 3876325,
@@ -168,7 +189,7 @@
     "2026-08-17": [
       {
         "date": "2026-08-17",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "codex-auto-review",
         "requests": 8,
         "tokens_in": 22599,
@@ -178,7 +199,7 @@
       },
       {
         "date": "2026-08-17",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "gpt-5.6-sol",
         "requests": 26,
         "tokens_in": 94481,

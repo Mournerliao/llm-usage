@@ -677,19 +677,16 @@
     }
   ],
   "sources": [
-    "chatgpt",
-    "cursor",
-    "custom",
-    "headroom",
-    "krill"
+    "codex",
+    "cursor"
   ],
   "subscription_sources": [
-    "chatgpt"
+    "codex"
   ],
   "daily": [
     {
       "date": "2026-07-27",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "codex-auto-review",
       "requests": 10,
       "tokens_in": 73799,
@@ -699,7 +696,7 @@
     },
     {
       "date": "2026-07-27",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "gpt-5.6-sol",
       "requests": 773,
       "tokens_in": 5350509,
@@ -742,7 +739,7 @@
     },
     {
       "date": "2026-07-28",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "codex-auto-review",
       "requests": 73,
       "tokens_in": 245744,
@@ -752,7 +749,7 @@
     },
     {
       "date": "2026-07-28",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "gpt-5.6-sol",
       "requests": 1042,
       "tokens_in": 4091501,
@@ -762,7 +759,7 @@
     },
     {
       "date": "2026-07-28",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "unknown",
       "requests": 11,
       "tokens_in": 113239,
@@ -816,7 +813,7 @@
     },
     {
       "date": "2026-07-29",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "codex-auto-review",
       "requests": 24,
       "tokens_in": 130262,
@@ -826,7 +823,7 @@
     },
     {
       "date": "2026-07-29",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "gpt-5.6-sol",
       "requests": 209,
       "tokens_in": 1512721,
@@ -836,7 +833,7 @@
     },
     {
       "date": "2026-07-29",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "gpt-5.6-terra",
       "requests": 2,
       "tokens_in": 24634,
@@ -967,7 +964,7 @@
     },
     {
       "date": "2026-08-01",
-      "source": "headroom",
+      "source": "codex",
       "model": "codex-auto-review",
       "requests": 50,
       "tokens_in": 268821,
@@ -977,7 +974,7 @@
     },
     {
       "date": "2026-08-01",
-      "source": "headroom",
+      "source": "codex",
       "model": "gpt-5.6-luna",
       "requests": 40,
       "tokens_in": 138723,
@@ -987,7 +984,7 @@
     },
     {
       "date": "2026-08-01",
-      "source": "headroom",
+      "source": "codex",
       "model": "gpt-5.6-sol",
       "requests": 308,
       "tokens_in": 1258045,
@@ -997,7 +994,7 @@
     },
     {
       "date": "2026-08-03",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "codex-auto-review",
       "requests": 8,
       "tokens_in": 51431,
@@ -1007,7 +1004,7 @@
     },
     {
       "date": "2026-08-03",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "gpt-5.6-sol",
       "requests": 259,
       "tokens_in": 1760644,
@@ -1061,23 +1058,23 @@
     },
     {
       "date": "2026-08-04",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "codex-auto-review",
-      "requests": 26,
-      "tokens_in": 241007,
-      "tokens_out": 3883,
+      "requests": 47,
+      "tokens_in": 301120,
+      "tokens_out": 7416,
       "cache_write": 0,
-      "cache_read": 574720
+      "cache_read": 925184
     },
     {
       "date": "2026-08-04",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "gpt-5.6-sol",
-      "requests": 729,
-      "tokens_in": 2692558,
-      "tokens_out": 338614,
+      "requests": 969,
+      "tokens_in": 3623505,
+      "tokens_out": 410137,
       "cache_write": 2155261,
-      "cache_read": 97852364
+      "cache_read": 122826188
     },
     {
       "date": "2026-08-04",
@@ -1135,24 +1132,14 @@
       "cost_cents": 893.5925
     },
     {
-      "date": "2026-08-04",
-      "source": "headroom",
-      "model": "codex-auto-review",
-      "requests": 21,
-      "tokens_in": 60113,
-      "tokens_out": 3533,
-      "cache_write": 0,
-      "cache_read": 350464
-    },
-    {
-      "date": "2026-08-04",
-      "source": "headroom",
+      "date": "2026-08-05",
+      "source": "codex",
       "model": "gpt-5.6-sol",
-      "requests": 240,
-      "tokens_in": 930947,
-      "tokens_out": 71523,
+      "requests": 49,
+      "tokens_in": 650990,
+      "tokens_out": 27452,
       "cache_write": 0,
-      "cache_read": 24973824
+      "cache_read": 6359748
     },
     {
       "date": "2026-08-05",
@@ -1188,14 +1175,24 @@
       "cost_cents": 765.0058
     },
     {
-      "date": "2026-08-05",
-      "source": "custom",
-      "model": "gpt-5.6-sol",
-      "requests": 49,
-      "tokens_in": 650990,
-      "tokens_out": 27452,
+      "date": "2026-08-06",
+      "source": "codex",
+      "model": "codex-auto-review",
+      "requests": 57,
+      "tokens_in": 526756,
+      "tokens_out": 10052,
       "cache_write": 0,
-      "cache_read": 6359748
+      "cache_read": 982016
+    },
+    {
+      "date": "2026-08-06",
+      "source": "codex",
+      "model": "gpt-5.6-sol",
+      "requests": 530,
+      "tokens_in": 5511746,
+      "tokens_out": 268602,
+      "cache_write": 0,
+      "cache_read": 57091226
     },
     {
       "date": "2026-08-06",
@@ -1251,26 +1248,6 @@
       "cache_write": 0,
       "cache_read": 7947038,
       "cost_cents": 554.9315
-    },
-    {
-      "date": "2026-08-06",
-      "source": "custom",
-      "model": "codex-auto-review",
-      "requests": 57,
-      "tokens_in": 526756,
-      "tokens_out": 10052,
-      "cache_write": 0,
-      "cache_read": 982016
-    },
-    {
-      "date": "2026-08-06",
-      "source": "custom",
-      "model": "gpt-5.6-sol",
-      "requests": 530,
-      "tokens_in": 5511746,
-      "tokens_out": 268602,
-      "cache_write": 0,
-      "cache_read": 57091226
     },
     {
       "date": "2026-08-07",
@@ -1329,7 +1306,7 @@
     },
     {
       "date": "2026-08-10",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "codex-auto-review",
       "requests": 12,
       "tokens_in": 142465,
@@ -1339,7 +1316,7 @@
     },
     {
       "date": "2026-08-10",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "gpt-5.6-sol",
       "requests": 130,
       "tokens_in": 749855,
@@ -1371,23 +1348,23 @@
     },
     {
       "date": "2026-08-11",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "codex-auto-review",
-      "requests": 8,
-      "tokens_in": 57731,
-      "tokens_out": 1063,
+      "requests": 68,
+      "tokens_in": 295839,
+      "tokens_out": 7076,
       "cache_write": 0,
-      "cache_read": 139520
+      "cache_read": 2289920
     },
     {
       "date": "2026-08-11",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "gpt-5.6-sol",
-      "requests": 36,
-      "tokens_in": 181132,
-      "tokens_out": 15942,
+      "requests": 399,
+      "tokens_in": 1688613,
+      "tokens_out": 170896,
       "cache_write": 0,
-      "cache_read": 2217216
+      "cache_read": 44374528
     },
     {
       "date": "2026-08-11",
@@ -1434,44 +1411,24 @@
       "cost_cents": 92.2087
     },
     {
-      "date": "2026-08-11",
-      "source": "headroom",
+      "date": "2026-08-12",
+      "source": "codex",
       "model": "codex-auto-review",
-      "requests": 60,
-      "tokens_in": 238108,
-      "tokens_out": 6013,
+      "requests": 118,
+      "tokens_in": 2588160,
+      "tokens_out": 12508,
       "cache_write": 0,
-      "cache_read": 2150400
-    },
-    {
-      "date": "2026-08-11",
-      "source": "headroom",
-      "model": "gpt-5.6-sol",
-      "requests": 363,
-      "tokens_in": 1507481,
-      "tokens_out": 154954,
-      "cache_write": 0,
-      "cache_read": 42157312
+      "cache_read": 6680320
     },
     {
       "date": "2026-08-12",
-      "source": "chatgpt",
-      "model": "codex-auto-review",
-      "requests": 69,
-      "tokens_in": 1849538,
-      "tokens_out": 7992,
-      "cache_write": 0,
-      "cache_read": 3879936
-    },
-    {
-      "date": "2026-08-12",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "gpt-5.6-sol",
-      "requests": 981,
-      "tokens_in": 5792085,
-      "tokens_out": 419262,
+      "requests": 1463,
+      "tokens_in": 8449014,
+      "tokens_out": 632995,
       "cache_write": 0,
-      "cache_read": 114319488
+      "cache_read": 173905024
     },
     {
       "date": "2026-08-12",
@@ -1507,44 +1464,24 @@
       "cost_cents": 110.7014
     },
     {
-      "date": "2026-08-12",
-      "source": "headroom",
+      "date": "2026-08-13",
+      "source": "codex",
       "model": "codex-auto-review",
-      "requests": 49,
-      "tokens_in": 738622,
-      "tokens_out": 4516,
+      "requests": 55,
+      "tokens_in": 1406600,
+      "tokens_out": 6807,
       "cache_write": 0,
-      "cache_read": 2800384
-    },
-    {
-      "date": "2026-08-12",
-      "source": "headroom",
-      "model": "gpt-5.6-sol",
-      "requests": 482,
-      "tokens_in": 2656929,
-      "tokens_out": 213733,
-      "cache_write": 0,
-      "cache_read": 59585536
+      "cache_read": 980480
     },
     {
       "date": "2026-08-13",
-      "source": "chatgpt",
-      "model": "codex-auto-review",
-      "requests": 36,
-      "tokens_in": 1075869,
-      "tokens_out": 4589,
-      "cache_write": 0,
-      "cache_read": 589056
-    },
-    {
-      "date": "2026-08-13",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "gpt-5.6-sol",
-      "requests": 565,
-      "tokens_in": 2379413,
-      "tokens_out": 243383,
+      "requests": 705,
+      "tokens_in": 3509858,
+      "tokens_out": 281544,
       "cache_write": 0,
-      "cache_read": 74812032
+      "cache_read": 87349888
     },
     {
       "date": "2026-08-13",
@@ -1580,28 +1517,8 @@
       "cost_cents": 1667.9541
     },
     {
-      "date": "2026-08-13",
-      "source": "headroom",
-      "model": "codex-auto-review",
-      "requests": 19,
-      "tokens_in": 330731,
-      "tokens_out": 2218,
-      "cache_write": 0,
-      "cache_read": 391424
-    },
-    {
-      "date": "2026-08-13",
-      "source": "headroom",
-      "model": "gpt-5.6-sol",
-      "requests": 140,
-      "tokens_in": 1130445,
-      "tokens_out": 38161,
-      "cache_write": 0,
-      "cache_read": 12537856
-    },
-    {
       "date": "2026-08-14",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "codex-auto-review",
       "requests": 46,
       "tokens_in": 577598,
@@ -1611,7 +1528,7 @@
     },
     {
       "date": "2026-08-14",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "gpt-5.6-sol",
       "requests": 1180,
       "tokens_in": 3876325,
@@ -1709,23 +1626,23 @@
     },
     {
       "date": "2026-08-17",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "codex-auto-review",
-      "requests": 8,
-      "tokens_in": 22599,
-      "tokens_out": 1315,
+      "requests": 53,
+      "tokens_in": 352920,
+      "tokens_out": 7424,
       "cache_write": 0,
-      "cache_read": 137216
+      "cache_read": 1277696
     },
     {
       "date": "2026-08-17",
-      "source": "chatgpt",
+      "source": "codex",
       "model": "gpt-5.6-sol",
-      "requests": 26,
-      "tokens_in": 94481,
-      "tokens_out": 7931,
+      "requests": 239,
+      "tokens_in": 682195,
+      "tokens_out": 111547,
       "cache_write": 0,
-      "cache_read": 1614592
+      "cache_read": 22466432
     },
     {
       "date": "2026-08-17",
@@ -1761,24 +1678,24 @@
       "cost_cents": 3359.9307
     },
     {
-      "date": "2026-08-17",
-      "source": "headroom",
+      "date": "2026-08-18",
+      "source": "codex",
       "model": "codex-auto-review",
-      "requests": 45,
-      "tokens_in": 330321,
-      "tokens_out": 6109,
+      "requests": 10,
+      "tokens_in": 75415,
+      "tokens_out": 1268,
       "cache_write": 0,
-      "cache_read": 1140480
+      "cache_read": 200192
     },
     {
-      "date": "2026-08-17",
-      "source": "headroom",
+      "date": "2026-08-18",
+      "source": "codex",
       "model": "gpt-5.6-sol",
-      "requests": 213,
-      "tokens_in": 587714,
-      "tokens_out": 103616,
+      "requests": 32,
+      "tokens_in": 272711,
+      "tokens_out": 16031,
       "cache_write": 0,
-      "cache_read": 20851840
+      "cache_read": 2875520
     },
     {
       "date": "2026-08-18",
@@ -1812,26 +1729,6 @@
       "cache_write": 0,
       "cache_read": 71198208,
       "cost_cents": 5090.2876
-    },
-    {
-      "date": "2026-08-18",
-      "source": "headroom",
-      "model": "codex-auto-review",
-      "requests": 10,
-      "tokens_in": 75415,
-      "tokens_out": 1268,
-      "cache_write": 0,
-      "cache_read": 200192
-    },
-    {
-      "date": "2026-08-18",
-      "source": "headroom",
-      "model": "gpt-5.6-sol",
-      "requests": 32,
-      "tokens_in": 272711,
-      "tokens_out": 16031,
-      "cache_write": 0,
-      "cache_read": 2875520
     }
   ],
   "year": {

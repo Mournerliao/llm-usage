@@ -267,11 +267,11 @@ class TestBuildWeekView(unittest.TestCase):
 
     def test_subscription_source_renders_as_label_not_dash(self):
         daily = fold.fold_events([
-            row("2026-08-10", "gpt-5.6-sol", source="chatgpt", requests=3,
+            row("2026-08-10", "gpt-5.6-sol", source="codex", requests=3,
                 **tokens(i=100, o=20, cr=800)),
         ])
         view = weekview.build_week_view(daily, WEEK,
-                                       subscription_sources=["chatgpt"])
+                                       subscription_sources=["codex"])
         self.assertEqual(view["cost_display"], "Subscription")
         self.assertEqual(view["models"][0]["cost_display"], "Subscription")
 
@@ -279,26 +279,26 @@ class TestBuildWeekView(unittest.TestCase):
         daily = fold.fold_events([
             row("2026-08-10", "opus", source="cursor", requests=1,
                 cost_cents=100.0, **tokens(i=10)),
-            row("2026-08-10", "gpt-5.6-sol", source="chatgpt", requests=1,
+            row("2026-08-10", "gpt-5.6-sol", source="codex", requests=1,
                 **tokens(i=20)),
         ])
         view = weekview.build_week_view(daily, WEEK,
-                                       subscription_sources=["chatgpt"])
+                                       subscription_sources=["codex"])
         self.assertEqual(view["cost_display"], "$1.00 · Subscription")
         by_label = {m["label"]: m["cost_display"] for m in view["models"]}
         self.assertEqual(by_label["opus"], "$1.00")
         self.assertEqual(by_label["gpt-5.6-sol"], "Subscription")
 
     def test_same_model_from_two_sources_is_aggregated(self):
-        """展示层按模型聚合；chatgpt 与中转站的同名模型合成一行。"""
+        """展示层按模型聚合；两个 ADE 的同名模型合成一行。"""
         daily = fold.fold_events([
-            row("2026-08-10", "gpt-5.5", source="chatgpt", requests=2,
+            row("2026-08-10", "gpt-5.5", source="codex", requests=2,
                 **tokens(i=100)),
-            row("2026-08-10", "gpt-5.5", source="krill", requests=3,
+            row("2026-08-10", "gpt-5.5", source="cursor", requests=3,
                 **tokens(i=50)),
         ])
         view = weekview.build_week_view(daily, WEEK,
-                                       subscription_sources=["chatgpt"])
+                                       subscription_sources=["codex"])
         self.assertEqual(len(view["models"]), 1)
         self.assertEqual(view["models"][0]["requests"], 5)
         self.assertEqual(view["models"][0]["tokens_total"], 150)
@@ -436,11 +436,11 @@ class TestChatgptCollector(unittest.TestCase):
                                       "output_tokens": 999999}}}},
         ]
 
-    def test_openai_provider_becomes_chatgpt_source(self):
+    def test_any_provider_belongs_to_codex_ade(self):
         raw = chatgpt_collector.parse_rollout(self._records())
         events = chatgpt_collector.to_events(raw, self._day_of)
         self.assertEqual(len(events), 1)
-        self.assertEqual(events[0].source, "chatgpt")
+        self.assertEqual(events[0].source, "codex")
         self.assertEqual(events[0].model, "gpt-5.6-sol")
         self.assertEqual(events[0].date, "2026-08-17")
 
@@ -455,11 +455,11 @@ class TestChatgptCollector(unittest.TestCase):
         # reasoning 是 output 的子集，总量不应再加一次
         self.assertEqual(e.tokens_total, (80453 - 79616) + 179 + 0 + 79616)
 
-    def test_relay_provider_is_its_own_source(self):
+    def test_relay_provider_still_belongs_to_codex(self):
         raw = chatgpt_collector.parse_rollout(
             self._records(provider="krill", model="gpt-5.5"))
         events = chatgpt_collector.to_events(raw, self._day_of)
-        self.assertEqual(events[0].source, "krill")
+        self.assertEqual(events[0].source, "codex")
         self.assertEqual(events[0].model, "gpt-5.5")
 
     def test_skips_zero_token_counts(self):
@@ -494,12 +494,12 @@ class TestChatgptCollector(unittest.TestCase):
         self.assertEqual(events[0].tokens_out, 6)
         self.assertEqual(events[0].cache_read, 20)
 
-    def test_source_for_provider(self):
+    def test_source_is_always_codex_ade(self):
         self.assertEqual(chatgpt_collector.source_for_provider("openai"),
-                         "chatgpt")
+                         "codex")
         self.assertEqual(chatgpt_collector.source_for_provider("xiaomi-mimo"),
-                         "xiaomi-mimo")
-        self.assertEqual(chatgpt_collector.source_for_provider(None), "chatgpt")
+                         "codex")
+        self.assertEqual(chatgpt_collector.source_for_provider(None), "codex")
 
     def test_default_codex_home_is_cross_platform(self):
         self.assertEqual(chatgpt_collector._codex_home({}),
@@ -532,7 +532,7 @@ class TestCollectSeam(unittest.TestCase):
         records = TestChatgptCollector()._records()
         result = chatgpt_collector.collect(ctx, {}, rollouts=[records])
         self.assertTrue(result.machine_shard)
-        self.assertEqual(result.events[0].source, "chatgpt")
+        self.assertEqual(result.events[0].source, "codex")
 
     def test_persist_account_level_writes_under_source(self):
         ctx = CollectContext(tz=TZ, root=Path("."), since="2026-08-01")
@@ -560,8 +560,7 @@ class TestCollectSeam(unittest.TestCase):
             paths = sorted(p.relative_to(ctx.root).as_posix()
                            for p in ctx.root.rglob("*.json"))
             self.assertEqual(paths, [
-                "data/raw/chatgpt/work-mac/2026-08.json",
-                "data/raw/krill/work-mac/2026-08.json",
+                "data/raw/codex/work-mac/2026-08.json",
             ])
 
     def test_persist_machine_shard_requires_machine(self):
@@ -628,17 +627,17 @@ class TestRawLayer(unittest.TestCase):
     def test_machine_shard_does_not_collide_with_account_level(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            write_events(root, "chatgpt", [Event(
-                date="2026-08-17", source="chatgpt", model="x", requests=1)],
+            write_events(root, "codex", [Event(
+                date="2026-08-17", source="codex", model="x", requests=1)],
                 ["2026-08-17"], shard="work-mac")
-            write_events(root, "chatgpt", [Event(
-                date="2026-08-17", source="chatgpt", model="x", requests=2)],
+            write_events(root, "codex", [Event(
+                date="2026-08-17", source="codex", model="x", requests=2)],
                 ["2026-08-17"], shard="home-win")
             paths = sorted(p.relative_to(root).as_posix()
                            for p in root.rglob("*.json"))
             self.assertEqual(paths, [
-                "data/raw/chatgpt/home-win/2026-08.json",
-                "data/raw/chatgpt/work-mac/2026-08.json",
+                "data/raw/codex/home-win/2026-08.json",
+                "data/raw/codex/work-mac/2026-08.json",
             ])
             self.assertEqual(sum(r["requests"] for r in read_all_events(root)), 3)
 

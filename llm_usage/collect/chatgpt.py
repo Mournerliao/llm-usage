@@ -20,10 +20,9 @@ Admin Usage API 只覆盖 API key，和订阅用量不相交。
 
 == 源怎么拆 ==
 
-Codex 经常接中转站。``session_meta.model_provider`` 为 ``openai`` 的记入源
-``chatgpt``（ChatGPT Plus 订阅，不填成本）；其余 provider 各自成为一个源
-（``krill`` / ``custom`` / …），给以后「ADE vs 中转站」的卡片留分片。同一模型
-名在展示层仍按模型聚合，和现在一样。
+Source 是 ADE，不是计费后端。Codex 日志里的 ``model_provider``（``openai`` /
+``krill`` / ``custom`` / …）只说明当时打向哪个接口；无论走 ChatGPT Plus 还是
+中转站，用量都归 ``codex``。Cursor 走官方接口，归 ``cursor``。
 
 这是本机源：会话只存在于产生它的那台机器，两台机器都要采，文件按 machine 分片。
 """
@@ -38,21 +37,17 @@ from pathlib import Path
 
 from . import CollectResult, Event
 
-# ChatGPT 订阅走的官方 provider。其余一律视为中转站 / 外部模型。
+# ChatGPT 订阅走的官方 provider，记在日志里但不决定 Source。
 OPENAI_PROVIDER = "openai"
-SUBSCRIPTION_SOURCE = "chatgpt"
+ADE_SOURCE = "codex"
 
-_SOURCE_SAFE = re.compile(r"[^a-zA-Z0-9._-]+")
 _WINDOWS_ENV = re.compile(r"%([^%]+)%")
 
 
 def source_for_provider(provider: str | None) -> str:
-    """把 Codex 的 model_provider 翻译成 Event.source。"""
-    name = (provider or OPENAI_PROVIDER).strip() or OPENAI_PROVIDER
-    if name == OPENAI_PROVIDER:
-        return SUBSCRIPTION_SOURCE
-    safe = _SOURCE_SAFE.sub("-", name).strip("-.")
-    return safe or "relay"
+    """Codex 的任何 provider 都归 ADE ``codex``。保留函数是为了测试与旧调用。"""
+    del provider
+    return ADE_SOURCE
 
 
 def _day_of_timestamp(ts: str | int | float, tz) -> str:

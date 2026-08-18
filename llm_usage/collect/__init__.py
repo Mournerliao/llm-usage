@@ -22,7 +22,7 @@ Cursor 的用量来自账号级接口，两台机器采到的是同一份数据�
 
 Codex 这类源相反：会话日志只存在于产生它的那台机器。它们在文件系统上按
 ``data/raw/<source>/<machine>/<月>.json`` 分片，避免两台机器互相覆盖；但
-``Event.source`` 仍然是 ``chatgpt`` / 中转站名，machine 不进公开契约。展示与
+``Event.source`` 仍然是 ADE 名（``cursor`` / ``codex``），machine 不进公开契约。展示与
 聚合都看不见机器。
 """
 from __future__ import annotations
@@ -56,7 +56,7 @@ class Event:
     """
 
     date: str                        # YYYY-MM-DD，按配置时区计算
-    source: str                      # 源名，如 cursor / chatgpt
+    source: str                      # ADE 名，如 cursor / codex
     model: str
     requests: int = 0
     tokens_in: int | None = None
@@ -121,7 +121,7 @@ class CollectContext:
 @dataclass(frozen=True)
 class CollectResult:
     """一次采集的产物。``machine_shard`` 为真时按 ``ctx.machine`` 分片落盘，
-    并按 ``Event.source`` 分组（一次采集可能拆出 chatgpt / 中转站）。"""
+    并按 ``Event.source`` 分组（一次采集可能拆出多个 ADE）。"""
 
     events: list[Event]
     days: list[str]

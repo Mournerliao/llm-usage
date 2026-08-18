@@ -1,5 +1,5 @@
 {
-  "source": "chatgpt",
+  "source": "codex",
   "month": "2026-05",
   "days": {
     "2026-05-01": [],
@@ -11,7 +11,7 @@
     "2026-05-07": [
       {
         "date": "2026-05-07",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "codex-auto-review",
         "requests": 6,
         "tokens_in": 72066,
@@ -21,7 +21,7 @@
       },
       {
         "date": "2026-05-07",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "gpt-5.5",
         "requests": 295,
         "tokens_in": 2505568,
@@ -33,7 +33,7 @@
     "2026-05-08": [
       {
         "date": "2026-05-08",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "codex-auto-review",
         "requests": 125,
         "tokens_in": 2031465,
@@ -43,7 +43,7 @@
       },
       {
         "date": "2026-05-08",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "gpt-5.5",
         "requests": 274,
         "tokens_in": 1765314,
@@ -61,7 +61,7 @@
     "2026-05-15": [
       {
         "date": "2026-05-15",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "gpt-5.5",
         "requests": 64,
         "tokens_in": 453232,
@@ -75,7 +75,7 @@
     "2026-05-18": [
       {
         "date": "2026-05-18",
-        "source": "chatgpt",
+        "source": "codex",
         "model": "gpt-5.5",
         "requests": 79,
         "tokens_in": 525245,

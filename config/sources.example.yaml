@@ -22,12 +22,10 @@ sources:
     type: cursor
     # token_env: CURSOR_SESSION_TOKEN
 
-  # ChatGPT / Codex：读本机 ~/.codex 会话日志里的逐次 token。
-  # openai provider → 源名 chatgpt（Plus 订阅，不填成本）；
-  # 其余 provider（中转站 / 外部模型）各自成为一个源，给以后按 ADE / 中转站
-  # 分卡片留分片。同一模型名在展示层仍按模型聚合。
+  # Codex：读本机 ~/.codex 会话日志里的逐次 token。
+  # 无论走 ChatGPT Plus（model_provider=openai）还是中转站，用量都归 ADE `codex`。
+  # 默认跨平台读取当前用户的 ~/.codex；通常无需配置。
+  # Windows 也支持环境变量写法：%USERPROFILE%/.codex
   - name: chatgpt
     type: chatgpt
-    # 默认跨平台读取当前用户的 ~/.codex；通常无需配置。
-    # Windows 也支持环境变量写法：%USERPROFILE%/.codex
     # codex_home: ~/.codex
