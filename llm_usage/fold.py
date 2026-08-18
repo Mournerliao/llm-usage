@@ -7,9 +7,12 @@
 == 为什么周次由数据决定，而不是由「今天」决定 ==
 
 「本周」取的是**最近有用量的那一天所在的 ISO 周**，不是运行时的当天。这样
-stats.json 完全由 raw 决定：同一份 raw 重跑任意次、在任何时刻跑，结果都一样。
-若改成读系统时钟，同一份原始数据在周一和周三会产出不同产物，幂等性就没了，
-而且连着几天没用量时卡片会显示一片空白。
+周次、日明细和 WeekView 完全由 raw 决定：同一份 raw 重跑任意次、在任何时刻跑，
+这三块都一样。若改成读系统时钟，同一份原始数据在周一和周三会产出不同产物，
+幂等性就没了，而且连着几天没用量时卡片会显示一片空白。
+
+唯一的例外是顶层的 ``generated_at`` / ``updated_display``：页眉右端要回答「这张卡片
+还新不新」，必须用写出这一刻的时钟。同一份 raw 在不同时刻重跑，只有这两项会变。
 
 == 展示窗口与年度数据 ==
 
@@ -22,8 +25,9 @@ from __future__ import annotations
 import json
 from collections import defaultdict
 from datetime import date as Date
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from llm_usage import REPO_ROOT, config, pricing, view
 from llm_usage.collect import read_all_events
@@ -135,14 +139,36 @@ def build_year(daily: list[dict], latest: str) -> dict:
     }
 
 
-def build_stats(daily_all: list[dict]) -> dict:
-    """把全量日记录切成 stats.json：展示窗口的明细 + 带视图的周次 + 年度汇总。"""
+def _now_stamp(now: datetime | None = None) -> tuple[str, str]:
+    """写出这一刻的时钟，转成 ISO 时间戳和页眉文案。
+
+    ``now`` 只给测试注入。生产路径读配置时区的当前时刻。
+    """
+    tz = ZoneInfo(config.load_aggregate_config()["timezone"])
+    instant = datetime.now(tz) if now is None else now
+    if instant.tzinfo is None:
+        instant = instant.replace(tzinfo=tz)
+    else:
+        instant = instant.astimezone(tz)
+    generated_at = instant.isoformat(timespec="seconds")
+    return generated_at, view.format_updated(generated_at)
+
+
+def build_stats(daily_all: list[dict], *, now: datetime | None = None) -> dict:
+    """把全量日记录切成 stats.json：展示窗口的明细 + 带视图的周次 + 年度汇总。
+
+    ``now`` 只影响 ``generated_at`` / ``updated_display``，不参与周次窗口。
+    """
     subs = config.subscription_sources()
+    generated_at, updated_display = _now_stamp(now)
     dates = sorted({r["date"] for r in daily_all})
     if not dates:
         return {"schema_version": SCHEMA_VERSION,
                 "timezone": config.load_aggregate_config()["timezone"],
-                "latest_date": None, "weeks": [], "sources": [],
+                "latest_date": None,
+                "generated_at": generated_at,
+                "updated_display": updated_display,
+                "weeks": [], "sources": [],
                 "subscription_sources": subs,
                 "daily": [], "year": None}
 
@@ -160,6 +186,8 @@ def build_stats(daily_all: list[dict]) -> dict:
         "schema_version": SCHEMA_VERSION,
         "timezone": config.load_aggregate_config()["timezone"],
         "latest_date": latest,
+        "generated_at": generated_at,
+        "updated_display": updated_display,
         "weeks": weeks,
         "sources": sorted({r["source"] for r in daily_all}),
         "subscription_sources": subs,

@@ -16,7 +16,7 @@ from __future__ import annotations
 import math
 from collections import defaultdict
 from datetime import date as Date
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Any
 
 from llm_usage.contract import TOKEN_KINDS
@@ -121,6 +121,18 @@ def format_day(day: str) -> str:
 
 def format_range(start: str, end: str) -> str:
     return f"{format_day(start)} – {format_day(end)}"
+
+
+def format_updated(generated_at: str | None) -> str:
+    """产物刷新时刻 → ``Updated Aug 18, 17:20``。空值给空串，渲染器直接省略。
+
+    钟点按时间戳自带的偏移显示，不在这里再转时区——fold 写入时已经是配置时区。
+    """
+    if not generated_at:
+        return ""
+    dt = datetime.fromisoformat(generated_at)
+    return (f"Updated {MONTH_ABBR[dt.month - 1]} {dt.day}, "
+            f"{dt.hour:02d}:{dt.minute:02d}")
 
 
 # ---------------------------------------------------------------------- 归约

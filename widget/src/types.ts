@@ -107,6 +107,10 @@ export interface UsageStats {
   subscription_sources?: string[];
   daily: UsageRow[];
   year: YearSummary | null;
+  /** 产物写出时刻。只回答卡片新不新，不参与周次窗口。 */
+  generated_at?: string;
+  /** generated_at 的展示文案，如 Updated Aug 18, 17:20。渲染器不自己格式化。 */
+  updated_display?: string;
 }
 
 /** 主题模式：跟随系统，或强制浅色 / 深色。 */

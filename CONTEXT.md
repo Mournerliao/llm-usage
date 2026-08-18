@@ -35,5 +35,8 @@ token 按各模型单价折算出的成本，单位为分（`cost_cents`）。Cu
 **Subscription source**:
 raw 里没有官方成本的源。fold 时按 API 牌价补金额；对不上牌价的模型，金额列仍显示 Subscription。
 
+**Updated display**:
+产物刷新时刻的展示文案，如 `Updated Aug 18, 17:20`。由 `generated_at` 在 fold 时格式化，两端渲染器只读这一项。不参与周次窗口。
+
 **Machine**:
 本机标识。只当 raw 分片键，不进 Event，也不进公开展示。

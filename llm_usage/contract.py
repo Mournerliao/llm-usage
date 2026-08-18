@@ -22,7 +22,7 @@ TOKEN_KINDS = tuple(
     if kind in _SCHEMA["properties"]["daily"]["items"]["properties"])
 
 _REQUIRED_TOP = ("schema_version", "timezone", "latest_date", "weeks",
-                 "sources", "daily", "year")
+                 "sources", "daily", "year", "generated_at", "updated_display")
 _REQUIRED_ROW = ("date", "source", "model", "requests")
 _REQUIRED_VIEW = ("week", "start", "end", "range_display", "basis", "requests",
                   "tokens_display", "cost_display", "requests_display",

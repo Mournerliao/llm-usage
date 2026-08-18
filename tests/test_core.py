@@ -182,6 +182,99 @@ class TestWeekWindow(unittest.TestCase):
         stats = fold.build_stats([])
         self.assertIsNone(stats["latest_date"])
         self.assertEqual(stats["weeks"], [])
+        self.assertTrue(stats["generated_at"])
+        self.assertTrue(stats["updated_display"].startswith("Updated "))
+
+    def test_generated_at_is_the_only_clock_field(self):
+        """同一份 raw 换个时刻重跑，周次与数字不变，只有页眉时间戳变。"""
+        daily = fold.fold_events([row("2026-05-06", "m")])
+        t1 = datetime(2026, 8, 18, 17, 20, tzinfo=TZ)
+        t2 = datetime(2026, 8, 18, 18, 5, tzinfo=TZ)
+        first = fold.build_stats(daily, now=t1)
+        second = fold.build_stats(daily, now=t2)
+        self.assertEqual(first["weeks"], second["weeks"])
+        self.assertEqual(first["daily"], second["daily"])
+        self.assertEqual(first["generated_at"], "2026-08-18T17:20:00+08:00")
+        self.assertEqual(first["updated_display"], "Updated Aug 18, 17:20")
+        self.assertEqual(second["updated_display"], "Updated Aug 18, 18:05")
+
+
+# OpenAI 公开 API 牌价（美元 / 百万 token，短上下文）。测试里用字面量当独立预期值，
+# 不从实现倒推。来源：https://developers.openai.com/api/docs/pricing
+SOL = {"input": 5.00, "cache_read": 0.50, "cache_write": 6.25, "output": 30.00}
+
+
+class TestListPrices(unittest.TestCase):
+    def test_one_million_input_tokens_is_five_dollars(self):
+        cents = pricing.cost_cents_from_tokens(
+            tokens_in=1_000_000, tokens_out=0, cache_write=0, cache_read=0,
+            rates=SOL)
+        self.assertAlmostEqual(cents, 500.0)
+
+    def test_cache_write_replaces_overlapping_input_not_adds(self):
+        """写入缓存的那部分按 1.25x 计价，不再按 1x 加一遍。"""
+        cents = pricing.cost_cents_from_tokens(
+            tokens_in=800_000, tokens_out=0, cache_write=800_000, cache_read=0,
+            rates=SOL)
+        self.assertAlmostEqual(cents, 500.0)  # 0.8M × $6.25
+
+    def test_four_kinds_use_their_own_rates(self):
+        # 1M 未写入的输入 $5 + 1M 写入 $6.25 + 10M 缓存读 $5 + 0.1M 输出 $3
+        cents = pricing.cost_cents_from_tokens(
+            tokens_in=2_000_000, tokens_out=100_000,
+            cache_write=1_000_000, cache_read=10_000_000, rates=SOL)
+        self.assertAlmostEqual(cents, 1925.0)
+
+    def test_does_not_overwrite_vendor_cost(self):
+        daily = [row("2026-08-10", "gpt-5.6-sol", source="cursor",
+                     cost_cents=12.0, **tokens(i=1_000_000))]
+        filled = pricing.fill_list_prices(
+            daily, {"gpt-5.6-sol": SOL}, {})
+        self.assertAlmostEqual(filled[0]["cost_cents"], 12.0)
+
+    def test_fills_missing_cost_from_the_price_table(self):
+        daily = [row("2026-08-10", "gpt-5.6-sol", source="codex",
+                     **tokens(i=1_000_000))]
+        filled = pricing.fill_list_prices(
+            daily, {"gpt-5.6-sol": SOL}, {})
+        self.assertAlmostEqual(filled[0]["cost_cents"], 500.0)
+
+    def test_price_alias_does_not_rename_the_model(self):
+        daily = [row("2026-08-10", "codex-auto-review", source="codex",
+                     **tokens(i=1_000_000))]
+        filled = pricing.fill_list_prices(
+            daily, {"gpt-5.6-sol": SOL},
+            {"codex-auto-review": "gpt-5.6-sol"})
+        self.assertEqual(filled[0]["model"], "codex-auto-review")
+        self.assertAlmostEqual(filled[0]["cost_cents"], 500.0)
+
+    def test_unknown_model_stays_unpriced(self):
+        daily = [row("2026-08-10", "unknown", source="codex", **tokens(i=10))]
+        filled = pricing.fill_list_prices(daily, {"gpt-5.6-sol": SOL}, {})
+        self.assertNotIn("cost_cents", filled[0])
+
+    def test_mixed_week_hero_is_a_single_dollar_amount(self):
+        """有官方折算的和按牌价补上的加在同一个数字里，不再拼 Subscription。"""
+        daily = pricing.fill_list_prices([
+            row("2026-08-10", "opus", source="cursor", requests=1,
+                cost_cents=100.0, **tokens(i=10)),
+            row("2026-08-10", "gpt-5.6-sol", source="codex", requests=1,
+                **tokens(i=1_000_000)),
+        ], {"gpt-5.6-sol": SOL}, {})
+        view = weekview.build_week_view(daily, WEEK, subscription_sources=["codex"])
+        self.assertEqual(view["cost_display"], "$6.00")
+        by_label = {m["label"]: m["cost_display"] for m in view["models"]}
+        self.assertEqual(by_label["opus"], "$1.00")
+        self.assertEqual(by_label["gpt-5.6-sol"], "$5.00")
+
+    def test_build_stats_uses_committed_sol_list_price(self):
+        daily = fold.fold_events([
+            row("2026-08-10", "gpt-5.6-sol", source="codex",
+                **tokens(i=1_000_000)),
+        ])
+        stats = fold.build_stats(daily)
+        self.assertEqual(stats["weeks"][0]["view"]["cost_display"], "$5.00")
+        self.assertAlmostEqual(stats["daily"][0]["cost_cents"], 500.0)
 
 
 # OpenAI 公开 API 牌价（美元 / 百万 token，短上下文）。测试里用字面量当独立预期值，
@@ -297,6 +390,13 @@ class TestFormatters(unittest.TestCase):
         self.assertEqual(weekview.format_day("2026-08-03"), "Aug 3")
         self.assertEqual(weekview.format_range("2026-08-10", "2026-08-16"),
                          "Aug 10 – Aug 16")
+
+    def test_format_updated(self):
+        self.assertEqual(
+            weekview.format_updated("2026-08-18T17:20:00+08:00"),
+            "Updated Aug 18, 17:20")
+        self.assertEqual(weekview.format_updated(""), "")
+        self.assertEqual(weekview.format_updated(None), "")
 
 
 class TestBuildWeekView(unittest.TestCase):
@@ -887,6 +987,17 @@ class TestSvgRenderer(unittest.TestCase):
     def test_empty_week_renders_placeholder(self):
         svg = render.render_svg(weekview.build_week_view([], None))
         self.assertIn("No data", svg)
+
+    def test_header_prints_updated_display(self):
+        """刷新时刻进页眉右端，不另起一节，也不撑高卡片。"""
+        stamp = "Updated Aug 18, 17:20"
+        plain = render.render_svg(self._view())
+        stamped = render.render_svg(self._view(), updated_display=stamp)
+        self.assertIn(stamp, stamped)
+        self.assertIn("This week", stamped)
+        self.assertIn("Aug 10 – Aug 16", stamped)
+        self.assertIn(f". {stamp}", stamped)
+        self.assertEqual(_svg_height(stamped), _svg_height(plain))
 
     def test_has_accessible_label(self):
         svg = render.render_svg(self._view())

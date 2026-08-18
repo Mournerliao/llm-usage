@@ -257,12 +257,29 @@ export function UsageWidget({
       style={style}
     >
       <header className="flex min-w-0 flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h2 className="text-[12.5px] tracking-[0.08em] text-muted-foreground">
-          {title}
-        </h2>
-        <time className="font-mono text-[12.5px] tabular-nums text-muted-foreground">
-          {view.range_display || "—"}
-        </time>
+        <div className="flex min-w-0 flex-wrap items-baseline gap-x-2">
+          <h2 className="text-[12.5px] tracking-[0.08em] text-muted-foreground">
+            {title}
+          </h2>
+          {view.range_display ? (
+            <>
+              <span className="text-[12.5px] text-muted-foreground" aria-hidden="true">
+                ·
+              </span>
+              <time className="font-mono text-[12.5px] tabular-nums text-muted-foreground">
+                {view.range_display}
+              </time>
+            </>
+          ) : null}
+        </div>
+        {stats.updated_display ? (
+          <time
+            className="shrink-0 font-mono text-[12.5px] tabular-nums text-muted-foreground"
+            dateTime={stats.generated_at}
+          >
+            {stats.updated_display}
+          </time>
+        ) : null}
       </header>
 
       {weeks.length > 1 && (

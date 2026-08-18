@@ -76,6 +76,8 @@ interface UsageStats {
   schema_version: number;      // 必须是 4
   timezone: string;
   latest_date: string | null;
+  generated_at: string;        // 产物写出时刻
+  updated_display: string;     // 如 Updated Aug 18, 17:20
   weeks: { week: string; start: string; end: string; view: WeekView }[];
   sources: string[];
   daily: UsageRow[];           // 仍保留，widget 展示只读 weeks[].view

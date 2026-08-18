@@ -53,7 +53,8 @@ def main():
 
     stats = fold.aggregate(REPO_ROOT)
     render.render_files(stats)
-    print(f"[done] latest_date={stats['latest_date']}")
+    print(f"[done] latest_date={stats['latest_date']} "
+          f"{stats.get('updated_display', '')}")
 
 
 if __name__ == "__main__":

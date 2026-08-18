@@ -100,24 +100,32 @@ def _rule(y: float, theme: dict, x0: float = PAD, x1: float = CARD_W - PAD) -> s
             f'stroke="{theme["border"]}" stroke-width="1"/>')
 
 
-def render_svg(view: dict[str, Any], theme_name: str = "light") -> str:
-    """把一周的视图渲染成一张卡片。``view`` 来自 ``stats.weeks[0].view``。"""
+def render_svg(view: dict[str, Any], theme_name: str = "light", *,
+               updated_display: str = "") -> str:
+    """把一周的视图渲染成一张卡片。``view`` 来自 ``stats.weeks[0].view``。
+
+    ``updated_display`` 是产物刷新时刻，来自 ``stats.updated_display``，不是周视图
+    的一部分。缺省则不印右端时间，方便单测只盯某一周的内容。
+    """
     t = THEMES[theme_name]
     models = view.get("models") or []
     inner_w = CARD_W - PAD * 2
     body: list[str] = []
 
-    # ---- 页眉：左边说明这是哪一周，右边给出确切区间。
-    body.append(_text(PAD, 44, "This week", size=12.5, fill=t["muted"], spacing=0.9))
-    if view.get("range_display"):
-        body.append(_text(CARD_W - PAD, 44, view["range_display"], size=12.5,
-                          fill=t["muted"], anchor="end"))
+    # ---- 页眉：窗口身份在左（哪一周 + 区间），产物新鲜度在右。
+    # 刷新时刻是快照元数据，跟区间同属这一行，不单独占一节。
+    body.append(_window_title(t, view.get("range_display") or ""))
+    if updated_display:
+        body.append(_text(CARD_W - PAD, 44, updated_display, size=12.5,
+                          fill=t["muted"], family=MONO, anchor="end"))
 
     if not view.get("week"):
         body.append(_text(PAD, 92, "No data", size=22, fill=t["ink"],
                           family=MONO, weight="600"))
-        height = 132
-        return _wrap(body, height, t, "No usage data")
+        alt = "No usage data"
+        if updated_display:
+            alt += f". {updated_display}"
+        return _wrap(body, 132, t, alt)
 
     # ---- 主数字：左 token 量，右折算成本。两者字号刻意差一级，token 是主角。
     #
@@ -210,7 +218,22 @@ def render_svg(view: dict[str, Any], theme_name: str = "light") -> str:
     height = y + 28
     alt = (f"This week {view['range_display']}: {view['tokens_display']} tokens, "
            f"model cost {view['cost_display']}")
+    if updated_display:
+        alt += f". {updated_display}"
     return _wrap(body, height, t, alt, clip_w=name_w)
+
+
+def _window_title(theme: dict, range_display: str) -> str:
+    """页眉左侧：This week 与日期区间收成一簇，区间不再独占右端。"""
+    title = (
+        f'<tspan letter-spacing="0.9">{esc("This week")}</tspan>'
+    )
+    if range_display:
+        title += f'<tspan dx="8">· {esc(range_display)}</tspan>'
+    return (
+        f'<text x="{PAD}" y="44" font-family="{SANS}" font-size="12.5" '
+        f'fill="{theme["muted"]}">{title}</text>'
+    )
 
 
 def _label_advance(label: str, size: float) -> float:
@@ -244,7 +267,10 @@ def render_files(stats: dict) -> list[Path]:
     written = []
     for theme in ("light", "dark"):
         path = ASSETS / f"widget-{theme}.svg"
-        path.write_text(render_svg(card, theme), encoding="utf-8")
+        path.write_text(
+            render_svg(card, theme,
+                       updated_display=stats.get("updated_display") or ""),
+            encoding="utf-8")
         written.append(path)
     print(f"[ok] 渲染 {len(written)} 个 SVG：{card.get('week') or '空'}")
     return written
