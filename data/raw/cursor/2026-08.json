@@ -597,35 +597,68 @@
       {
         "date": "2026-08-19",
         "source": "cursor",
+        "model": "claude-4.5-sonnet",
+        "requests": 3,
+        "tokens_in": 18,
+        "tokens_out": 559,
+        "cache_write": 114270,
+        "cache_read": 37904,
+        "cost_cents": 44.8323
+      },
+      {
+        "date": "2026-08-19",
+        "source": "cursor",
+        "model": "claude-4.5-sonnet-thinking",
+        "requests": 2,
+        "tokens_in": 42,
+        "tokens_out": 815,
+        "cache_write": 227962,
+        "cache_read": 227290,
+        "cost_cents": 93.5396
+      },
+      {
+        "date": "2026-08-19",
+        "source": "cursor",
         "model": "claude-opus-5-thinking-high",
-        "requests": 8,
-        "tokens_in": 420,
-        "tokens_out": 190612,
-        "cache_write": 1435974,
-        "cache_read": 34023657,
-        "cost_cents": 3075.4066
+        "requests": 15,
+        "tokens_in": 130467,
+        "tokens_out": 264156,
+        "cache_write": 2182884,
+        "cache_read": 48459616,
+        "cost_cents": 4440.3208
+      },
+      {
+        "date": "2026-08-19",
+        "source": "cursor",
+        "model": "composer-2.5",
+        "requests": 1,
+        "tokens_in": 176904,
+        "tokens_out": 42570,
+        "cache_write": 0,
+        "cache_read": 6467079,
+        "cost_cents": 148.8293
       },
       {
         "date": "2026-08-19",
         "source": "cursor",
         "model": "cursor-grok-4.5-high",
         "requests": 6,
-        "tokens_in": 1060317,
-        "tokens_out": 9932,
+        "tokens_in": 1068704,
+        "tokens_out": 15551,
         "cache_write": 0,
-        "cache_read": 1218432,
-        "cost_cents": 278.9442
+        "cache_read": 1329792,
+        "cost_cents": 289.561
       },
       {
         "date": "2026-08-19",
         "source": "cursor",
         "model": "cursor-grok-4.6-high",
-        "requests": 52,
-        "tokens_in": 7202291,
-        "tokens_out": 354086,
+        "requests": 66,
+        "tokens_in": 8711980,
+        "tokens_out": 510515,
         "cache_write": 0,
-        "cache_read": 27747840,
-        "cost_cents": 3035.3265
+        "cache_read": 49694464,
+        "cost_cents": 4524.2994
       }
     ]
   }
