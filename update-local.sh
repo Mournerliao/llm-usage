@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 本机用量更新脚本：采集 → 写原始数据 → 推送。
+# 本机用量更新脚本：同步 → 采集 → 写原始数据 → 推送。
 #
 # 采集必须在本机跑：Cursor 要用本机登录态，Codex 要读 ~/.codex 会话日志，
 # 云端 runner 都拿不到。本脚本只推送「原始数据」，产物交给 GitHub Actions。
@@ -31,34 +31,85 @@ else
   exit 1
 fi
 
-echo "==> 采集并汇总"
-if [ -n "${SINCE:-}" ]; then
-  "$PY" run.py --since "$SINCE"
-else
-  "$PY" run.py
+# 本机会写出但不该带进合并的两类文件：
+#
+# 产物（stats.json / SVG）归 GitHub Actions 独占，而本机 run.py 也会写出它们，
+# 且 generated_at 每次都不同；raw 则是每次全量重采的结果，两台机器写同一个
+# 账号级文件。带着这两类脏文件去同步，就会和远端撞车，而冲突一旦留下，
+# 后面每小时都会卡在「未合并文件」上。两类文件都能重新生成，丢弃是安全的。
+CI_OWNED_PATHS=(data/stats.json assets)
+GENERATED_PATHS=("${CI_OWNED_PATHS[@]}" data/raw)
+COMMIT_MSG="chore(data): usage raw @ $(date +%F)"
+
+restore_generated() {
+  git checkout -f HEAD -- "${GENERATED_PATHS[@]}" 2>/dev/null || true
+}
+
+unmerged_files() {
+  git diff --name-only --diff-filter=U
+}
+
+collect() {
+  if [ -n "${SINCE:-}" ]; then
+    "$PY" run.py --since "$SINCE"
+  else
+    "$PY" run.py
+  fi
+  # 只留 raw 进暂存，产物退回 HEAD，交给 CI 生成。
+  git checkout -f HEAD -- "${CI_OWNED_PATHS[@]}" 2>/dev/null || true
+}
+
+commit_raw() {  # 有变更则提交，返回 0 表示有提交
+  git add data/raw
+  if git diff --cached --quiet; then
+    return 1
+  fi
+  git commit -m "$COMMIT_MSG"
+}
+
+# 上一轮若在冲突里退出，先自愈，不要求人工介入。
+git rebase --abort 2>/dev/null || true
+restore_generated
+while git stash list | grep -q '^stash@{0}: autostash$'; do
+  echo "==> 丢弃上次同步残留的贮藏"
+  git stash drop >/dev/null
+done
+if [ -n "$(unmerged_files)" ]; then
+  echo "错误：仍有未解决的冲突，需要手工处理：" >&2
+  unmerged_files >&2
+  exit 1
 fi
 
-# 只提交原始数据。产物由 CI 生成，本机不碰，避免两台机器争同一个文件。
+# 先同步再采集。此刻 raw 与产物都和 HEAD 一致，autostash 里不会有它们，
+# 也就没有和远端同一个文件撞车的机会。
 echo "==> 同步远端"
 git pull --rebase --autostash origin main
 
+echo "==> 采集并汇总"
+collect
+
 echo "==> 提交原始数据"
-git add data/raw
-if git diff --cached --quiet; then
+if ! commit_raw; then
   echo "无变更，跳过提交。"
   exit 0
 fi
 
-git commit -m "chore(data): usage raw @ $(date +%F)"
-
-# 推送失败几乎总是因为另一台机器刚推过，rebase 后重试一次即可。
-#
-# Cursor 的用量来自账号级接口，两台机器采到的是同一份数据、写同一个文件，所以这里
-# 确实可能撞上冲突（不像按机器分片那样天然无冲突）。但两边的内容是同一份数据的快照，
-# 取任意一边都对，之后任何一次采集都会把它重写成最新的完整状态。
 if ! git push origin main; then
-  echo "==> 推送被拒，重新 rebase 后再试"
-  git pull --rebase --autostash origin main
+  # 远端在采集期间前进了（CI 回写产物，或另一台机器推了 raw）。不需要合并：
+  # raw 是全量重采的结果，基于最新远端再采一次就是完整的最新状态。
+  echo "==> 推送被拒，基于最新远端重采一次"
+  git fetch origin main
+  if [ "$(git rev-list --count FETCH_HEAD..HEAD)" != "1" ] ||
+     [ -n "$(git status --porcelain -- ':(exclude)data/raw')" ]; then
+    echo "错误：本地还有其他未推送的提交或改动，不做自动重来。" >&2
+    exit 1
+  fi
+  git reset --hard FETCH_HEAD
+  collect
+  if ! commit_raw; then
+    echo "无变更，跳过提交。"
+    exit 0
+  fi
   git push origin main
 fi
 
