@@ -1,0 +1,301 @@
+{
+  "source": "cursor",
+  "month": "2026-02",
+  "days": {
+    "2026-02-01": [],
+    "2026-02-02": [
+      {
+        "date": "2026-02-02",
+        "source": "cursor",
+        "model": "default",
+        "requests": 8,
+        "tokens_in": 148978,
+        "tokens_out": 38567,
+        "cache_write": 204303,
+        "cache_read": 2411603,
+        "cost_cents": 127.5904
+      }
+    ],
+    "2026-02-03": [
+      {
+        "date": "2026-02-03",
+        "source": "cursor",
+        "model": "default",
+        "requests": 8,
+        "tokens_in": 103587,
+        "tokens_out": 13841,
+        "cache_write": 9342,
+        "cache_read": 1084011,
+        "cost_cents": 49.521
+      }
+    ],
+    "2026-02-04": [
+      {
+        "date": "2026-02-04",
+        "source": "cursor",
+        "model": "default",
+        "requests": 23,
+        "tokens_in": 1127767,
+        "tokens_out": 89228,
+        "cache_write": 492650,
+        "cache_read": 13017216,
+        "cost_cents": 581.5193
+      }
+    ],
+    "2026-02-05": [
+      {
+        "date": "2026-02-05",
+        "source": "cursor",
+        "model": "claude-4.5-opus-high-thinking",
+        "requests": 6,
+        "tokens_in": 208,
+        "tokens_out": 16390,
+        "cache_write": 359922,
+        "cache_read": 988414,
+        "cost_cents": 315.4509
+      },
+      {
+        "date": "2026-02-05",
+        "source": "cursor",
+        "model": "claude-4.5-sonnet-thinking",
+        "requests": 1,
+        "tokens_in": 51,
+        "tokens_out": 1481,
+        "cache_write": 14544,
+        "cache_read": 85289,
+        "cost_cents": 10.2495
+      },
+      {
+        "date": "2026-02-05",
+        "source": "cursor",
+        "model": "default",
+        "requests": 61,
+        "tokens_in": 1000590,
+        "tokens_out": 147987,
+        "cache_write": 995517,
+        "cache_read": 16325296,
+        "cost_cents": 746.438
+      }
+    ],
+    "2026-02-06": [
+      {
+        "date": "2026-02-06",
+        "source": "cursor",
+        "model": "claude-4.6-opus-high-thinking",
+        "requests": 25,
+        "tokens_in": 150,
+        "tokens_out": 62460,
+        "cache_write": 1021249,
+        "cache_read": 5508366,
+        "cost_cents": 982.166
+      },
+      {
+        "date": "2026-02-06",
+        "source": "cursor",
+        "model": "default",
+        "requests": 13,
+        "tokens_in": 266113,
+        "tokens_out": 20441,
+        "cache_write": 228849,
+        "cache_read": 2789617,
+        "cost_cents": 143.8753
+      }
+    ],
+    "2026-02-07": [],
+    "2026-02-08": [],
+    "2026-02-09": [
+      {
+        "date": "2026-02-09",
+        "source": "cursor",
+        "model": "claude-4.6-opus-high-thinking",
+        "requests": 11,
+        "tokens_in": 6547,
+        "tokens_out": 64773,
+        "cache_write": 783321,
+        "cache_read": 7112603,
+        "cost_cents": 843.0476
+      },
+      {
+        "date": "2026-02-09",
+        "source": "cursor",
+        "model": "default",
+        "requests": 12,
+        "tokens_in": 1224259,
+        "tokens_out": 63698,
+        "cache_write": 196792,
+        "cache_read": 7040239,
+        "cost_cents": 391.8561
+      }
+    ],
+    "2026-02-10": [
+      {
+        "date": "2026-02-10",
+        "source": "cursor",
+        "model": "claude-4.6-opus-high-thinking",
+        "requests": 7,
+        "tokens_in": 50,
+        "tokens_out": 44862,
+        "cache_write": 308917,
+        "cache_read": 2906993,
+        "cost_cents": 421.7643
+      },
+      {
+        "date": "2026-02-10",
+        "source": "cursor",
+        "model": "default",
+        "requests": 40,
+        "tokens_in": 1644066,
+        "tokens_out": 98144,
+        "cache_write": 216300,
+        "cache_read": 13657984,
+        "cost_cents": 632.8818
+      }
+    ],
+    "2026-02-11": [
+      {
+        "date": "2026-02-11",
+        "source": "cursor",
+        "model": "claude-4.6-opus-high-thinking",
+        "requests": 4,
+        "tokens_in": 23577,
+        "tokens_out": 19219,
+        "cache_write": 174506,
+        "cache_read": 2552991,
+        "cost_cents": 285.8954
+      },
+      {
+        "date": "2026-02-11",
+        "source": "cursor",
+        "model": "composer-1.5",
+        "requests": 2,
+        "tokens_in": 0,
+        "tokens_out": 6074,
+        "cache_write": 364026,
+        "cache_read": 1553120,
+        "cost_cents": 77.6602
+      },
+      {
+        "date": "2026-02-11",
+        "source": "cursor",
+        "model": "default",
+        "requests": 6,
+        "tokens_in": 212447,
+        "tokens_out": 11742,
+        "cache_write": 179371,
+        "cache_read": 1282048,
+        "cost_cents": 88.0737
+      }
+    ],
+    "2026-02-12": [
+      {
+        "date": "2026-02-12",
+        "source": "cursor",
+        "model": "claude-4.6-opus-high-thinking",
+        "requests": 21,
+        "tokens_in": 7848,
+        "tokens_out": 108141,
+        "cache_write": 812817,
+        "cache_read": 18896177,
+        "cost_cents": 1548.8997
+      },
+      {
+        "date": "2026-02-12",
+        "source": "cursor",
+        "model": "default",
+        "requests": 7,
+        "tokens_in": 528081,
+        "tokens_out": 31599,
+        "cache_write": 116705,
+        "cache_read": 4240892,
+        "cost_cents": 205.58
+      }
+    ],
+    "2026-02-13": [],
+    "2026-02-14": [],
+    "2026-02-15": [],
+    "2026-02-16": [],
+    "2026-02-17": [],
+    "2026-02-18": [],
+    "2026-02-19": [],
+    "2026-02-20": [
+      {
+        "date": "2026-02-20",
+        "source": "cursor",
+        "model": "claude-4.6-opus-high-thinking",
+        "requests": 2,
+        "tokens_in": 12,
+        "tokens_out": 4983,
+        "cache_write": 43651,
+        "cache_read": 271655,
+        "cost_cents": 53.3281
+      },
+      {
+        "date": "2026-02-20",
+        "source": "cursor",
+        "model": "default",
+        "requests": 16,
+        "tokens_in": 143008,
+        "tokens_out": 30401,
+        "cache_write": 0,
+        "cache_read": 1936640,
+        "cost_cents": 84.5326
+      }
+    ],
+    "2026-02-21": [
+      {
+        "date": "2026-02-21",
+        "source": "cursor",
+        "model": "default",
+        "requests": 42,
+        "tokens_in": 426627,
+        "tokens_out": 98819,
+        "cache_write": 0,
+        "cache_read": 7335247,
+        "cost_cents": 296.001
+      }
+    ],
+    "2026-02-22": [
+      {
+        "date": "2026-02-22",
+        "source": "cursor",
+        "model": "default",
+        "requests": 28,
+        "tokens_in": 387964,
+        "tokens_out": 77204,
+        "cache_write": 0,
+        "cache_read": 4497854,
+        "cost_cents": 207.2643
+      }
+    ],
+    "2026-02-23": [],
+    "2026-02-24": [],
+    "2026-02-25": [
+      {
+        "date": "2026-02-25",
+        "source": "cursor",
+        "model": "default",
+        "requests": 21,
+        "tokens_in": 1658594,
+        "tokens_out": 67076,
+        "cache_write": 0,
+        "cache_read": 11673663,
+        "cost_cents": 539.4114
+      }
+    ],
+    "2026-02-26": [
+      {
+        "date": "2026-02-26",
+        "source": "cursor",
+        "model": "default",
+        "requests": 1,
+        "tokens_in": 8616,
+        "tokens_out": 1270,
+        "cache_write": 0,
+        "cache_read": 40448,
+        "cost_cents": 2.8502
+      }
+    ],
+    "2026-02-27": [],
+    "2026-02-28": []
+  }
+}

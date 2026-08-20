@@ -1,0 +1,300 @@
+{
+  "source": "cursor",
+  "month": "2026-01",
+  "days": {
+    "2026-01-02": [
+      {
+        "date": "2026-01-02",
+        "source": "cursor",
+        "model": "default",
+        "requests": 6,
+        "tokens_in": 0,
+        "tokens_out": 13874,
+        "cache_write": 49294,
+        "cache_read": 882688,
+        "cost_cents": 36.5533
+      }
+    ],
+    "2026-01-03": [],
+    "2026-01-04": [
+      {
+        "date": "2026-01-04",
+        "source": "cursor",
+        "model": "default",
+        "requests": 28,
+        "tokens_in": 88693,
+        "tokens_out": 87483,
+        "cache_write": 1110096,
+        "cache_read": 13845218,
+        "cost_cents": 548.4689
+      }
+    ],
+    "2026-01-05": [
+      {
+        "date": "2026-01-05",
+        "source": "cursor",
+        "model": "default",
+        "requests": 48,
+        "tokens_in": 167175,
+        "tokens_out": 211289,
+        "cache_write": 2585410,
+        "cache_read": 25122683,
+        "cost_cents": 1098.9136
+      }
+    ],
+    "2026-01-06": [
+      {
+        "date": "2026-01-06",
+        "source": "cursor",
+        "model": "default",
+        "requests": 33,
+        "tokens_in": 474342,
+        "tokens_out": 79502,
+        "cache_write": 737655,
+        "cache_read": 12115200,
+        "cost_cents": 502.0808
+      }
+    ],
+    "2026-01-07": [
+      {
+        "date": "2026-01-07",
+        "source": "cursor",
+        "model": "default",
+        "requests": 75,
+        "tokens_in": 1114280,
+        "tokens_out": 199722,
+        "cache_write": 2316197,
+        "cache_read": 23558213,
+        "cost_cents": 1137.5982
+      }
+    ],
+    "2026-01-08": [
+      {
+        "date": "2026-01-08",
+        "source": "cursor",
+        "model": "default",
+        "requests": 55,
+        "tokens_in": 274873,
+        "tokens_out": 175713,
+        "cache_write": 1657703,
+        "cache_read": 18843960,
+        "cost_cents": 818.0988
+      }
+    ],
+    "2026-01-09": [
+      {
+        "date": "2026-01-09",
+        "source": "cursor",
+        "model": "default",
+        "requests": 19,
+        "tokens_in": 81619,
+        "tokens_out": 61551,
+        "cache_write": 630354,
+        "cache_read": 6083810,
+        "cost_cents": 278.0225
+      }
+    ],
+    "2026-01-10": [],
+    "2026-01-11": [
+      {
+        "date": "2026-01-11",
+        "source": "cursor",
+        "model": "default",
+        "requests": 32,
+        "tokens_in": 533363,
+        "tokens_out": 115690,
+        "cache_write": 580672,
+        "cache_read": 6715423,
+        "cost_cents": 376.554
+      }
+    ],
+    "2026-01-12": [
+      {
+        "date": "2026-01-12",
+        "source": "cursor",
+        "model": "default",
+        "requests": 12,
+        "tokens_in": 0,
+        "tokens_out": 26235,
+        "cache_write": 304580,
+        "cache_read": 2492928,
+        "cost_cents": 116.1367
+      }
+    ],
+    "2026-01-13": [
+      {
+        "date": "2026-01-13",
+        "source": "cursor",
+        "model": "default",
+        "requests": 45,
+        "tokens_in": 1116309,
+        "tokens_out": 110412,
+        "cache_write": 2206951,
+        "cache_read": 12133934,
+        "cost_cents": 785.0031
+      }
+    ],
+    "2026-01-14": [
+      {
+        "date": "2026-01-14",
+        "source": "cursor",
+        "model": "default",
+        "requests": 20,
+        "tokens_in": 759450,
+        "tokens_out": 61420,
+        "cache_write": 551593,
+        "cache_read": 7094388,
+        "cost_cents": 378.0921
+      }
+    ],
+    "2026-01-15": [
+      {
+        "date": "2026-01-15",
+        "source": "cursor",
+        "model": "default",
+        "requests": 39,
+        "tokens_in": 640709,
+        "tokens_out": 147944,
+        "cache_write": 1210138,
+        "cache_read": 15161508,
+        "cost_cents": 699.16
+      }
+    ],
+    "2026-01-16": [
+      {
+        "date": "2026-01-16",
+        "source": "cursor",
+        "model": "default",
+        "requests": 18,
+        "tokens_in": 319769,
+        "tokens_out": 80541,
+        "cache_write": 500115,
+        "cache_read": 10497005,
+        "cost_cents": 413.2352
+      }
+    ],
+    "2026-01-17": [],
+    "2026-01-18": [
+      {
+        "date": "2026-01-18",
+        "source": "cursor",
+        "model": "default",
+        "requests": 5,
+        "tokens_in": 26920,
+        "tokens_out": 18989,
+        "cache_write": 122467,
+        "cache_read": 734976,
+        "cost_cents": 48.4412
+      }
+    ],
+    "2026-01-19": [],
+    "2026-01-20": [
+      {
+        "date": "2026-01-20",
+        "source": "cursor",
+        "model": "default",
+        "requests": 1,
+        "tokens_in": 14681,
+        "tokens_out": 5194,
+        "cache_write": 39574,
+        "cache_read": 348672,
+        "cost_cents": 18.6151
+      }
+    ],
+    "2026-01-21": [
+      {
+        "date": "2026-01-21",
+        "source": "cursor",
+        "model": "default",
+        "requests": 19,
+        "tokens_in": 27743,
+        "tokens_out": 45314,
+        "cache_write": 431667,
+        "cache_read": 4364288,
+        "cost_cents": 193.7218
+      }
+    ],
+    "2026-01-22": [
+      {
+        "date": "2026-01-22",
+        "source": "cursor",
+        "model": "default",
+        "requests": 25,
+        "tokens_in": 396413,
+        "tokens_out": 107381,
+        "cache_write": 1063443,
+        "cache_read": 17265552,
+        "cost_cents": 678.5494
+      }
+    ],
+    "2026-01-23": [
+      {
+        "date": "2026-01-23",
+        "source": "cursor",
+        "model": "default",
+        "requests": 2,
+        "tokens_in": 0,
+        "tokens_out": 5328,
+        "cache_write": 44032,
+        "cache_read": 285696,
+        "cost_cents": 15.8432
+      }
+    ],
+    "2026-01-24": [],
+    "2026-01-25": [],
+    "2026-01-26": [
+      {
+        "date": "2026-01-26",
+        "source": "cursor",
+        "model": "default",
+        "requests": 18,
+        "tokens_in": 260577,
+        "tokens_out": 85846,
+        "cache_write": 692909,
+        "cache_read": 10106086,
+        "cost_cents": 423.3455
+      }
+    ],
+    "2026-01-27": [
+      {
+        "date": "2026-01-27",
+        "source": "cursor",
+        "model": "default",
+        "requests": 36,
+        "tokens_in": 749496,
+        "tokens_out": 120565,
+        "cache_write": 917113,
+        "cache_read": 14502227,
+        "cost_cents": 643.2208
+      }
+    ],
+    "2026-01-28": [],
+    "2026-01-29": [
+      {
+        "date": "2026-01-29",
+        "source": "cursor",
+        "model": "default",
+        "requests": 11,
+        "tokens_in": 94617,
+        "tokens_out": 21512,
+        "cache_write": 176869,
+        "cache_read": 1327611,
+        "cost_cents": 80.0332
+      }
+    ],
+    "2026-01-30": [
+      {
+        "date": "2026-01-30",
+        "source": "cursor",
+        "model": "default",
+        "requests": 19,
+        "tokens_in": 5005,
+        "tokens_out": 43406,
+        "cache_write": 308344,
+        "cache_read": 3490420,
+        "cost_cents": 152.4727
+      }
+    ],
+    "2026-01-31": []
+  }
+}
