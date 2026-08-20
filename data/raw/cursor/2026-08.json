@@ -123,12 +123,12 @@
         "date": "2026-08-05",
         "source": "cursor",
         "model": "composer-2.5",
-        "requests": 21,
-        "tokens_in": 1163417,
-        "tokens_out": 49425,
+        "requests": 20,
+        "tokens_in": 1160264,
+        "tokens_out": 48590,
         "cache_write": 0,
-        "cache_read": 10731827,
-        "cost_cents": 285.5424
+        "cache_read": 9737771,
+        "cost_cents": 265.2949
       },
       {
         "date": "2026-08-05",
@@ -699,12 +699,12 @@
         "date": "2026-08-20",
         "source": "cursor",
         "model": "cursor-grok-4.6-high-fast",
-        "requests": 8,
-        "tokens_in": 310686,
-        "tokens_out": 31489,
+        "requests": 23,
+        "tokens_in": 1186885,
+        "tokens_out": 96950,
         "cache_write": 0,
-        "cache_read": 2795648,
-        "cost_cents": 434.2186
+        "cache_read": 17457408,
+        "cost_cents": 2317.6458
       }
     ]
   }
