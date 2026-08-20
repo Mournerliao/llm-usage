@@ -494,28 +494,6 @@
         "cache_write": 0,
         "cache_read": 1384960,
         "cost_cents": 80.5615
-      },
-      {
-        "date": "2026-06-18",
-        "source": "cursor",
-        "model": "composer-2.5-fast",
-        "requests": 1,
-        "tokens_in": 99068,
-        "tokens_out": 3993,
-        "cache_write": 0,
-        "cache_read": 570696,
-        "cost_cents": 64.2447
-      },
-      {
-        "date": "2026-06-18",
-        "source": "cursor",
-        "model": "default",
-        "requests": 1,
-        "tokens_in": 114334,
-        "tokens_out": 2997,
-        "cache_write": 0,
-        "cache_read": 822888,
-        "cost_cents": 79.9401
       }
     ],
     "2026-06-19": [],
