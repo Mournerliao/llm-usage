@@ -653,12 +653,36 @@
         "date": "2026-08-19",
         "source": "cursor",
         "model": "cursor-grok-4.6-high",
-        "requests": 76,
-        "tokens_in": 10419000,
-        "tokens_out": 616614,
+        "requests": 85,
+        "tokens_in": 11608912,
+        "tokens_out": 654181,
         "cache_write": 0,
-        "cache_read": 61084928,
-        "cost_cents": 5497.8543
+        "cache_read": 67396352,
+        "cost_cents": 6072.0482
+      }
+    ],
+    "2026-08-20": [
+      {
+        "date": "2026-08-20",
+        "source": "cursor",
+        "model": "claude-4.5-sonnet-thinking",
+        "requests": 9,
+        "tokens_in": 128,
+        "tokens_out": 4616,
+        "cache_write": 985878,
+        "cache_read": 589289,
+        "cost_cents": 394.3453
+      },
+      {
+        "date": "2026-08-20",
+        "source": "cursor",
+        "model": "cursor-grok-4.6-high",
+        "requests": 15,
+        "tokens_in": 1016019,
+        "tokens_out": 125181,
+        "cache_write": 0,
+        "cache_read": 17082112,
+        "cost_cents": 1128.5403
       }
     ]
   }
