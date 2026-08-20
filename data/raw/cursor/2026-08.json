@@ -676,13 +676,24 @@
       {
         "date": "2026-08-20",
         "source": "cursor",
-        "model": "cursor-grok-4.6-high",
-        "requests": 15,
-        "tokens_in": 1016019,
-        "tokens_out": 125181,
+        "model": "cursor-grok-4.5-high",
+        "requests": 1,
+        "tokens_in": 69556,
+        "tokens_out": 7629,
         "cache_write": 0,
-        "cache_read": 17082112,
-        "cost_cents": 1128.5403
+        "cache_read": 181632,
+        "cost_cents": 27.5702
+      },
+      {
+        "date": "2026-08-20",
+        "source": "cursor",
+        "model": "cursor-grok-4.6-high",
+        "requests": 46,
+        "tokens_in": 2412377,
+        "tokens_out": 289349,
+        "cache_write": 0,
+        "cache_read": 38451200,
+        "cost_cents": 2570.569
       }
     ]
   }
