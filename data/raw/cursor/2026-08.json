@@ -688,12 +688,12 @@
         "date": "2026-08-20",
         "source": "cursor",
         "model": "cursor-grok-4.6-high",
-        "requests": 46,
-        "tokens_in": 2412377,
-        "tokens_out": 289349,
+        "requests": 54,
+        "tokens_in": 2859496,
+        "tokens_out": 335580,
         "cache_write": 0,
-        "cache_read": 38451200,
-        "cost_cents": 2570.569
+        "cache_read": 48128384,
+        "cost_cents": 3168.2966
       }
     ]
   }
