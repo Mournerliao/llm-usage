@@ -676,6 +676,17 @@
       {
         "date": "2026-08-20",
         "source": "cursor",
+        "model": "claude-opus-5-thinking-high",
+        "requests": 4,
+        "tokens_in": 86,
+        "tokens_out": 42825,
+        "cache_write": 214653,
+        "cache_read": 7268191,
+        "cost_cents": 604.6732
+      },
+      {
+        "date": "2026-08-20",
+        "source": "cursor",
         "model": "cursor-grok-4.5-high",
         "requests": 1,
         "tokens_in": 69556,
@@ -699,12 +710,12 @@
         "date": "2026-08-20",
         "source": "cursor",
         "model": "cursor-grok-4.6-high-fast",
-        "requests": 33,
-        "tokens_in": 1601157,
-        "tokens_out": 142838,
+        "requests": 36,
+        "tokens_in": 2099213,
+        "tokens_out": 242709,
         "cache_write": 0,
-        "cache_read": 27547648,
-        "cost_cents": 3537.6518
+        "cache_read": 36645760,
+        "cost_cents": 4766.5307
       }
     ]
   }
