@@ -243,6 +243,27 @@
         "cache_read": 114954880
       }
     ],
-    "2026-08-21": []
+    "2026-08-21": [
+      {
+        "date": "2026-08-21",
+        "source": "codex",
+        "model": "codex-auto-review",
+        "requests": 17,
+        "tokens_in": 176595,
+        "tokens_out": 2497,
+        "cache_write": 0,
+        "cache_read": 652544
+      },
+      {
+        "date": "2026-08-21",
+        "source": "codex",
+        "model": "gpt-5.6-sol",
+        "requests": 146,
+        "tokens_in": 300989,
+        "tokens_out": 55419,
+        "cache_write": 0,
+        "cache_read": 19041152
+      }
+    ]
   }
 }
