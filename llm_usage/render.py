@@ -40,7 +40,9 @@ THEMES = {
         "border": "#E6E4DF",
         "ink": "#16181C",
         "muted": "#6C7076",
-        "accent": "#A6321F",
+        # 只有左上角那个 token 总量用 GitHub Primer 的 success 绿。其余数字和条
+        # 都走 ink / 灰阶，费用也不再单独染色。
+        "accent": "#1A7F37",
         "track": "#EFEDE8",
         "bar": "#16181C",
         # 四个色阶之间的明度差刻意拉开：相邻两段挨在一起时边界要能看出来。
@@ -58,7 +60,7 @@ THEMES = {
         "border": "#242B33",
         "ink": "#E8E4DC",
         "muted": "#98A0A9",
-        "accent": "#F0705C",
+        "accent": "#3FB950",
         "track": "#1C232B",
         "bar": "#D8D3CA",
         "kinds": {
@@ -134,14 +136,14 @@ def render_svg(view: dict[str, Any], theme_name: str = "light", *,
     # macOS 的 SF Mono 是这个值，Windows 的 Consolas 不是，后缀会贴上或飘开。
     body.append(
         f'<text x="{PAD}" y="104" font-family="{MONO}" font-size="44" '
-        f'fill="{t["ink"]}" font-weight="600">{esc(view["tokens_display"])}'
-        f'<tspan font-family="{SANS}" font-size="13" fill="{t["muted"]}"'
+        f'fill="{t["accent"]}" font-weight="600">{esc(view["tokens_display"])}'
+        f'<tspan font-family="{SANS}" font-size="13" fill="{t["ink"]}"'
         f' font-weight="400" dx="9">tokens</tspan></text>')
     body.append(_text(PAD, 126, f"{view['requests_display']} requests", size=12,
-                      fill=t["muted"]))
+                      fill=t["ink"]))
 
     body.append(_text(CARD_W - PAD, 104, view["cost_display"], size=30,
-                      fill=t["accent"], family=MONO, weight="600", anchor="end"))
+                      fill=t["ink"], family=MONO, weight="600", anchor="end"))
     body.append(_text(CARD_W - PAD, 126, "Model cost", size=12, fill=t["muted"],
                       anchor="end"))
 

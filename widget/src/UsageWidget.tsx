@@ -315,19 +315,19 @@ export function UsageWidget({
             <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
               <div className="min-w-0">
                 <p className="flex items-baseline gap-2">
-                  <span className="font-mono text-[2.75rem] leading-none font-semibold tabular-nums text-foreground">
+                  <span className="font-mono text-[2.75rem] leading-none font-semibold tabular-nums text-accent">
                     {view.tokens_display}
                   </span>
-                  <span className="text-[13px] text-muted-foreground">tokens</span>
+                  <span className="text-[13px] text-foreground">tokens</span>
                 </p>
-                <p className="mt-2 text-[12px] text-muted-foreground">
+                <p className="mt-2 text-[12px] text-foreground">
                   {weekLabel(activeIndex)} · {view.requests_display} requests
                 </p>
               </div>
               {/* 窄容器里成本会换到下一行，此时跟着左边缘对齐；只有和 token 量并排
                   时才右对齐，否则数字贴左而标签贴右，两行读起来是错开的。 */}
               <div className="text-left @xl:text-right">
-                <p className="font-mono text-[1.875rem] leading-none font-semibold tabular-nums text-accent">
+                <p className="font-mono text-[1.875rem] leading-none font-semibold tabular-nums text-foreground">
                   {view.cost_display}
                 </p>
                 <p className="mt-2 text-[12px] text-muted-foreground">Model cost</p>
