@@ -756,23 +756,23 @@
         "date": "2026-08-21",
         "source": "cursor",
         "model": "composer-2.5",
-        "requests": 1,
-        "tokens_in": 75859,
-        "tokens_out": 7346,
+        "requests": 13,
+        "tokens_in": 535428,
+        "tokens_out": 52923,
         "cache_write": 0,
-        "cache_read": 561088,
-        "cost_cents": 16.8512
+        "cache_read": 9926129,
+        "cost_cents": 238.5247
       },
       {
         "date": "2026-08-21",
         "source": "cursor",
         "model": "cursor-grok-4.6-high",
-        "requests": 14,
-        "tokens_in": 1422847,
-        "tokens_out": 192195,
+        "requests": 19,
+        "tokens_in": 1882353,
+        "tokens_out": 240958,
         "cache_write": 0,
-        "cache_read": 14740864,
-        "cost_cents": 1095.9227
+        "cache_read": 23227392,
+        "cost_cents": 1638.8086
       },
       {
         "date": "2026-08-21",
