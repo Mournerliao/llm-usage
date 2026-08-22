@@ -768,11 +768,11 @@
         "source": "cursor",
         "model": "cursor-grok-4.6-high",
         "requests": 19,
-        "tokens_in": 1882353,
-        "tokens_out": 240958,
+        "tokens_in": 1887428,
+        "tokens_out": 243429,
         "cache_write": 0,
-        "cache_read": 23227392,
-        "cost_cents": 1638.8086
+        "cache_read": 23789184,
+        "cost_cents": 1669.3958
       },
       {
         "date": "2026-08-21",
@@ -785,6 +785,7 @@
         "cache_read": 9361728,
         "cost_cents": 1274.024
       }
-    ]
+    ],
+    "2026-08-22": []
   }
 }
