@@ -861,12 +861,12 @@
         "date": "2026-08-25",
         "source": "cursor",
         "model": "cursor-grok-4.6-high-fast",
-        "requests": 107,
-        "tokens_in": 1661158,
-        "tokens_out": 149005,
+        "requests": 120,
+        "tokens_in": 2023569,
+        "tokens_out": 217906,
         "cache_write": 0,
-        "cache_read": 20003648,
-        "cost_cents": 2835.104
+        "cache_read": 28891328,
+        "cost_cents": 3944.5751
       }
     ]
   }
