@@ -850,12 +850,12 @@
         "date": "2026-08-25",
         "source": "cursor",
         "model": "cursor-grok-4.6-high",
-        "requests": 4,
-        "tokens_in": 92725,
-        "tokens_out": 4393,
+        "requests": 17,
+        "tokens_in": 816920,
+        "tokens_out": 112014,
         "cache_write": 0,
-        "cache_read": 367872,
-        "cost_cents": 39.5744
+        "cache_read": 11485056,
+        "cost_cents": 800.832
       },
       {
         "date": "2026-08-25",
