@@ -273,22 +273,23 @@
         "date": "2026-08-25",
         "source": "codex",
         "model": "codex-auto-review",
-        "requests": 103,
-        "tokens_in": 892498,
-        "tokens_out": 12813,
+        "requests": 134,
+        "tokens_in": 1792575,
+        "tokens_out": 16163,
         "cache_write": 0,
-        "cache_read": 5710080
+        "cache_read": 9602560
       },
       {
         "date": "2026-08-25",
         "source": "codex",
         "model": "gpt-5.6-sol",
-        "requests": 640,
-        "tokens_in": 1886376,
-        "tokens_out": 270367,
+        "requests": 770,
+        "tokens_in": 2115811,
+        "tokens_out": 318727,
         "cache_write": 0,
-        "cache_read": 68618368
+        "cache_read": 87748736
       }
-    ]
+    ],
+    "2026-08-26": []
   }
 }
