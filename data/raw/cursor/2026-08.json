@@ -907,12 +907,12 @@
         "date": "2026-08-26",
         "source": "cursor",
         "model": "cursor-grok-4.6-high-fast",
-        "requests": 7,
-        "tokens_in": 403466,
-        "tokens_out": 30964,
+        "requests": 8,
+        "tokens_in": 409619,
+        "tokens_out": 32284,
         "cache_write": 0,
-        "cache_read": 5187712,
-        "cost_cents": 703.4467
+        "cache_read": 6088768,
+        "cost_cents": 797.5975
       }
     ]
   }
