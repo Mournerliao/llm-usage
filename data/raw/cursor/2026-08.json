@@ -869,6 +869,29 @@
         "cost_cents": 8081.9808
       }
     ],
-    "2026-08-26": []
+    "2026-08-26": [
+      {
+        "date": "2026-08-26",
+        "source": "cursor",
+        "model": "claude-opus-5-thinking-xhigh",
+        "requests": 3,
+        "tokens_in": 6,
+        "tokens_out": 3151,
+        "cache_write": 171682,
+        "cache_read": 329586,
+        "cost_cents": 131.661
+      },
+      {
+        "date": "2026-08-26",
+        "source": "cursor",
+        "model": "cursor-grok-4.6-high-fast",
+        "requests": 2,
+        "tokens_in": 120910,
+        "tokens_out": 26020,
+        "cache_write": 0,
+        "cache_read": 1033792,
+        "cost_cents": 169.0995
+      }
+    ]
   }
 }
