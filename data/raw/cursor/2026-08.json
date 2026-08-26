@@ -918,12 +918,36 @@
         "date": "2026-08-26",
         "source": "cursor",
         "model": "cursor-grok-4.6-high-fast",
-        "requests": 207,
-        "tokens_in": 6072279,
-        "tokens_out": 398728,
+        "requests": 213,
+        "tokens_in": 6518322,
+        "tokens_out": 415342,
         "cache_write": 0,
-        "cache_read": 74973440,
-        "cost_cents": 10381.3871
+        "cache_read": 79552000,
+        "cost_cents": 11037.5971
+      }
+    ],
+    "2026-08-27": [
+      {
+        "date": "2026-08-27",
+        "source": "cursor",
+        "model": "composer-2.5-fast",
+        "requests": 4,
+        "tokens_in": 151160,
+        "tokens_out": 16065,
+        "cache_write": 0,
+        "cache_read": 2481376,
+        "cost_cents": 193.5143
+      },
+      {
+        "date": "2026-08-27",
+        "source": "cursor",
+        "model": "cursor-grok-4.6-high-fast",
+        "requests": 12,
+        "tokens_in": 1000293,
+        "tokens_out": 104730,
+        "cache_write": 0,
+        "cache_read": 26747904,
+        "cost_cents": 3198.0037
       }
     ]
   }
