@@ -295,21 +295,21 @@
         "date": "2026-08-26",
         "source": "codex",
         "model": "codex-auto-review",
-        "requests": 1,
-        "tokens_in": 14303,
-        "tokens_out": 132,
+        "requests": 2,
+        "tokens_in": 19541,
+        "tokens_out": 214,
         "cache_write": 0,
-        "cache_read": 4864
+        "cache_read": 23040
       },
       {
         "date": "2026-08-26",
         "source": "codex",
         "model": "gpt-5.6-sol",
-        "requests": 39,
-        "tokens_in": 137790,
-        "tokens_out": 17269,
+        "requests": 45,
+        "tokens_in": 270950,
+        "tokens_out": 18054,
         "cache_write": 0,
-        "cache_read": 3512448
+        "cache_read": 4157440
       }
     ]
   }
