@@ -918,12 +918,12 @@
         "date": "2026-08-26",
         "source": "cursor",
         "model": "cursor-grok-4.6-high-fast",
-        "requests": 142,
-        "tokens_in": 3811244,
-        "tokens_out": 254545,
+        "requests": 188,
+        "tokens_in": 4665815,
+        "tokens_out": 300907,
         "cache_write": 0,
-        "cache_read": 44328832,
-        "cost_cents": 6248.9671
+        "cache_read": 58018816,
+        "cost_cents": 8013.9865
       }
     ]
   }
