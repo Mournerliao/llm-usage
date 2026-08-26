@@ -873,6 +873,17 @@
       {
         "date": "2026-08-26",
         "source": "cursor",
+        "model": "claude-opus-5-low",
+        "requests": 8,
+        "tokens_in": 14,
+        "tokens_out": 985,
+        "cache_write": 37109,
+        "cache_read": 50579,
+        "cost_cents": 28.1916
+      },
+      {
+        "date": "2026-08-26",
+        "source": "cursor",
         "model": "claude-opus-5-thinking-high",
         "requests": 4,
         "tokens_in": 102817,
@@ -907,12 +918,12 @@
         "date": "2026-08-26",
         "source": "cursor",
         "model": "cursor-grok-4.6-high-fast",
-        "requests": 30,
-        "tokens_in": 1502755,
-        "tokens_out": 94457,
+        "requests": 142,
+        "tokens_in": 3811244,
+        "tokens_out": 254545,
         "cache_write": 0,
-        "cache_read": 17681216,
-        "cost_cents": 2468.7043
+        "cache_read": 44328832,
+        "cost_cents": 6248.9671
       }
     ]
   }
