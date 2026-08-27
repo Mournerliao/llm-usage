@@ -942,12 +942,12 @@
         "date": "2026-08-27",
         "source": "cursor",
         "model": "cursor-grok-4.6-high-fast",
-        "requests": 12,
-        "tokens_in": 1000293,
-        "tokens_out": 104730,
+        "requests": 16,
+        "tokens_in": 1134347,
+        "tokens_out": 107990,
         "cache_write": 0,
-        "cache_read": 26747904,
-        "cost_cents": 3198.0037
+        "cache_read": 27241600,
+        "cost_cents": 3304.9069
       }
     ]
   }
