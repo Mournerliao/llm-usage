@@ -327,11 +327,11 @@
         "date": "2026-08-27",
         "source": "codex",
         "model": "gpt-5.6-sol",
-        "requests": 434,
-        "tokens_in": 1031801,
-        "tokens_out": 170253,
+        "requests": 437,
+        "tokens_in": 1274292,
+        "tokens_out": 170737,
         "cache_write": 0,
-        "cache_read": 54257408
+        "cache_read": 54287616
       }
     ]
   }
