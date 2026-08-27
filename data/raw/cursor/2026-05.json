@@ -161,12 +161,12 @@
         "date": "2026-05-09",
         "source": "cursor",
         "model": "gpt-5.5-medium",
-        "requests": 105,
-        "tokens_in": 4613394,
-        "tokens_out": 293747,
+        "requests": 104,
+        "tokens_in": 4599519,
+        "tokens_out": 292130,
         "cache_write": 0,
-        "cache_read": 53242880,
-        "cost_cents": 5681.5341
+        "cache_read": 53138432,
+        "cost_cents": 5664.5232
       }
     ],
     "2026-05-10": [

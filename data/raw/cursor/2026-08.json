@@ -931,12 +931,12 @@
         "date": "2026-08-27",
         "source": "cursor",
         "model": "claude-opus-5-thinking-high",
-        "requests": 12,
-        "tokens_in": 123391,
-        "tokens_out": 162031,
-        "cache_write": 942552,
-        "cache_read": 27401370,
-        "cost_cents": 2355.4269
+        "requests": 14,
+        "tokens_in": 271174,
+        "tokens_out": 171141,
+        "cache_write": 1014602,
+        "cache_read": 28119667,
+        "cost_cents": 2453.7726
       },
       {
         "date": "2026-08-27",
@@ -964,12 +964,12 @@
         "date": "2026-08-27",
         "source": "cursor",
         "model": "cursor-grok-4.6-high-fast",
-        "requests": 181,
-        "tokens_in": 6278190,
-        "tokens_out": 370244,
+        "requests": 241,
+        "tokens_in": 6944412,
+        "tokens_out": 404620,
         "cache_write": 0,
-        "cache_read": 64760320,
-        "cost_cents": 9411.8138
+        "cache_read": 67595008,
+        "cost_cents": 9993.9998
       }
     ]
   }
