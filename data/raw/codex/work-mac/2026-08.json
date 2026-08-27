@@ -317,21 +317,21 @@
         "date": "2026-08-27",
         "source": "codex",
         "model": "codex-auto-review",
-        "requests": 7,
-        "tokens_in": 58280,
-        "tokens_out": 1419,
+        "requests": 11,
+        "tokens_in": 80630,
+        "tokens_out": 1972,
         "cache_write": 0,
-        "cache_read": 184576
+        "cache_read": 435456
       },
       {
         "date": "2026-08-27",
         "source": "codex",
         "model": "gpt-5.6-sol",
-        "requests": 122,
-        "tokens_in": 266961,
-        "tokens_out": 55302,
+        "requests": 146,
+        "tokens_in": 331744,
+        "tokens_out": 64357,
         "cache_write": 0,
-        "cache_read": 15212032
+        "cache_read": 19690240
       }
     ]
   }
