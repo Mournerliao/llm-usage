@@ -930,6 +930,28 @@
       {
         "date": "2026-08-27",
         "source": "cursor",
+        "model": "claude-opus-5-thinking-high",
+        "requests": 1,
+        "tokens_in": 32,
+        "tokens_out": 14559,
+        "cache_write": 240914,
+        "cache_read": 3460629,
+        "cost_cents": 360.0162
+      },
+      {
+        "date": "2026-08-27",
+        "source": "cursor",
+        "model": "composer-2.5",
+        "requests": 2,
+        "tokens_in": 136988,
+        "tokens_out": 14238,
+        "cache_write": 0,
+        "cache_read": 1317614,
+        "cost_cents": 36.7612
+      },
+      {
+        "date": "2026-08-27",
+        "source": "cursor",
         "model": "composer-2.5-fast",
         "requests": 4,
         "tokens_in": 151160,
@@ -942,12 +964,12 @@
         "date": "2026-08-27",
         "source": "cursor",
         "model": "cursor-grok-4.6-high-fast",
-        "requests": 16,
-        "tokens_in": 1134347,
-        "tokens_out": 107990,
+        "requests": 26,
+        "tokens_in": 2281126,
+        "tokens_out": 193514,
         "cache_write": 0,
-        "cache_read": 27241600,
-        "cost_cents": 3304.9069
+        "cache_read": 39699328,
+        "cost_cents": 5110.3338
       }
     ]
   }
