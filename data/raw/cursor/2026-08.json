@@ -964,12 +964,12 @@
         "date": "2026-08-27",
         "source": "cursor",
         "model": "cursor-grok-4.6-high-fast",
-        "requests": 26,
-        "tokens_in": 2281126,
-        "tokens_out": 193514,
+        "requests": 119,
+        "tokens_in": 3530686,
+        "tokens_out": 239655,
         "cache_write": 0,
-        "cache_read": 39699328,
-        "cost_cents": 5110.3338
+        "cache_read": 47625472,
+        "cost_cents": 6454.5588
       }
     ]
   }
