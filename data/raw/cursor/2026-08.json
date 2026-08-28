@@ -999,12 +999,12 @@
         "date": "2026-08-28",
         "source": "cursor",
         "model": "cursor-grok-4.6-high-fast",
-        "requests": 1,
-        "tokens_in": 4028,
-        "tokens_out": 2831,
+        "requests": 9,
+        "tokens_in": 122355,
+        "tokens_out": 23006,
         "cache_write": 0,
-        "cache_read": 0,
-        "cost_cents": 1.0507
+        "cache_read": 3418880,
+        "cost_cents": 412.965
       }
     ]
   }
