@@ -972,6 +972,40 @@
         "cost_cents": 9993.9998
       }
     ],
-    "2026-08-28": []
+    "2026-08-28": [
+      {
+        "date": "2026-08-28",
+        "source": "cursor",
+        "model": "claude-opus-5-thinking-high",
+        "requests": 1,
+        "tokens_in": 46,
+        "tokens_out": 27435,
+        "cache_write": 120152,
+        "cache_read": 2183126,
+        "cost_cents": 252.8618
+      },
+      {
+        "date": "2026-08-28",
+        "source": "cursor",
+        "model": "cursor-grok-4.5-high-fast",
+        "requests": 10,
+        "tokens_in": 54827,
+        "tokens_out": 4718,
+        "cache_write": 0,
+        "cache_read": 212864,
+        "cost_cents": 51.7096
+      },
+      {
+        "date": "2026-08-28",
+        "source": "cursor",
+        "model": "cursor-grok-4.6-high-fast",
+        "requests": 1,
+        "tokens_in": 4028,
+        "tokens_out": 2831,
+        "cache_write": 0,
+        "cache_read": 0,
+        "cost_cents": 1.0507
+      }
+    ]
   }
 }
