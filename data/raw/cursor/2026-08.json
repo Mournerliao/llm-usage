@@ -1022,22 +1022,22 @@
         "source": "cursor",
         "model": "cursor-grok-4.6-high",
         "requests": 2,
-        "tokens_in": 42027,
-        "tokens_out": 534,
+        "tokens_in": 43125,
+        "tokens_out": 1234,
         "cache_write": 0,
-        "cache_read": 37504,
-        "cost_cents": 10.601
+        "cache_read": 66560,
+        "cost_cents": 12.6934
       },
       {
         "date": "2026-08-28",
         "source": "cursor",
         "model": "cursor-grok-4.6-high-fast",
-        "requests": 33,
-        "tokens_in": 1442994,
-        "tokens_out": 87942,
+        "requests": 39,
+        "tokens_in": 1911220,
+        "tokens_out": 99740,
         "cache_write": 0,
-        "cache_read": 12783552,
-        "cost_cents": 1944.2419
+        "cache_read": 15081408,
+        "cost_cents": 2373.6497
       }
     ]
   }

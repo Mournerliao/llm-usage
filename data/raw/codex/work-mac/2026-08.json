@@ -339,21 +339,21 @@
         "date": "2026-08-28",
         "source": "codex",
         "model": "codex-auto-review",
-        "requests": 26,
-        "tokens_in": 152452,
-        "tokens_out": 3522,
+        "requests": 35,
+        "tokens_in": 190967,
+        "tokens_out": 4719,
         "cache_write": 0,
-        "cache_read": 1037824
+        "cache_read": 1273088
       },
       {
         "date": "2026-08-28",
         "source": "codex",
         "model": "gpt-5.6-sol",
-        "requests": 238,
-        "tokens_in": 679739,
-        "tokens_out": 85191,
+        "requests": 306,
+        "tokens_in": 1027237,
+        "tokens_out": 106521,
         "cache_write": 0,
-        "cache_read": 27793536
+        "cache_read": 36908544
       }
     ]
   }
