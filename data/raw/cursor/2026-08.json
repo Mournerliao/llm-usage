@@ -1039,6 +1039,30 @@
         "cache_read": 16205824,
         "cost_cents": 2498.5369
       }
+    ],
+    "2026-08-29": [
+      {
+        "date": "2026-08-29",
+        "source": "cursor",
+        "model": "cursor-grok-4.5-high-fast",
+        "requests": 8,
+        "tokens_in": 58895,
+        "tokens_out": 7196,
+        "cache_write": 0,
+        "cache_read": 263040,
+        "cost_cents": 62.8148
+      },
+      {
+        "date": "2026-08-29",
+        "source": "cursor",
+        "model": "cursor-grok-4.6-high-fast",
+        "requests": 4,
+        "tokens_in": 293210,
+        "tokens_out": 13506,
+        "cache_write": 0,
+        "cache_read": 972096,
+        "cost_cents": 230.7008
+      }
     ]
   }
 }

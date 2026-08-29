@@ -211,6 +211,98 @@
     ],
     "2026-08-19": [],
     "2026-08-20": [],
-    "2026-08-21": []
+    "2026-08-21": [
+      {
+        "date": "2026-08-21",
+        "source": "codex",
+        "model": "codex-auto-review",
+        "requests": 40,
+        "tokens_in": 370198,
+        "tokens_out": 4803,
+        "cache_write": 0,
+        "cache_read": 1584128
+      },
+      {
+        "date": "2026-08-21",
+        "source": "codex",
+        "model": "gpt-5.6-sol",
+        "requests": 171,
+        "tokens_in": 738432,
+        "tokens_out": 61404,
+        "cache_write": 0,
+        "cache_read": 14666112
+      }
+    ],
+    "2026-08-22": [],
+    "2026-08-23": [],
+    "2026-08-24": [],
+    "2026-08-25": [
+      {
+        "date": "2026-08-25",
+        "source": "codex",
+        "model": "codex-auto-review",
+        "requests": 21,
+        "tokens_in": 195031,
+        "tokens_out": 2459,
+        "cache_write": 0,
+        "cache_read": 653056
+      },
+      {
+        "date": "2026-08-25",
+        "source": "codex",
+        "model": "gpt-5.6-sol",
+        "requests": 129,
+        "tokens_in": 597840,
+        "tokens_out": 73386,
+        "cache_write": 0,
+        "cache_read": 15246336
+      }
+    ],
+    "2026-08-26": [],
+    "2026-08-27": [],
+    "2026-08-28": [
+      {
+        "date": "2026-08-28",
+        "source": "codex",
+        "model": "codex-auto-review",
+        "requests": 44,
+        "tokens_in": 178270,
+        "tokens_out": 5301,
+        "cache_write": 0,
+        "cache_read": 1136640
+      },
+      {
+        "date": "2026-08-28",
+        "source": "codex",
+        "model": "gpt-5.6-sol",
+        "requests": 245,
+        "tokens_in": 743682,
+        "tokens_out": 114530,
+        "cache_write": 0,
+        "cache_read": 23901952
+      }
+    ],
+    "2026-08-29": [
+      {
+        "date": "2026-08-29",
+        "source": "codex",
+        "model": "codex-auto-review",
+        "requests": 31,
+        "tokens_in": 221239,
+        "tokens_out": 3851,
+        "cache_write": 0,
+        "cache_read": 881920
+      },
+      {
+        "date": "2026-08-29",
+        "source": "codex",
+        "model": "gpt-5.6-sol",
+        "requests": 361,
+        "tokens_in": 1300946,
+        "tokens_out": 104173,
+        "cache_write": 0,
+        "cache_read": 37845760
+      }
+    ]
   }
 }
