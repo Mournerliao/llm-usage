@@ -110,6 +110,7 @@ Common flags:
 
 - `--only cursor` collect one source
 - `--since 2026-07-01` override the collection start
+- `--collect-only` write raw events only; this is what the local update scripts run
 - `--skip-collect` fold and render only; this is what CI runs
 
 For automatic updates, macOS launchd can run `./update-local.sh`; Windows Task
@@ -150,6 +151,8 @@ Start-ScheduledTask -TaskName "LLM Usage Update"     # run now
 Disable-ScheduledTask -TaskName "LLM Usage Update"   # pause
 .\install-scheduled-task.ps1 -Uninstall               # remove
 ```
+
+Logs go to `%LOCALAPPDATA%\llm-usage\update.log`.
 
 ## Config is two files
 

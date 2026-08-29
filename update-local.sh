@@ -21,6 +21,8 @@ cd "$(dirname "$0")"
 # launchd / cron 的 PATH 很窄。本机 git 和 python3 都在 Homebrew 前缀下。
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
 export GIT_TERMINAL_PROMPT=0
+export PYTHONIOENCODING=utf-8
+export PYTHONUTF8=1
 
 if [ -x .venv/bin/python ]; then
   PY=.venv/bin/python
@@ -33,10 +35,11 @@ fi
 
 # 本机会写出但不该带进合并的两类文件：
 #
-# 产物（stats.json / SVG）归 GitHub Actions 独占，而本机 run.py 也会写出它们，
-# 且 generated_at 每次都不同；raw 则是每次全量重采的结果，两台机器写同一个
-# 账号级文件。带着这两类脏文件去同步，就会和远端撞车，而冲突一旦留下，
-# 后面每小时都会卡在「未合并文件」上。两类文件都能重新生成，丢弃是安全的。
+# 产物（stats.json / SVG）归 GitHub Actions 独占。本机现在用 --collect-only，
+# 不会再写它们；但一次手跑完整 run.py 仍可能留下脏产物。raw 则是每次全量
+# 重采的结果，两台机器写同一个账号级文件。带着这两类脏文件去同步，就会和
+# 远端撞车，而冲突一旦留下，后面每小时都会卡在「未合并文件」上。两类文件
+# 都能重新生成，丢弃是安全的。
 CI_OWNED_PATHS=(data/stats.json assets)
 GENERATED_PATHS=("${CI_OWNED_PATHS[@]}" data/raw)
 COMMIT_MSG="chore(data): usage raw @ $(date +%F)"
@@ -51,11 +54,11 @@ unmerged_files() {
 
 collect() {
   if [ -n "${SINCE:-}" ]; then
-    "$PY" run.py --since "$SINCE"
+    "$PY" run.py --collect-only --since "$SINCE"
   else
-    "$PY" run.py
+    "$PY" run.py --collect-only
   fi
-  # 只留 raw 进暂存，产物退回 HEAD，交给 CI 生成。
+  # --collect-only 不写产物；这里只清掉一次完整 run.py 留下的脏文件。
   git checkout -f HEAD -- "${CI_OWNED_PATHS[@]}" 2>/dev/null || true
 }
 
@@ -85,7 +88,7 @@ fi
 echo "==> 同步远端"
 git pull --rebase --autostash origin main
 
-echo "==> 采集并汇总"
+echo "==> 采集原始数据"
 collect
 
 echo "==> 提交原始数据"

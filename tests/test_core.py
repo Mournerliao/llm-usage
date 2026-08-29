@@ -17,8 +17,11 @@ sys.path.insert(0, ROOT)
 
 from llm_usage import fold, pricing, render  # noqa: E402
 from llm_usage import view as weekview  # noqa: E402
+from llm_usage.cli import run_collect  # noqa: E402
 from llm_usage.collect import (  # noqa: E402
+    COLLECTORS,
     CollectContext,
+    CollectResult,
     Event,
     persist,
     read_all_events,
@@ -748,6 +751,89 @@ class TestCollectSeam(unittest.TestCase):
             ctx, {}, rollouts=[TestChatgptCollector()._records()])
         with self.assertRaises(SystemExit):
             persist(ctx, result)
+
+
+class TestRunCollectIsolation(unittest.TestCase):
+    def test_cursor_failure_does_not_block_codex(self):
+        """账号级 Cursor 失败时，本机 Codex 仍要落盘。这是 Windows 定时任务的真实形状。"""
+        class Boom:
+            @staticmethod
+            def collect(ctx, cfg):
+                raise SystemExit("拿不到 Cursor 登录态")
+
+        class Ok:
+            @staticmethod
+            def collect(ctx, cfg):
+                return CollectResult(
+                    events=[Event(date="2026-08-17", source="codex",
+                                  model="x", requests=1, tokens_in=1,
+                                  tokens_out=0, cache_write=0, cache_read=0)],
+                    days=["2026-08-17"],
+                    machine_shard=True,
+                )
+
+        ctx = CollectContext(tz=TZ, root=Path("."), since="2026-08-01",
+                             machine="home-win")
+        sources = [
+            {"name": "cursor", "type": "cursor"},
+            {"name": "chatgpt", "type": "chatgpt"},
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            ctx.root = Path(tmp)
+            with mock.patch.dict(COLLECTORS, {"cursor": Boom, "chatgpt": Ok}):
+                count = run_collect(ctx, sources, only=None)
+            self.assertEqual(count, 1)
+            paths = sorted(p.relative_to(ctx.root).as_posix()
+                           for p in ctx.root.rglob("*.json"))
+            self.assertEqual(paths, ["data/raw/codex/home-win/2026-08.json"])
+
+    def test_all_sources_failing_still_exits(self):
+        class Boom:
+            @staticmethod
+            def collect(ctx, cfg):
+                raise RuntimeError("network down")
+
+        ctx = CollectContext(tz=TZ, root=Path("."), since="2026-08-01")
+        with mock.patch.dict(COLLECTORS, {"cursor": Boom}):
+            with self.assertRaises(SystemExit):
+                run_collect(ctx, [{"name": "cursor", "type": "cursor"}],
+                            only=None)
+
+    def test_persist_config_error_is_not_swallowed(self):
+        """缺 machine 是配置错误，不能被当成「这个源失败、别的继续」。"""
+        class CursorOk:
+            @staticmethod
+            def collect(ctx, cfg):
+                return CollectResult(
+                    events=[Event(date="2026-08-17", source="cursor",
+                                  model="x", requests=1)],
+                    days=["2026-08-17"],
+                    machine_shard=False,
+                )
+
+        class CodexOk:
+            @staticmethod
+            def collect(ctx, cfg):
+                return CollectResult(
+                    events=[Event(date="2026-08-17", source="codex",
+                                  model="x", requests=1, tokens_in=1,
+                                  tokens_out=0, cache_write=0, cache_read=0)],
+                    days=["2026-08-17"],
+                    machine_shard=True,
+                )
+
+        ctx = CollectContext(tz=TZ, root=Path("."), since="2026-08-01")
+        sources = [
+            {"name": "cursor", "type": "cursor"},
+            {"name": "chatgpt", "type": "chatgpt"},
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            ctx.root = Path(tmp)
+            with mock.patch.dict(COLLECTORS, {
+                    "cursor": CursorOk, "chatgpt": CodexOk}):
+                with self.assertRaises(SystemExit) as raised:
+                    run_collect(ctx, sources, only=None)
+            self.assertIn("machine", str(raised.exception))
 
 
 class TestRawLayer(unittest.TestCase):

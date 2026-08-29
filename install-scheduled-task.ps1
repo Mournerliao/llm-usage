@@ -41,7 +41,8 @@ if (-not (Test-Path -LiteralPath $updateScript -PathType Leaf)) {
 $powershell = (Get-Command powershell.exe -ErrorAction Stop).Source
 $action = New-ScheduledTaskAction `
     -Execute $powershell `
-    -Argument "-NoProfile -NonInteractive -ExecutionPolicy Bypass -File `"$updateScript`""
+    -Argument "-NoProfile -NonInteractive -ExecutionPolicy Bypass -File `"$updateScript`"" `
+    -WorkingDirectory $PSScriptRoot
 $trigger = New-ScheduledTaskTrigger -Daily -At $DailyAt
 $settings = New-ScheduledTaskSettingsSet `
     -StartWhenAvailable `
@@ -70,6 +71,7 @@ Register-ScheduledTask `
     -Force | Out-Null
 
 Write-Host "Installed scheduled task '$TaskName' (daily at $DailyAt)."
+Write-Host "Logs: $env:LOCALAPPDATA\llm-usage\update.log"
 Write-Host "Manage it in Task Scheduler (taskschd.msc) or with Get-ScheduledTask."
 
 if ($RunNow) {
