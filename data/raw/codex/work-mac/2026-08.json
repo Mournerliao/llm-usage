@@ -358,6 +358,27 @@
     ],
     "2026-08-29": [],
     "2026-08-30": [],
-    "2026-08-31": []
+    "2026-08-31": [
+      {
+        "date": "2026-08-31",
+        "source": "codex",
+        "model": "codex-auto-review",
+        "requests": 4,
+        "tokens_in": 52628,
+        "tokens_out": 685,
+        "cache_write": 0,
+        "cache_read": 19456
+      },
+      {
+        "date": "2026-08-31",
+        "source": "codex",
+        "model": "gpt-5.6-sol",
+        "requests": 137,
+        "tokens_in": 381764,
+        "tokens_out": 44397,
+        "cache_write": 0,
+        "cache_read": 15579392
+      }
+    ]
   }
 }
