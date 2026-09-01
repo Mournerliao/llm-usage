@@ -7,12 +7,12 @@
         "date": "2026-09-01",
         "source": "cursor",
         "model": "claude-4.6-opus-high-thinking",
-        "requests": 4,
-        "tokens_in": 62041,
-        "tokens_out": 42777,
-        "cache_write": 717331,
-        "cache_read": 2178860,
-        "cost_cents": 656.5519
+        "requests": 6,
+        "tokens_in": 62054,
+        "tokens_out": 76625,
+        "cache_write": 968010,
+        "cache_read": 2786377,
+        "cost_cents": 928.2286
       },
       {
         "date": "2026-09-01",
