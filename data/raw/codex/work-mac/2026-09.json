@@ -2,6 +2,27 @@
   "source": "codex",
   "month": "2026-09",
   "days": {
-    "2026-09-01": []
+    "2026-09-01": [
+      {
+        "date": "2026-09-01",
+        "source": "codex",
+        "model": "codex-auto-review",
+        "requests": 15,
+        "tokens_in": 88285,
+        "tokens_out": 2490,
+        "cache_write": 0,
+        "cache_read": 428288
+      },
+      {
+        "date": "2026-09-01",
+        "source": "codex",
+        "model": "gpt-5.6-sol",
+        "requests": 85,
+        "tokens_in": 167116,
+        "tokens_out": 26574,
+        "cache_write": 0,
+        "cache_read": 7123712
+      }
+    ]
   }
 }
