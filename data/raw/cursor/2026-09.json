@@ -18,12 +18,12 @@
         "date": "2026-09-01",
         "source": "cursor",
         "model": "claude-opus-5-thinking-high",
-        "requests": 3,
-        "tokens_in": 277323,
-        "tokens_out": 45830,
-        "cache_write": 961214,
-        "cache_read": 2859288,
-        "cost_cents": 845.7084
+        "requests": 5,
+        "tokens_in": 277439,
+        "tokens_out": 127549,
+        "cache_write": 1528823,
+        "cache_read": 12744852,
+        "cost_cents": 1899.0978
       },
       {
         "date": "2026-09-01",
