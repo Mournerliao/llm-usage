@@ -18,12 +18,12 @@
         "date": "2026-09-01",
         "source": "cursor",
         "model": "claude-opus-5-thinking-high",
-        "requests": 5,
-        "tokens_in": 277439,
-        "tokens_out": 127549,
-        "cache_write": 1528823,
-        "cache_read": 12744852,
-        "cost_cents": 1899.0978
+        "requests": 7,
+        "tokens_in": 398073,
+        "tokens_out": 147419,
+        "cache_write": 1601631,
+        "cache_read": 15941249,
+        "cost_cents": 2147.4968
       },
       {
         "date": "2026-09-01",
@@ -51,12 +51,12 @@
         "date": "2026-09-01",
         "source": "cursor",
         "model": "cursor-grok-4.6-high-fast",
-        "requests": 13,
-        "tokens_in": 599657,
-        "tokens_out": 80091,
+        "requests": 20,
+        "tokens_in": 1388322,
+        "tokens_out": 184044,
         "cache_write": 0,
-        "cache_read": 7783104,
-        "cost_cents": 1094.1556
+        "cache_read": 21478528,
+        "cost_cents": 2886.2718
       },
       {
         "date": "2026-09-01",
