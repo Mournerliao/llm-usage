@@ -86,17 +86,23 @@ class CollectContext:
 
     tz: tzinfo
     root: Path
-    # 采集起点。接口型源每次重采 [since, 今天] 的全部数据并覆盖写回，所以采集幂等：
-    # 跑一次和跑十次结果相同，漏跑补跑都能自愈。
+    # 采集起点。接口型源每次重采 [since, as_of 或今天] 的全部数据并覆盖写回，
+    # 所以采集幂等：跑一次和跑十次结果相同，漏跑补跑都能自愈。
     since: str = "2026-01-01"
     # 本机标识，只给「会话在本机」的源当文件分片键。账号级源忽略它。
     machine: str | None = None
+    # 采集终点。None 表示配置时区的「现在」。测试传入固定日期，窗口才不随
+    # 日历翻月而多写出空分片。fold 的 ``now`` 是同一类缝：时钟是输入，不是
+    # 藏在实现里的 datetime.now()。
+    as_of: str | None = None
 
     def day_of(self, ms: int) -> str:
         """毫秒时间戳 → 配置时区下的 YYYY-MM-DD。"""
         return datetime.fromtimestamp(ms / 1000, self.tz).strftime("%Y-%m-%d")
 
     def today(self) -> str:
+        if self.as_of is not None:
+            return self.as_of
         return datetime.now(self.tz).strftime("%Y-%m-%d")
 
     def since_ms(self) -> int:

@@ -717,7 +717,8 @@ class TestCollectSeam(unittest.TestCase):
         self.assertEqual(result.events[0].source, "codex")
 
     def test_persist_account_level_writes_under_source(self):
-        ctx = CollectContext(tz=TZ, root=Path("."), since="2026-08-01")
+        ctx = CollectContext(tz=TZ, root=Path("."), since="2026-08-01",
+                             as_of="2026-08-31")
         with tempfile.TemporaryDirectory() as tmp:
             ctx.root = Path(tmp)
             result = cursor_collector.collect(
@@ -728,9 +729,26 @@ class TestCollectSeam(unittest.TestCase):
                            for p in ctx.root.rglob("*.json"))
             self.assertEqual(paths, ["data/raw/cursor/2026-08.json"])
 
+    def test_persist_writes_empty_month_when_as_of_crosses_boundary(self):
+        """负责区间跨月时，没有用量的那个月也要落盘，避免旧记录留成幽灵。"""
+        ctx = CollectContext(tz=TZ, root=Path("."), since="2026-08-01",
+                             as_of="2026-09-01")
+        with tempfile.TemporaryDirectory() as tmp:
+            ctx.root = Path(tmp)
+            result = cursor_collector.collect(
+                ctx, {"name": "cursor"},
+                fetch=lambda start, end: TestCursorCollector()._raw())
+            persist(ctx, result)
+            paths = sorted(p.relative_to(ctx.root).as_posix()
+                           for p in ctx.root.rglob("*.json"))
+            self.assertEqual(paths, [
+                "data/raw/cursor/2026-08.json",
+                "data/raw/cursor/2026-09.json",
+            ])
+
     def test_persist_machine_shard_groups_by_event_source(self):
         ctx = CollectContext(tz=TZ, root=Path("."), since="2026-08-01",
-                             machine="work-mac")
+                             machine="work-mac", as_of="2026-08-31")
         chat = TestChatgptCollector()
         with tempfile.TemporaryDirectory() as tmp:
             ctx.root = Path(tmp)
@@ -945,10 +963,15 @@ class TestRawLayer(unittest.TestCase):
 
 
 class TestCollectContext(unittest.TestCase):
+    def test_today_uses_as_of_when_set(self):
+        ctx = CollectContext(tz=TZ, root=Path("."), as_of="2026-08-31")
+        self.assertEqual(ctx.today(), "2026-08-31")
+
     def test_days_since_is_ascending_and_includes_today(self):
-        ctx = CollectContext(tz=TZ, root=Path("."))
-        days = ctx.days_between("2026-08-10", "2026-08-12")
-        self.assertEqual(days, ["2026-08-10", "2026-08-11", "2026-08-12"])
+        ctx = CollectContext(tz=TZ, root=Path("."),
+                             since="2026-08-10", as_of="2026-08-12")
+        self.assertEqual(ctx.days_since(),
+                         ["2026-08-10", "2026-08-11", "2026-08-12"])
 
     def test_days_between_is_empty_when_reversed(self):
         ctx = CollectContext(tz=TZ, root=Path("."))
