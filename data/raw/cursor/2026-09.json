@@ -129,6 +129,17 @@
       {
         "date": "2026-09-02",
         "source": "cursor",
+        "model": "composer-2.5-fast",
+        "requests": 1,
+        "tokens_in": 236088,
+        "tokens_out": 33041,
+        "cache_write": 0,
+        "cache_read": 5396384,
+        "cost_cents": 430.0293
+      },
+      {
+        "date": "2026-09-02",
+        "source": "cursor",
         "model": "cursor-grok-4.6-high",
         "requests": 8,
         "tokens_in": 1239782,
@@ -141,12 +152,12 @@
         "date": "2026-09-02",
         "source": "cursor",
         "model": "cursor-grok-4.6-high-fast",
-        "requests": 19,
-        "tokens_in": 1217408,
-        "tokens_out": 96642,
+        "requests": 31,
+        "tokens_in": 2176818,
+        "tokens_out": 212920,
         "cache_write": 0,
-        "cache_read": 17161536,
-        "cost_cents": 2309.3926
+        "cache_read": 36324416,
+        "cost_cents": 4718.8759
       },
       {
         "date": "2026-09-02",
