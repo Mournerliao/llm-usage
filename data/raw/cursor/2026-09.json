@@ -198,12 +198,12 @@
         "date": "2026-09-03",
         "source": "cursor",
         "model": "cursor-grok-4.6-high",
-        "requests": 23,
-        "tokens_in": 1526934,
-        "tokens_out": 161194,
+        "requests": 34,
+        "tokens_in": 2817532,
+        "tokens_out": 268248,
         "cache_write": 0,
-        "cache_read": 21957504,
-        "cost_cents": 1474.3074
+        "cache_read": 36525952,
+        "cost_cents": 2512.4171
       },
       {
         "date": "2026-09-03",
