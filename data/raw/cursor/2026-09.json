@@ -188,11 +188,11 @@
         "source": "cursor",
         "model": "claude-opus-5-thinking-medium",
         "requests": 1,
-        "tokens_in": 4,
-        "tokens_out": 2158,
-        "cache_write": 124635,
-        "cache_read": 122303,
-        "cost_cents": 89.409
+        "tokens_in": 26,
+        "tokens_out": 22316,
+        "cache_write": 163724,
+        "cache_read": 1760576,
+        "cost_cents": 246.1593
       },
       {
         "date": "2026-09-03",
