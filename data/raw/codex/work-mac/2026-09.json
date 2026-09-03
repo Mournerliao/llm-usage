@@ -51,21 +51,21 @@
         "date": "2026-09-03",
         "source": "codex",
         "model": "codex-auto-review",
-        "requests": 45,
-        "tokens_in": 192446,
-        "tokens_out": 5269,
+        "requests": 54,
+        "tokens_in": 259507,
+        "tokens_out": 6702,
         "cache_write": 0,
-        "cache_read": 2407168
+        "cache_read": 2579968
       },
       {
         "date": "2026-09-03",
         "source": "codex",
         "model": "gpt-5.6-sol",
-        "requests": 192,
-        "tokens_in": 494573,
-        "tokens_out": 91633,
+        "requests": 326,
+        "tokens_in": 735198,
+        "tokens_out": 166428,
         "cache_write": 0,
-        "cache_read": 20924032
+        "cache_read": 40459904
       }
     ]
   }
