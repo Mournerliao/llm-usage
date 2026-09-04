@@ -243,6 +243,39 @@
       {
         "date": "2026-09-04",
         "source": "cursor",
+        "model": "claude-opus-5-thinking-medium",
+        "requests": 5,
+        "tokens_in": 60,
+        "tokens_out": 33224,
+        "cache_write": 268899,
+        "cache_read": 2871085,
+        "cost_cents": 394.7061
+      },
+      {
+        "date": "2026-09-04",
+        "source": "cursor",
+        "model": "composer-2.5-fast",
+        "requests": 1,
+        "tokens_in": 48720,
+        "tokens_out": 5626,
+        "cache_write": 0,
+        "cache_read": 477952,
+        "cost_cents": 46.9526
+      },
+      {
+        "date": "2026-09-04",
+        "source": "cursor",
+        "model": "cursor-grok-4.6-high",
+        "requests": 3,
+        "tokens_in": 512860,
+        "tokens_out": 46129,
+        "cache_write": 0,
+        "cache_read": 3527808,
+        "cost_cents": 305.2481
+      },
+      {
+        "date": "2026-09-04",
+        "source": "cursor",
         "model": "grok-bot-automation",
         "requests": 10,
         "tokens_in": 60417,
